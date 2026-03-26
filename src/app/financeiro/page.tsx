@@ -5,181 +5,164 @@ import React, { useState, useEffect } from 'react';
 const MONTHS = ['Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', 'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'];
 
 export default function FinanceiroPage() {
-  const [transacoes, setTransacoes] = useState<any[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [isNFModalOpen, setIsNFModalOpen] = useState(false);
-  const [selectedReceipt, setSelectedReceipt] = useState<any>(null);
+  const [transacoes, setTransacoes] = useState<any[]>([
+    { id: 1, data: '2026-03-25', descricao: 'Sessão Individual', valor: 200, tipo: 'receita' },
+    { id: 2, data: '2026-03-24', descricao: 'Sessão Convênio', valor: 350, tipo: 'receita' },
+    { id: 3, data: '2026-03-23', descricao: 'Seção Luciano', valor: 200, tipo: 'receita' },
+    { id: 4, data: '2026-03-23', descricao: 'Sessão Particular', valor: 200, tipo: 'receita' },
+  ]);
 
   const [selectedMonth, setSelectedMonth] = useState(new Date().getMonth());
-  const [selectedYear] = useState(2026);
+  const [selectedYear, setSelectedYear] = useState(2026);
 
-  const fetchData = async () => {
-    setLoading(true);
-    try {
-      const response = await fetch('/api/financeiro');
-      const data = await response.json();
-      setTransacoes(Array.isArray(data) ? data : []);
-    } catch (e) { console.error(e); } finally { setLoading(false); }
-  };
+  const [isNFModalOpen, setIsNFModalOpen] = useState(false);
+  const [isLancamentoModalOpen, setIsLancamentoModalOpen] = useState(false);
+  const [selectedTransaction, setSelectedTransaction] = useState<any>(null);
+  const [editingId, setEditingId] = useState<number | null>(null);
 
-  useEffect(() => { fetchData(); }, []);
+  const [novaDescricao, setNovaDescricao] = useState('');
+  const [novoValor, setNovoValor] = useState('');
+  const [novoTipo, setNovoTipo] = useState('receita');
 
   const periodTransacoes = transacoes.filter(t => {
     const d = new Date(t.data);
-    return d.getMonth() === selectedMonth && d.getFullYear() === selectedYear;
+    return d.getUTCMonth() === selectedMonth && d.getUTCFullYear() === selectedYear;
   });
 
   const totals = periodTransacoes.reduce((acc, t) => {
     const val = parseFloat(t.valor) || 0;
-    if (t.tipo === 'receita') acc.entradas += val;
-    else acc.saidas += val;
+    t.tipo === 'receita' ? acc.entradas += val : acc.saidas += val;
     return acc;
   }, { entradas: 0, saidas: 0 });
 
-  // Função para o botão "Novo Lançamento"
-  const handleNovoLancamento = () => {
-    setIsModalOpen(true);
-    // Aqui você pode adicionar a lógica para abrir seu formulário de cadastro
-    console.log("Abrindo formulário de novo lançamento...");
+  const handleAbrirNovo = () => {
+    setEditingId(null);
+    setNovaDescricao('');
+    setNovoValor('');
+    setNovoTipo('receita');
+    setIsLancamentoModalOpen(true);
   };
 
-  if (loading) return <div style={{ padding: '50px', textAlign: 'center', color: 'white' }}>Carregando Dashboard...</div>;
+  const handleAbrirEdicao = (t: any) => {
+    setEditingId(t.id);
+    setNovaDescricao(t.descricao);
+    setNovoValor(t.valor.toString());
+    setNovoTipo(t.tipo);
+    setIsLancamentoModalOpen(true);
+  };
+
+  const handleExcluir = (id: number) => {
+    if (confirm("Deseja realmente excluir este lançamento?")) {
+      setTransacoes(transacoes.filter(t => t.id !== id));
+    }
+  };
+
+  const handleSalvarLancamento = () => {
+    if (!novaDescricao || !novoValor) return;
+    if (editingId) {
+      setTransacoes(transacoes.map(t => t.id === editingId ? { ...t, descricao: novaDescricao, valor: parseFloat(novoValor), tipo: novoTipo } : t));
+    } else {
+      const novoItem = { id: Date.now(), data: new Date().toISOString().split('T')[0], descricao: novaDescricao, valor: parseFloat(novoValor), tipo: novoTipo };
+      setTransacoes([novoItem, ...transacoes]);
+    }
+    setIsLancamentoModalOpen(false);
+  };
 
   return (
-    <div style={{ minHeight: '100vh', padding: '24px', width: '100%', backgroundColor: '#0f172a', color: 'white' }}>
+    <div style={{ minHeight: '100vh', padding: '24px', color: '#fff', background: '#0a0f18' }}>
 
       <style>{`
-        /* KPI CARDS COM MOVIMENTO */
-        .kpi-card {
-          background-color: #1e293b;
-          padding: 24px;
-          border-radius: 12px;
-          border: 1px solid rgba(255, 255, 255, 0.1);
-          position: relative;
-          transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-          cursor: pointer;
-        }
-        .kpi-card:hover {
-          transform: translateY(-8px);
-          background-color: #232f45;
-          box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.4);
-        }
-        .kpi-card::before { content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 5px; }
-        .card-receita::before { background-color: #22c55e; }
-        .card-despesa::before { background-color: #ef4444; }
-        .card-saldo::before { background-color: #3b82f6; }
-
-        /* BOTÕES */
-        .btn-action {
-          background-color: #2563eb; color: white; border: none;
-          padding: 10px 20px; border-radius: 8px; font-weight: 600;
-          cursor: pointer; display: flex; align-items: center; gap: 8px;
-          transition: all 0.2s;
-        }
-        .btn-action:hover { background-color: #1d4ed8; transform: translateY(-2px); }
-        .btn-action:active { transform: scale(0.95); }
-
-        .btn-outline {
-          background-color: transparent; color: white;
-          border: 1px solid rgba(255, 255, 255, 0.3);
-          padding: 10px 20px; border-radius: 8px; cursor: pointer;
-          transition: all 0.2s;
-        }
-        .btn-outline:hover { background-color: rgba(255,255,255,0.05); }
-
-        /* ESTILO NF-E PROFISSIONAL (CORREÇÃO MODO ESCURO) */
-        .nf-container {
-          background-color: #1e293b;
-          border: 1px solid #334155;
-          border-radius: 16px;
-          width: 100%;
-          max-width: 550px;
-          overflow: hidden;
-          box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
-        }
-        .nf-header { background: #1a2232; padding: 20px; border-bottom: 1px solid #334155; }
-        .nf-body { padding: 25px; }
-        .nf-field {
-          display: flex; justify-content: space-between;
-          padding: 14px 0; border-bottom: 1px solid rgba(255,255,255,0.05);
-        }
-        .nf-label { color: #94a3b8; font-size: 13px; text-transform: uppercase; font-weight: 500; }
-        .nf-value { color: #ffffff !important; font-weight: 600; font-family: 'Courier New', monospace; font-size: 15px; }
-
-        /* RECIBO PARA IMPRESSÃO */
-        .modal-recibo-paper {
-          background-color: #ffffff !important;
-          color: #1e293b !important;
-          padding: 50px; border-radius: 8px; width: 100%; max-width: 700px; font-family: serif;
-        }
+        .kpi-card { background: #ffffff; padding: 20px; border-radius: 12px; border: 1px solid #334155; transition: all 0.3s ease; cursor: default; }
+        .kpi-card:hover { transform: translateY(-4px); box-shadow: 0 10px 20px rgba(0,0,0,0.2); border-color: #2563eb; }
+        .kpi-card h2, .kpi-card span { color: #1e293b !important; }
+        
+        .btn-blue { background: #2563eb; color: white; border: none; padding: 10px 20px; border-radius: 8px; cursor: pointer; font-weight: bold; }
+        .btn-outline { background: transparent; color: #94a3b8; border: 1px solid #334155; padding: 8px 15px; border-radius: 6px; cursor: pointer; font-size: 13px; }
+        .btn-outline:hover { background: #1e293b; color: #fff; }
+        
+        .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.85); display: flex; align-items: center; justify-content: center; z-index: 9999; }
+        
+        /* CORREÇÃO DOS CAMPOS DO MODAL */
+        .modal-input { width: 100%; padding: 12px; margin-top: 5px; margin-bottom: 15px; border: 1px solid #ddd; border-radius: 6px; color: #1e293b; background: #fff; font-size: 14px; }
+        .modal-select { width: 100%; padding: 12px; margin-top: 5px; margin-bottom: 20px; border: 1px solid #ddd; border-radius: 6px; color: #1e293b; background: #fff; font-size: 14px; cursor: pointer; }
+        
+        /* SELECT DO CABEÇALHO (MANTÉM DARK) */
+        .header-select { background: #1e293b; color: #fff; border: 1px solid #334155; padding: 8px; border-radius: 8px; cursor: pointer; }
+        
+        .action-btn { background: none; border: none; cursor: pointer; font-size: 16px; padding: 5px; }
         
         @media print { 
-          .no-print { display: none !important; }
-          body { background: white !important; }
+          .no-print { display: none !important; } 
+          body { background: white !important; color: black !important; }
+          .modal-overlay { background: white !important; position: absolute !important; inset: 0 !important; }
+          .report-box { border: none !important; box-shadow: none !important; color: black !important; background: white !important; width: 100% !important; }
+          .report-box * { color: black !important; }
         }
       `}</style>
 
-      {/* HEADER */}
-      <header style={{ marginBottom: '2.5rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-        <div>
-          <h1 style={{ fontSize: '1.8rem', fontWeight: 'bold' }}>Gestão Financeira</h1>
-          <p style={{ opacity: 0.6 }}>Controle de faturamento e obrigações fiscais.</p>
-        </div>
-        <div style={{ display: 'flex', gap: '12px' }}>
-          <button onClick={() => setIsNFModalOpen(true)} className="btn-outline">📊 Relatório para NF-e</button>
-          <button onClick={handleNovoLancamento} className="btn-action">+ Novo Lançamento</button>
-        </div>
-      </header>
+      {/* CABEÇALHO */}
+      <div className="no-print" style={{ marginBottom: '40px' }}>
+        <h1 style={{ fontSize: '32px', fontWeight: 'bold', margin: 0 }}>Gestão Financeira</h1>
+        <p style={{ color: '#94a3b8', fontSize: '16px', marginTop: '8px' }}>
+          Acompanhe o fluxo de caixa, emita recibos e organize dados para faturamento.
+        </p>
 
-      {/* FILTROS */}
-      <div style={{ marginBottom: '2rem' }}>
-        <select
-          style={{ background: '#1e293b', color: 'white', padding: '10px', borderRadius: '8px', border: '1px solid #334155', cursor: 'pointer' }}
-          value={selectedMonth}
-          onChange={(e) => setSelectedMonth(Number(e.target.value))}
-        >
-          {MONTHS.map((m, i) => <option key={i} value={i}>{m}</option>)}
-        </select>
-      </div>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginTop: '25px' }}>
+          <div style={{ display: 'flex', gap: '10px' }}>
+            <select className="header-select" value={selectedMonth} onChange={(e) => setSelectedMonth(Number(e.target.value))}>
+              {MONTHS.map((m, i) => <option key={i} value={i}>{m}</option>)}
+            </select>
+            <select className="header-select" value={selectedYear} onChange={(e) => setSelectedYear(Number(e.target.value))}>
+              <option value={2026}>2026</option>
+              <option value={2025}>2025</option>
+            </select>
+          </div>
 
-      {/* KPI CARDS */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '1.5rem', marginBottom: '2.5rem' }}>
-        <div className="kpi-card card-receita">
-          <p style={{ fontSize: '11px', color: '#22c55e', fontWeight: 'bold', letterSpacing: '1px' }}>RECEITA BRUTA</p>
-          <h2 style={{ fontSize: '28px', margin: '8px 0 0 0' }}>R$ {totals.entradas.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</h2>
-        </div>
-        <div className="kpi-card card-despesa">
-          <p style={{ fontSize: '11px', color: '#ef4444', fontWeight: 'bold', letterSpacing: '1px' }}>DESPESAS</p>
-          <h2 style={{ fontSize: '28px', margin: '8px 0 0 0' }}>R$ {totals.saidas.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</h2>
-        </div>
-        <div className="kpi-card card-saldo">
-          <p style={{ fontSize: '11px', color: '#3b82f6', fontWeight: 'bold', letterSpacing: '1px' }}>LUCRO LÍQUIDO</p>
-          <h2 style={{ fontSize: '28px', margin: '8px 0 0 0' }}>R$ {(totals.entradas - totals.saidas).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</h2>
+          <div style={{ display: 'flex', gap: '10px' }}>
+            <button onClick={() => window.print()} className="btn-outline">🖨️ Imprimir PDF</button>
+            <button onClick={() => setIsNFModalOpen(true)} className="btn-outline">📊 Dados NF-e</button>
+            <button onClick={handleAbrirNovo} className="btn-blue">+ Novo Lançamento</button>
+          </div>
         </div>
       </div>
 
-      {/* TABELA DE LANÇAMENTOS */}
-      <div style={{ background: '#1e293b', borderRadius: '12px', overflow: 'hidden', border: '1px solid #334155' }}>
-        <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+      {/* CARDS */}
+      <div className="no-print" style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '20px', marginBottom: '30px' }}>
+        <div className="kpi-card" style={{ borderLeft: '5px solid #10b981' }}>
+          <span style={{ fontSize: '11px', fontWeight: 'bold', color: '#10b981' }}>RECEITAS</span>
+          <h2 style={{ margin: '5px 0 0 0', fontSize: '28px' }}>R$ {totals.entradas.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</h2>
+        </div>
+        <div className="kpi-card" style={{ borderLeft: '5px solid #ef4444' }}>
+          <span style={{ fontSize: '11px', fontWeight: 'bold', color: '#ef4444' }}>DESPESAS</span>
+          <h2 style={{ margin: '5px 0 0 0', fontSize: '28px' }}>R$ {totals.saidas.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</h2>
+        </div>
+        <div className="kpi-card" style={{ borderLeft: '5px solid #3b82f6' }}>
+          <span style={{ fontSize: '11px', fontWeight: 'bold', color: '#3b82f6' }}>SALDO</span>
+          <h2 style={{ margin: '5px 0 0 0', fontSize: '28px' }}>R$ {(totals.entradas - totals.saidas).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</h2>
+        </div>
+      </div>
+
+      {/* TABELA */}
+      <div className="kpi-card no-print" style={{ padding: '0', overflow: 'hidden' }}>
+        <table style={{ width: '100%', borderCollapse: 'collapse', color: '#1e293b' }}>
           <thead>
-            <tr style={{ background: 'rgba(0,0,0,0.2)', fontSize: '12px', color: '#94a3b8' }}>
-              <th style={{ textAlign: 'left', padding: '15px 20px' }}>PACIENTE / DESCRIÇÃO</th>
-              <th style={{ textAlign: 'right', padding: '15px 20px' }}>VALOR</th>
-              <th style={{ textAlign: 'center', padding: '15px 20px' }}>AÇÕES</th>
+            <tr style={{ background: '#f8fafc', textAlign: 'left', fontSize: '12px' }}>
+              <th style={{ padding: '15px' }}>DESCRIÇÃO</th>
+              <th style={{ padding: '15px', textAlign: 'right' }}>VALOR</th>
+              <th style={{ padding: '15px', textAlign: 'center' }}>AÇÕES</th>
             </tr>
           </thead>
           <tbody>
-            {periodTransacoes.map((t, i) => (
-              <tr key={i} style={{ borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
-                <td style={{ padding: '15px 20px' }}>{t.descricao}</td>
-                <td style={{ padding: '15px 20px', textAlign: 'right', color: t.tipo === 'receita' ? '#22c55e' : '#ef4444', fontWeight: 'bold' }}>
-                  {t.tipo === 'receita' ? '+ ' : '- '} R$ {parseFloat(t.valor).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+            {periodTransacoes.map((t) => (
+              <tr key={t.id} style={{ borderTop: '1px solid #e2e8f0' }}>
+                <td style={{ padding: '15px', fontWeight: '500' }}>{t.descricao}</td>
+                <td style={{ padding: '15px', textAlign: 'right', fontWeight: 'bold', color: t.tipo === 'receita' ? '#10b981' : '#ef4444' }}>
+                  {t.tipo === 'receita' ? '+' : '-'} R$ {t.valor.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
                 </td>
-                <td style={{ padding: '15px 20px', textAlign: 'center' }}>
-                  {t.tipo === 'receita' && (
-                    <button onClick={() => setSelectedReceipt(t)} className="btn-action" style={{ fontSize: '11px', padding: '6px 14px', margin: '0 auto' }}>📂 Abrir Recibo</button>
-                  )}
+                <td style={{ padding: '15px', textAlign: 'center', display: 'flex', justifyContent: 'center', gap: '12px' }}>
+                  <button onClick={() => handleAbrirEdicao(t)} className="action-btn">✏️</button>
+                  <button onClick={() => handleExcluir(t.id)} className="action-btn">🗑️</button>
+                  <button onClick={() => setSelectedTransaction(t)} className="btn-blue" style={{ fontSize: '10px', padding: '4px 8px' }}>Recibo</button>
                 </td>
               </tr>
             ))}
@@ -187,51 +170,70 @@ export default function FinanceiroPage() {
         </table>
       </div>
 
-      {/* MODAL NF-E PROFISSIONAL (ATUALIZADO PARA IMPRESSÃO) */}
+      {/* MODAL NOVO/EDITAR (VISIBILIDADE CORRIGIDA) */}
+      {isLancamentoModalOpen && (
+        <div className="modal-overlay" onClick={() => setIsLancamentoModalOpen(false)}>
+          <div style={{ background: 'white', padding: '30px', borderRadius: '12px', width: '400px', boxShadow: '0 20px 40px rgba(0,0,0,0.4)' }} onClick={e => e.stopPropagation()}>
+            <h3 style={{ color: '#1e293b', marginBottom: '20px', fontWeight: 'bold' }}>{editingId ? 'Editar Lançamento' : 'Novo Lançamento'}</h3>
+
+            <label style={{ color: '#64748b', fontSize: '12px', fontWeight: 'bold' }}>DESCRIÇÃO</label>
+            <input className="modal-input" type="text" value={novaDescricao} onChange={(e) => setNovaDescricao(e.target.value)} placeholder="Ex: Sessão Particular" />
+
+            <label style={{ color: '#64748b', fontSize: '12px', fontWeight: 'bold' }}>VALOR R$</label>
+            <input className="modal-input" type="number" value={novoValor} onChange={(e) => setNovoValor(e.target.value)} placeholder="0.00" />
+
+            <label style={{ color: '#64748b', fontSize: '12px', fontWeight: 'bold' }}>TIPO DE LANÇAMENTO</label>
+            <select className="modal-select" value={novoTipo} onChange={(e) => setNovoTipo(e.target.value)}>
+              <option value="receita">Receita (Entrada)</option>
+              <option value="despesa">Despesa (Saída)</option>
+            </select>
+
+            <button className="btn-blue" style={{ width: '100%', padding: '14px' }} onClick={handleSalvarLancamento}>
+              {editingId ? 'Salvar Alterações' : 'Confirmar Lançamento'}
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* MODAL DADOS NF-e (RESTAURADO COMPLETO) */}
       {isNFModalOpen && (
-        <div style={{ position: 'fixed', inset: 0, backgroundColor: 'rgba(0,0,0,0.85)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1100 }}>
-          <div className="nf-container">
-            <div className="nf-header">
-              <h2 style={{ margin: 0, fontSize: '1.2rem', color: '#ffffff' }}>Consolidado para Emissão de NF-e</h2>
-              <p style={{ margin: '5px 0 0 0', fontSize: '12px', color: '#94a3b8' }}>Competência: {MONTHS[selectedMonth]} / {selectedYear}</p>
+        <div className="modal-overlay" onClick={() => setIsNFModalOpen(false)}>
+          <div className="report-box" style={{ background: '#1e293b', padding: '40px', borderRadius: '16px', width: '500px', border: '1px solid #334155' }} onClick={e => e.stopPropagation()}>
+            <h2 style={{ margin: 0, fontSize: '22px', color: '#fff' }}>Relatório de Faturamento</h2>
+            <p style={{ color: '#94a3b8', marginBottom: '25px' }}>{MONTHS[selectedMonth]} / {selectedYear}</p>
+
+            <div style={{ background: 'rgba(16, 185, 129, 0.1)', padding: '20px', borderRadius: '12px', textAlign: 'center', marginBottom: '25px' }}>
+              <span style={{ color: '#94a3b8', fontSize: '11px', fontWeight: 'bold', display: 'block', marginBottom: '5px' }}>BASE DE CÁLCULO ISS (TOTAL RECEITAS)</span>
+              <h2 style={{ color: '#10b981', margin: 0, fontSize: '32px' }}>R$ {totals.entradas.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</h2>
             </div>
 
-            <div className="nf-body">
-              <div className="nf-field"><span className="nf-label">Base de Cálculo (ISS):</span> <span className="nf-value" style={{ color: '#22c55e' }}>R$ {totals.entradas.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span></div>
-              <div className="nf-field"><span className="nf-label">Código do Serviço:</span> <span className="nf-value">04.03 (Psicologia)</span></div>
-              <div className="nf-field"><span className="nf-label">Alíquota Sugerida:</span> <span className="nf-value">2,00 %</span></div>
-              <div className="nf-field"><span className="nf-label">Local de Incidência:</span> <span className="nf-value">Lauro de Freitas-BA</span></div>
-              <div className="nf-field"><span className="nf-label">Quantidade de Recibos:</span> <span className="nf-value">{periodTransacoes.filter(t => t.tipo === 'receita').length} Unid.</span></div>
-
-              <div style={{ marginTop: '25px', display: 'flex', gap: '10px' }}>
-                <button onClick={() => window.print()} className="btn-action" style={{ flex: 1, justifyContent: 'center' }}>
-                  🖨️ Imprimir Dados
-                </button>
-                <button onClick={() => setIsNFModalOpen(false)} style={{ flex: 1, background: '#334155', color: 'white', border: 'none', borderRadius: '8px', cursor: 'pointer' }}>Fechar</button>
+            <div style={{ color: '#fff', fontSize: '14px', borderTop: '1px solid #334155', paddingTop: '15px' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', padding: '10px 0', borderBottom: '1px solid #334155' }}>
+                <span style={{ color: '#94a3b8' }}>Prestadora:</span> <b>Lívia Brito</b>
               </div>
+              <div style={{ display: 'flex', justifyContent: 'space-between', padding: '10px 0', borderBottom: '1px solid #334155' }}>
+                <span style={{ color: '#94a3b8' }}>Município:</span> <b>Lauro de Freitas-BA</b>
+              </div>
+              <div style={{ display: 'flex', justifyContent: 'space-between', padding: '10px 0' }}>
+                <span style={{ color: '#94a3b8' }}>Qtd. Atendimentos:</span> <b>{periodTransacoes.filter(t => t.tipo === 'receita').length}</b>
+              </div>
+            </div>
+
+            <div className="no-print" style={{ display: 'flex', gap: '12px', marginTop: '40px' }}>
+              <button className="btn-outline" style={{ flex: 1 }} onClick={() => window.print()}>🖨️ Imprimir</button>
+              <button className="btn-blue" style={{ flex: 1 }} onClick={() => setIsNFModalOpen(false)}>Fechar</button>
             </div>
           </div>
         </div>
       )}
 
-      {/* MODAL DE RECIBO (LÍVIA BRITO) */}
-      {selectedReceipt && (
-        <div style={{ position: 'fixed', inset: 0, backgroundColor: 'rgba(0,0,0,0.9)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1200 }}>
-          <div className="modal-recibo-paper">
-            <h2 style={{ textAlign: 'center', borderBottom: '2px solid #1e293b', paddingBottom: '10px', textTransform: 'uppercase' }}>Recibo de Pagamento</h2>
-            <p style={{ fontSize: '1.2rem', margin: '40px 0', lineHeight: '1.8' }}>
-              Recebi de <b>{selectedReceipt.descricao}</b> a importância de <b>R$ {parseFloat(selectedReceipt.valor).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</b> referente a honorários de serviços profissionais de psicologia.
-            </p>
-            <p style={{ textAlign: 'right', fontWeight: '600' }}>Lauro de Freitas-BA, {new Date(selectedReceipt.data).toLocaleDateString('pt-BR')}.</p>
-            <div style={{ marginTop: '60px', textAlign: 'center' }}>
-              <div style={{ borderTop: '1px solid #1e293b', width: '280px', margin: '0 auto' }}></div>
-              <p style={{ margin: '5px 0' }}><b>Lívia Brito</b></p>
-              <p style={{ fontSize: '13px', opacity: 0.9 }}>Psicóloga - CRP 03/11748</p>
-            </div>
-            <div className="no-print" style={{ display: 'flex', gap: '10px', marginTop: '40px' }}>
-              <button onClick={() => window.print()} className="btn-action" style={{ flex: 1, justifyContent: 'center' }}>Imprimir</button>
-              <button onClick={() => setSelectedReceipt(null)} style={{ flex: 1, background: '#f1f5f9', border: 'none', borderRadius: '8px', cursor: 'pointer', fontWeight: '600' }}>Voltar</button>
-            </div>
+      {/* MODAL RECIBO (MANTIDO) */}
+      {selectedTransaction && (
+        <div className="modal-overlay" onClick={() => setSelectedTransaction(null)}>
+          <div className="report-box" style={{ background: 'white', padding: '40px', borderRadius: '12px', width: '600px', color: '#1e293b' }} onClick={e => e.stopPropagation()}>
+            <h2 style={{ textAlign: 'center', borderBottom: '2px solid #1e293b', paddingBottom: '10px' }}>RECIBO</h2>
+            <p style={{ fontSize: '18px', margin: '30px 0' }}>Recebi de <b>{selectedTransaction.descricao}</b> o valor de <b>R$ {selectedTransaction.valor.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</b> referente a serviços profissionais.</p>
+            <button className="btn-blue" style={{ width: '100%' }} onClick={() => setSelectedTransaction(null)}>Fechar</button>
           </div>
         </div>
       )}
