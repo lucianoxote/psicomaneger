@@ -116,18 +116,24 @@ export default function DocumentosPage() {
         </div>
       )}
 
-      <div style={{ display: 'flex', gap: '0.75rem', marginBottom: '2rem', overflowX: 'auto', paddingBottom: '0.5rem' }}>
+      <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '2.5rem', overflowX: 'auto', paddingBottom: '0.75rem', scrollbarWidth: 'none' }}>
         {['Todos', 'Contrato', 'Laudo', 'Atestado', 'Relatório', 'Anamnese', 'Legal', 'Financeiro'].map(filter => (
           <button
             key={filter}
             onClick={() => setActiveFilter(filter)}
             className="btn"
             style={{
-              backgroundColor: activeFilter === filter ? 'hsl(var(--primary))' : 'hsl(var(--secondary))',
-              color: activeFilter === filter ? 'white' : 'inherit',
-              fontSize: '0.75rem',
-              whiteSpace: 'nowrap'
+              backgroundColor: activeFilter === filter ? 'hsl(var(--primary))' : 'hsl(var(--secondary)/0.5)',
+              color: activeFilter === filter ? 'hsl(var(--primary-foreground))' : 'inherit',
+              fontSize: '0.8125rem',
+              padding: '0.5rem 1.25rem',
+              borderRadius: '99px',
+              border: activeFilter === filter ? 'none' : '1px solid hsl(var(--border))',
+              whiteSpace: 'nowrap',
+              fontWeight: activeFilter === filter ? '600' : '500',
+              transition: 'all 0.2s ease'
             }}
+
           >
             {filter}
           </button>
@@ -136,18 +142,22 @@ export default function DocumentosPage() {
 
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '1.5rem', marginBottom: '4rem' }}>
         {filteredTemplates.map(template => (
-          <div key={template.title} className="card" style={{ display: 'flex', flexDirection: 'column', gap: '1rem', justifyContent: 'space-between', transition: 'transform 0.2s' }} onMouseEnter={e => e.currentTarget.style.transform = 'translateY(-5px)'} onMouseLeave={e => e.currentTarget.style.transform = 'translateY(0)'}>
+          <div key={template.title} className="card" style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem', transition: 'all 0.3s ease' }}>
             <div style={{ display: 'flex', alignItems: 'flex-start', gap: '1rem' }}>
-              <div style={{ fontSize: '2rem', backgroundColor: 'hsl(var(--secondary))', width: '50px', height: '50px', display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: 'var(--radius)' }}>
+              <div style={{ fontSize: '1.75rem', backgroundColor: 'hsl(var(--secondary)/0.5)', width: '48px', height: '48px', display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: '12px', border: '1px solid hsl(var(--border))' }}>
                 {template.icon}
               </div>
               <div style={{ flex: 1 }}>
-                <h3 style={{ fontSize: '1rem', fontWeight: '600' }}>{template.title}</h3>
-                <span className="badge badge-outline" style={{ marginTop: '0.25rem' }}>{template.type}</span>
+                <h3 style={{ fontSize: '1.05rem', fontWeight: '700', letterSpacing: '-0.01em' }}>{template.title}</h3>
+                <span className="badge badge-outline" style={{ marginTop: '0.35rem', fontSize: '0.65rem', textTransform: 'uppercase', letterSpacing: '0.05em' }}>{template.type}</span>
               </div>
             </div>
-            <p style={{ fontSize: '0.8rem', opacity: 0.6 }}>{template.description}</p>
-            <button className="btn btn-primary" onClick={() => handleGenerateClick(template)} style={{ width: '100%', marginTop: '0.5rem' }}>Gerar Documento</button>
+            <p style={{ fontSize: '0.875rem', opacity: 0.6, lineHeight: '1.5', minHeight: '3em' }}>{template.description}</p>
+            <div style={{ marginTop: 'auto', paddingTop: '0.5rem' }}>
+              <button className="btn btn-primary" onClick={() => handleGenerateClick(template)} style={{ padding: '0.625rem 1.5rem', fontSize: '0.875rem' }}>
+                Gerar Documento
+              </button>
+            </div>
           </div>
         ))}
       </div>
