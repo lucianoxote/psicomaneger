@@ -2,6 +2,7 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useSettings } from './SettingsProvider';
+import { signOut } from 'next-auth/react';
 
 interface SidebarProps {
   isOpen?: boolean;
@@ -11,6 +12,10 @@ interface SidebarProps {
 export default function Sidebar({ isOpen, onClose }: SidebarProps) {
   const pathname = usePathname();
   const { t, settings } = useSettings();
+
+  const handleSignOut = () => {
+    signOut({ callbackUrl: '/login' });
+  };
 
   const links = [
     { href: '/', label: t('Dashboard'), icon: '📊' },
@@ -37,7 +42,7 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
           </button>
         )}
       </div>
-      <nav style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+      <nav style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', height: '100%' }}>
         {links.map((link, idx) => {
           const isActive = pathname === link.href || (link.href !== '/' && pathname?.startsWith(link.href));
           return (
@@ -51,6 +56,7 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
             </Link>
           );
         })}
+        
         <Link
           href="/configuracoes"
           className={`nav-link ${pathname === '/configuracoes' ? 'active' : ''}`}
@@ -59,6 +65,14 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
         >
           <span>⚙️</span> {t('Configurações')}
         </Link>
+
+        <button
+          onClick={handleSignOut}
+          className="nav-link"
+          style={{ border: 'none', background: 'none', cursor: 'pointer', textAlign: 'left', width: '100%' }}
+        >
+          <span>🚪</span> {t('Sair')}
+        </button>
       </nav>
     </aside>
   );

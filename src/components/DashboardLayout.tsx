@@ -2,10 +2,18 @@
 import { useState } from 'react';
 import Sidebar from './Sidebar';
 import { useSettings } from './SettingsProvider';
+import { usePathname } from 'next/navigation';
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const { settings } = useSettings();
+  const pathname = usePathname();
+
+  const isLoginPage = pathname === '/login';
+
+  if (isLoginPage) {
+    return <>{children}</>;
+  }
 
   return (
     <div className="layout-wrapper">
