@@ -7,8 +7,39 @@ export default function AgendaPage() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingAgendamentoId, setEditingAgendamentoId] = useState<string | null>(null);
   const [newAgendamento, setNewAgendamento] = useState({ paciente: '', data: new Date().toISOString().split('T')[0], hora: '08:00', tipo: 'Psi', pacienteId: '' });
+  
+  // Funções de data para gerenciar a semana atual
+  const getStartOfWeek = (d: Date) => {
+    const date = new Date(d);
+    const day = date.getDay();
+    const diff = date.getDate() - day; // ajusta para domingo (0)
+    return new Date(date.setDate(diff));
+  };
+  
+  const [currentDate, setCurrentDate] = useState<Date>(new Date());
+  const [viewMode, setViewMode] = useState<'month' | 'week' | 'day'>('month');
+
   const days = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];
   const times = ['08:00', '09:00', '10:00', '11:00', '12:00', '13:00', '14:00', '15:00', '16:00', '17:00', '18:00'];
+  
+  const moveDate = (direction: number) => {
+    const newDate = new Date(currentDate);
+    if (viewMode === 'month') {
+      newDate.setMonth(newDate.getMonth() + direction);
+    } else if (viewMode === 'week') {
+      newDate.setDate(newDate.getDate() + (direction * 7));
+    } else {
+      newDate.setDate(newDate.getDate() + direction);
+    }
+    setCurrentDate(newDate);
+  };
+
+  const getDayDate = (dayIndex: number) => {
+    if (viewMode === 'day') return new Date(currentDate);
+    const d = new Date(getStartOfWeek(currentDate));
+    d.setDate(d.getDate() + dayIndex);
+    return d;
+  };
 
   useEffect(() => {
      fetchData();
@@ -114,11 +145,23 @@ export default function AgendaPage() {
     <div className="agenda-container">
       <header style={{ marginBottom: '2.5rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         <div>
-          <h1 style={{ fontSize: '2rem', fontWeight: '700' }}>Agenda de Atendimentos</h1>
+          <h1 style={{ fontSize: '2rem', fontWeight: '700', textTransform: 'capitalize' }}>
+            Agenda {viewMode === 'month' && `- ${currentDate.toLocaleString('pt-BR', { month: 'long', year: 'numeric' })}`}
+            {viewMode === 'week' && `- Semana de ${getStartOfWeek(currentDate).toLocaleDateString('pt-BR')}`}
+            {viewMode === 'day' && `- ${currentDate.toLocaleDateString('pt-BR')}`}
+          </h1>
           <p style={{ opacity: 0.6 }}>Gerencie seus horários e confirme presenças.</p>
         </div>
-        <div style={{ display: 'flex', gap: '1rem' }}>
-          <button className="btn" style={{ border: '1px solid hsl(var(--border))' }}>Hoje</button>
+        <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center', flexWrap: 'wrap' }}>
+          <div style={{ display: 'flex', border: '1px solid hsl(var(--border))', borderRadius: 'var(--radius)', overflow: 'hidden' }}>
+            <button className="btn" style={{ borderRadius: 0, padding: '0.5rem 1rem', backgroundColor: viewMode === 'month' ? 'hsl(var(--primary))' : 'transparent', color: viewMode === 'month' ? 'hsl(var(--primary-foreground))' : 'inherit', borderRight: '1px solid hsl(var(--border))' }} onClick={() => setViewMode('month')}>Mês</button>
+            <button className="btn" style={{ borderRadius: 0, padding: '0.5rem 1rem', backgroundColor: viewMode === 'week' ? 'hsl(var(--primary))' : 'transparent', color: viewMode === 'week' ? 'hsl(var(--primary-foreground))' : 'inherit' }} onClick={() => setViewMode('week')}>Semana</button>
+          </div>
+          <div style={{ display: 'flex', border: '1px solid hsl(var(--border))', borderRadius: 'var(--radius)', overflow: 'hidden' }}>
+             <button className="btn" style={{ borderRadius: 0, padding: '0.5rem 0.75rem' }} onClick={() => moveDate(-1)}>←</button>
+             <button className="btn" style={{ borderRadius: 0, borderLeft: '1px solid hsl(var(--border))', borderRight: '1px solid hsl(var(--border))' }} onClick={() => { setCurrentDate(new Date()); setViewMode('day'); }}>Hoje</button>
+             <button className="btn" style={{ borderRadius: 0, padding: '0.5rem 0.75rem' }} onClick={() => moveDate(1)}>→</button>
+          </div>
           <button className="btn btn-primary" onClick={() => setIsModalOpen(true)}>+ Agendar Sessão</button>
         </div>
       </header>
@@ -173,28 +216,118 @@ export default function AgendaPage() {
       )}
 
       <div className="card" style={{ padding: '0', overflow: 'hidden', border: '1px solid hsl(var(--border))' }}>
-        <div style={{ display: 'grid', gridTemplateColumns: '100px repeat(7, 1fr)', backgroundColor: 'hsl(var(--secondary))', borderBottom: '1px solid hsl(var(--border))' }}>
+        {viewMode === 'month' ? (
+           <div style={{ display: 'flex', flexDirection: 'column' }}>
+             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', backgroundColor: 'hsl(var(--secondary))', borderBottom: '1px solid hsl(var(--border))' }}>
+                {days.map(day => (
+                  <div key={day} style={{ padding: '1rem', textAlign: 'center', fontWeight: '600', fontSize: '0.875rem', opacity: 0.7 }}>
+                    {day}
+                  </div>
+                ))}
+             </div>
+             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gridAutoRows: 'minmax(100px, auto)' }}>
+               {(() => {
+                  const year = currentDate.getFullYear();
+                  const month = currentDate.getMonth();
+                  const firstDay = new Date(year, month, 1).getDay();
+                  const daysInMonth = new Date(year, month + 1, 0).getDate();
+                  const daysInPrevMonth = new Date(year, month, 0).getDate();
+                  
+                  const monthDays = [];
+                  for (let i = firstDay - 1; i >= 0; i--) {
+                    monthDays.push({ day: daysInPrevMonth - i, isCurrentMonth: false, date: new Date(year, month - 1, daysInPrevMonth - i) });
+                  }
+                  for (let i = 1; i <= daysInMonth; i++) {
+                    monthDays.push({ day: i, isCurrentMonth: true, date: new Date(year, month, i) });
+                  }
+                  const remaining = 42 - monthDays.length;
+                  for (let i = 1; i <= remaining; i++) {
+                    monthDays.push({ day: i, isCurrentMonth: false, date: new Date(year, month + 1, i) });
+                  }
+                  
+                  return monthDays.map((d, index) => {
+                     const isToday = d.date.toDateString() === new Date().toDateString();
+                     const dayAgends = agendamentos.filter(a => {
+                        const aDate = new Date(a.data);
+                        return aDate.getDate() === d.date.getDate() && aDate.getMonth() === d.date.getMonth() && aDate.getFullYear() === d.date.getFullYear();
+                     });
+                     return (
+                        <div key={index} style={{ borderRight: (index + 1) % 7 !== 0 ? '1px solid hsl(var(--border))' : 'none', borderBottom: index < 35 || remaining > 0 ? '1px solid hsl(var(--border))' : 'none', padding: '0.5rem', minHeight: '120px', backgroundColor: d.isCurrentMonth ? 'transparent' : 'hsl(var(--secondary)/0.5)' }}>
+                           <div style={{ textAlign: 'right', marginBottom: '0.5rem' }}>
+                             <span style={{ display: 'inline-flex', width: '28px', height: '28px', alignItems: 'center', justifyContent: 'center', borderRadius: '50%', backgroundColor: isToday ? 'hsl(var(--primary))' : 'transparent', color: isToday ? 'hsl(var(--primary-foreground))' : (d.isCurrentMonth ? 'inherit' : 'gray'), fontSize: '0.875rem', fontWeight: isToday ? 'bold' : 'normal' }}>
+                               {d.day}
+                             </span>
+                           </div>
+                           <div style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
+                              {dayAgends.map(a => {
+                                const aDate = new Date(a.data);
+                                const timeStr = `${aDate.getHours().toString().padStart(2, '0')}:${aDate.getMinutes().toString().padStart(2, '0')}`;
+                                const isPast = aDate < new Date();
+                                return (
+                                  <div key={a._id} onClick={() => handleEditAgendamento(a)} style={{ 
+                                    fontSize: '0.7rem', 
+                                    padding: '0.3rem 0.5rem', 
+                                    backgroundColor: isPast ? 'hsl(var(--secondary))' : (a.tipo === 'Neuro' ? 'hsl(var(--success))' : 'hsl(var(--primary))'), 
+                                    color: isPast ? 'hsl(var(--foreground))' : (a.tipo === 'Neuro' ? '#fff' : 'hsl(var(--primary-foreground))'), 
+                                    borderRadius: '0.25rem', 
+                                    cursor: 'pointer', 
+                                    whiteSpace: 'nowrap', 
+                                    overflow: 'hidden', 
+                                    textOverflow: 'ellipsis',
+                                    opacity: isPast ? 0.7 : 1,
+                                    border: isPast ? '1px solid hsl(var(--border))' : 'none'
+                                  }}>
+                                     <span style={{ textDecoration: isPast ? 'line-through' : 'none', fontWeight: isPast ? 'normal' : '500' }}>{timeStr} - {a.paciente}</span>
+                                  </div>
+                                );
+                              })}
+                           </div>
+                        </div>
+                     )
+                  });
+               })()}
+             </div>
+           </div>
+        ) : (
+          <>
+            <div style={{ display: 'grid', gridTemplateColumns: viewMode === 'week' ? '100px repeat(7, 1fr)' : '100px 1fr', backgroundColor: 'hsl(var(--secondary))', borderBottom: '1px solid hsl(var(--border))' }}>
           <div style={{ padding: '1rem', borderRight: '1px solid hsl(var(--border))' }}></div>
-          {days.map(day => (
-            <div key={day} style={{ padding: '1rem', textAlign: 'center', fontWeight: '600', fontSize: '0.875rem' }}>{day}</div>
-          ))}
+          {(viewMode === 'week' ? days : [days[currentDate.getDay()]]).map((day, ix) => {
+            const dateObj = viewMode === 'week' ? getDayDate(ix) : currentDate;
+            const isToday = dateObj.toDateString() === new Date().toDateString();
+            return (
+              <div key={day} style={{ padding: '1rem', textAlign: 'center', fontWeight: '600', fontSize: '0.875rem' }}>
+                <div style={{ opacity: isToday ? 1 : 0.7, color: isToday ? 'hsl(var(--primary))' : 'inherit' }}>{day}</div>
+                <div style={{ fontSize: '1.25rem', marginTop: '0.4rem', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+                   <div style={{ width: '36px', height: '36px', display: 'flex', justifyContent: 'center', alignItems: 'center', borderRadius: '50%', backgroundColor: isToday ? 'hsl(var(--primary))' : 'transparent', color: isToday ? 'hsl(var(--primary-foreground))' : 'inherit' }}>
+                     {dateObj.getDate().toString().padStart(2, '0')}
+                   </div>
+                </div>
+              </div>
+            );
+          })}
         </div>
 
         <div style={{ height: '600px', overflowY: 'auto' }}>
           {times.map(time => (
-            <div key={time} style={{ display: 'grid', gridTemplateColumns: '100px repeat(7, 1fr)', borderBottom: '1px solid hsl(var(--border))' }}>
+            <div key={time} style={{ display: 'grid', gridTemplateColumns: viewMode === 'week' ? '100px repeat(7, 1fr)' : '100px 1fr', borderBottom: '1px solid hsl(var(--border))' }}>
               <div style={{ padding: '1rem', textAlign: 'right', fontSize: '0.75rem', borderRight: '1px solid hsl(var(--border))', opacity: 0.4, fontWeight: '500' }}>{time}</div>
-              {[...Array(7)].map((_, i) => (
-                <div key={i} style={{ borderRight: i < 6 ? '1px solid hsl(var(--border))' : 'none', minHeight: '5rem', padding: '0.4rem', position: 'relative' }}>
+              {[...Array(viewMode === 'week' ? 7 : 1)].map((_, i) => (
+                <div key={i} style={{ borderRight: (viewMode === 'week' && i < 6) ? '1px solid hsl(var(--border))' : 'none', minHeight: '5rem', padding: '0.4rem', position: 'relative' }}>
                   {agendamentos.filter((a: any) => {
                     const aDate = new Date(a.data);
-                    const now = new Date();
-                    const sevenDaysAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
-                    if (aDate < sevenDaysAgo) return false; // auto-hide after 7 days
+                    const colDate = getDayDate(i);
+                    // Checa se é exatamente o mesmo dia, mês e ano da coluna e a mesma hora
+                    if (aDate.getDate() !== colDate.getDate() || 
+                        aDate.getMonth() !== colDate.getMonth() || 
+                        aDate.getFullYear() !== colDate.getFullYear()) {
+                       return false;
+                    }
+
                     const h = aDate.getHours().toString().padStart(2, '0');
                     const m = aDate.getMinutes().toString().padStart(2, '0');
                     const timeStr = `${h}:${m}`;
-                    return aDate.getDay() === i && timeStr === time;
+                    return timeStr === time;
                   }).map((a: any) => {
                     const isPast = new Date(a.data) < new Date();
                     return (
@@ -228,7 +361,8 @@ export default function AgendaPage() {
             </div>
           ))}
         </div>
-
+        </>
+        )}
       </div>
     </div>
   );
