@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import localFont from "next/font/local";
 import "./globals.css";
-import Sidebar from "@/components/Sidebar";
+import DashboardLayout from "@/components/DashboardLayout";
 import { SettingsProvider } from "@/components/SettingsProvider";
 
 const geistSans = localFont({
@@ -29,10 +29,9 @@ export default function RootLayout({
     <html lang="pt-BR">
       <body className={`${geistSans.variable} ${geistMono.variable}`}>
         <SettingsProvider>
-          <Sidebar />
-          <main className="main-content">
+          <DashboardLayout>
             {children}
-          </main>
+          </DashboardLayout>
         </SettingsProvider>
       </body>
     </html>

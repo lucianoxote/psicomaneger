@@ -3,7 +3,12 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useSettings } from './SettingsProvider';
 
-export default function Sidebar() {
+interface SidebarProps {
+  isOpen?: boolean;
+  onClose?: () => void;
+}
+
+export default function Sidebar({ isOpen, onClose }: SidebarProps) {
   const pathname = usePathname();
   const { t, settings } = useSettings();
 
@@ -18,12 +23,19 @@ export default function Sidebar() {
   ];
 
   return (
-    <aside className="sidebar">
-      <div style={{ marginBottom: '2rem', padding: '0 1rem' }}>
-        <h2 style={{ fontSize: '1.25rem', fontWeight: '700', color: 'hsl(var(--primary))' }}>
-          PsicoManager
-        </h2>
-        <div style={{ fontSize: '0.65rem', opacity: 0.5, marginTop: '0.2rem' }}>{settings.nomeClinica}</div>
+    <aside className={`sidebar ${isOpen ? 'sidebar-open' : ''}`}>
+      <div style={{ marginBottom: '2rem', padding: '0 1rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <div>
+          <h2 style={{ fontSize: '1.25rem', fontWeight: '700', color: 'hsl(var(--primary))' }}>
+            PsicoManager
+          </h2>
+          <div style={{ fontSize: '0.65rem', opacity: 0.5, marginTop: '0.2rem' }}>{settings.nomeClinica}</div>
+        </div>
+        {onClose && (
+          <button className="mobile-close-btn" onClick={onClose} aria-label="Fechar menu">
+            ✕
+          </button>
+        )}
       </div>
       <nav style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
         {links.map((link, idx) => {
@@ -33,6 +45,7 @@ export default function Sidebar() {
               key={idx}
               href={link.href}
               className={`nav-link ${isActive ? 'active' : ''}`}
+              onClick={onClose}
             >
               <span>{link.icon}</span> {link.label}
             </Link>
@@ -42,6 +55,7 @@ export default function Sidebar() {
           href="/configuracoes"
           className={`nav-link ${pathname === '/configuracoes' ? 'active' : ''}`}
           style={{ marginTop: 'auto' }}
+          onClick={onClose}
         >
           <span>⚙️</span> {t('Configurações')}
         </Link>
