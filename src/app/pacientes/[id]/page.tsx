@@ -10,6 +10,7 @@ export default function PatientDetailsPage({ params }: { params: { id: string } 
   const [isSessionModalOpen, setIsSessionModalOpen] = useState(false);
   const [newSession, setNewSession] = useState({
     data: new Date().toISOString().split('T')[0],
+    hora: '08:00',
     tipo: 'Psicoterapia Individual',
     resumo: '',
     modalidade: '',
@@ -138,6 +139,7 @@ export default function PatientDetailsPage({ params }: { params: { id: string } 
     setEditingSessionId(null);
     setNewSession({
       data: new Date().toISOString().split('T')[0],
+      hora: '08:00',
       tipo: 'Psicoterapia Individual',
       resumo: '',
       modalidade: '',
@@ -174,6 +176,7 @@ export default function PatientDetailsPage({ params }: { params: { id: string } 
   const handleEditSession = (s: any) => {
     setNewSession({
       data: s.data ? new Date(s.data).toISOString().split('T')[0] : new Date().toISOString().split('T')[0],
+      hora: s.hora || '08:00',
       tipo: s.tipo || 'Psicoterapia Individual',
       resumo: s.resumo || '',
       modalidade: s.modalidade || '',
@@ -293,9 +296,15 @@ export default function PatientDetailsPage({ params }: { params: { id: string } 
             </header>
             <form style={{ padding: '1.5rem', maxHeight: '70vh', overflowY: 'auto' }} onSubmit={handleSaveSession}>
               <div className="form-grid">
-                <div className="form-group">
-                  <label className="form-label">Data da Sessão</label>
-                  <input type="date" className="form-input" value={newSession.data} onChange={e => setNewSession({ ...newSession, data: e.target.value })} required />
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+                  <div className="form-group">
+                    <label className="form-label">Data da Sessão</label>
+                    <input type="date" className="form-input" value={newSession.data} onChange={e => setNewSession({ ...newSession, data: e.target.value })} required />
+                  </div>
+                  <div className="form-group">
+                    <label className="form-label">Horário (para a Agenda)</label>
+                    <input type="time" className="form-input" value={newSession.hora} onChange={e => setNewSession({ ...newSession, hora: e.target.value })} />
+                  </div>
                 </div>
                 <div className="form-group">
                   <label className="form-label">Tipo</label>
