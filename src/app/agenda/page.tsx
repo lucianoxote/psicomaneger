@@ -20,7 +20,7 @@ export default function AgendaPage() {
   const [viewMode, setViewMode] = useState<'month' | 'week' | 'day'>('month');
 
   const days = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];
-  const times = ['08:00', '09:00', '10:00', '11:00', '12:00', '13:00', '14:00', '15:00', '16:00', '17:00', '18:00'];
+  const times = ['07:00', '08:00', '09:00', '10:00', '11:00', '12:00', '13:00', '14:00', '15:00', '16:00', '17:00', '18:00', '19:00', '20:00', '21:00'];
   
   const moveDate = (direction: number) => {
     const newDate = new Date(currentDate);
@@ -340,10 +340,11 @@ export default function AgendaPage() {
                     }
 
                     const h = aDate.getHours().toString().padStart(2, '0');
-                    const m = aDate.getMinutes().toString().padStart(2, '0');
-                    const timeStr = `${h}:${m}`;
-                    return timeStr === time;
+                    const slotHour = time.split(':')[0];
+                    return h === slotHour;
                   }).map((a: any) => {
+                    const aDate = new Date(a.data);
+                    const timeStr = `${aDate.getHours().toString().padStart(2, '0')}:${aDate.getMinutes().toString().padStart(2, '0')}`;
                     const isRealizado = a.status === 'realizado' || a.status === 'cancelado' || a.status === 'falta';
                     return (
                       <div key={a._id} className="card" onClick={() => handleEditAgendamento(a)} style={{
@@ -360,7 +361,9 @@ export default function AgendaPage() {
                         cursor: 'pointer',
                         opacity: isRealizado ? 0.7 : 1,
                       }}>
-                        <div style={{ fontWeight: '700', textDecoration: isRealizado ? 'line-through' : 'none', opacity: isRealizado ? 0.8 : 1 }}>{a.paciente}</div>
+                        <div style={{ fontWeight: '700', textDecoration: isRealizado ? 'line-through' : 'none', opacity: isRealizado ? 0.8 : 1 }}>
+                          <span style={{ opacity: 0.6, fontSize: '0.65rem' }}>{timeStr}</span> - {a.paciente}
+                        </div>
                         <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '0.4rem', opacity: 0.9 }}>
                           <span>{a.tipo}</span>
                           {isRealizado
