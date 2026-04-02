@@ -6,7 +6,7 @@ export default function AgendaPage() {
   const [pacientes, setPacientes] = useState<any[]>([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingAgendamentoId, setEditingAgendamentoId] = useState<string | null>(null);
-  const [newAgendamento, setNewAgendamento] = useState({ paciente: '', data: new Date().toISOString().split('T')[0], hora: '08:00', tipo: 'Psi', pacienteId: '' });
+  const [newAgendamento, setNewAgendamento] = useState({ paciente: '', data: new Date().toISOString().split('T')[0], hora: '08:00', tipo: 'Psi', pacienteId: '', status: 'agendado' });
   
   // Funções de data para gerenciar a semana atual
   const getStartOfWeek = (d: Date) => {
@@ -61,7 +61,7 @@ export default function AgendaPage() {
   const closeModal = () => {
     setIsModalOpen(false);
     setEditingAgendamentoId(null);
-    setNewAgendamento({ paciente: '', data: new Date().toISOString().split('T')[0], hora: '08:00', tipo: 'Psi', pacienteId: '' });
+    setNewAgendamento({ paciente: '', data: new Date().toISOString().split('T')[0], hora: '08:00', tipo: 'Psi', pacienteId: '', status: 'agendado' });
   };
 
   const handleCreateAgendamento = async (e: React.FormEvent) => {
@@ -106,8 +106,9 @@ export default function AgendaPage() {
       pacienteId: a.pacienteId,
       data: `${yyyy}-${mm}-${dd}`,
       hora: `${hh}:${min}`,
-      tipo: a.tipo
-    });
+      tipo: a.tipo,
+      status: a.status || 'agendado'
+    } as any);
     setEditingAgendamentoId(a._id);
     setIsModalOpen(true);
   };
@@ -196,12 +197,26 @@ export default function AgendaPage() {
                     <input type="time" className="form-input" required value={newAgendamento.hora} onChange={e => setNewAgendamento({...newAgendamento, hora: e.target.value})} />
                   </div>
                 </div>
-                <div className="form-group">
-                  <label className="form-label">Tipo de Atendimento</label>
-                  <select className="form-input" value={newAgendamento.tipo} onChange={e => setNewAgendamento({...newAgendamento, tipo: e.target.value})}>
-                    <option value="Psi">Psicoterapia</option>
-                    <option value="Neuro">Neuropsicologia</option>
-                  </select>
+                <div className="form-grid">
+                   <div className="form-group">
+                     <label className="form-label">Tipo de Atendimento</label>
+                     <select className="form-input" value={newAgendamento.tipo} onChange={e => setNewAgendamento({...newAgendamento, tipo: e.target.value})}>
+                       <option value="Psi">Psicoterapia</option>
+                       <option value="Neuro">Neuropsicologia</option>
+                     </select>
+                   </div>
+                   {editingAgendamentoId && (
+                      <div className="form-group">
+                        <label className="form-label">Status</label>
+                        <select className="form-input" value={(newAgendamento as any).status || 'agendado'} onChange={e => setNewAgendamento({...newAgendamento, status: e.target.value})}>
+                          <option value="agendado">Agendado</option>
+                          <option value="confirmado">Confirmado</option>
+                          <option value="realizado">Realizado</option>
+                          <option value="cancelado">Cancelado</option>
+                          <option value="falta">Faltou</option>
+                        </select>
+                      </div>
+                   )}
                 </div>
                 <footer style={{ marginTop: '2rem', display: 'flex', justifyContent: 'flex-end', gap: '1rem' }}>
                   {editingAgendamentoId && (
@@ -252,7 +267,7 @@ export default function AgendaPage() {
                         return aDate.getDate() === d.date.getDate() && aDate.getMonth() === d.date.getMonth() && aDate.getFullYear() === d.date.getFullYear();
                      });
                      return (
-                        <div key={index} style={{ borderRight: (index + 1) % 7 !== 0 ? '1px solid hsl(var(--border))' : 'none', borderBottom: index < 35 || remaining > 0 ? '1px solid hsl(var(--border))' : 'none', padding: '0.5rem', minHeight: '120px', backgroundColor: d.isCurrentMonth ? 'transparent' : 'hsl(var(--secondary)/0.5)' }}>
+                        <div key={index} style={{ borderRight: (index + 1) % 7 !== 0 ? '1px solid hsl(var(--border))' : 'none', borderBottom: index < 35 || remaining > 0 ? '1px solid hsl(var(--border))' : 'none', padding: '0.5rem', minHeight: '120px', backgroundColor: d.isCurrentMonth ? 'transparent' : 'hsl(var(--secondary)/0.5)', minWidth: 0, overflow: 'hidden' }}>
                            <div style={{ textAlign: 'right', marginBottom: '0.5rem' }}>
                              <span style={{ display: 'inline-flex', width: '28px', height: '28px', alignItems: 'center', justifyContent: 'center', borderRadius: '50%', backgroundColor: isToday ? 'hsl(var(--primary))' : 'transparent', color: isToday ? 'hsl(var(--primary-foreground))' : (d.isCurrentMonth ? 'inherit' : 'gray'), fontSize: '0.875rem', fontWeight: isToday ? 'bold' : 'normal' }}>
                                {d.day}
@@ -262,22 +277,22 @@ export default function AgendaPage() {
                               {dayAgends.map(a => {
                                 const aDate = new Date(a.data);
                                 const timeStr = `${aDate.getHours().toString().padStart(2, '0')}:${aDate.getMinutes().toString().padStart(2, '0')}`;
-                                const isPast = aDate < new Date();
+                                const isRealizado = a.status === 'realizado' || a.status === 'cancelado' || a.status === 'falta';
                                 return (
                                   <div key={a._id} onClick={() => handleEditAgendamento(a)} style={{ 
                                     fontSize: '0.7rem', 
                                     padding: '0.3rem 0.5rem', 
-                                    backgroundColor: isPast ? 'hsl(var(--secondary))' : (a.tipo === 'Neuro' ? 'hsl(var(--success))' : 'hsl(var(--primary))'), 
-                                    color: isPast ? 'hsl(var(--foreground))' : (a.tipo === 'Neuro' ? '#fff' : 'hsl(var(--primary-foreground))'), 
+                                    backgroundColor: isRealizado ? 'hsl(var(--secondary))' : (a.tipo === 'Neuro' ? 'hsl(var(--success))' : 'hsl(var(--primary))'), 
+                                    color: isRealizado ? 'hsl(var(--foreground))' : (a.tipo === 'Neuro' ? '#fff' : 'hsl(var(--primary-foreground))'), 
                                     borderRadius: '0.25rem', 
                                     cursor: 'pointer', 
                                     whiteSpace: 'nowrap', 
                                     overflow: 'hidden', 
                                     textOverflow: 'ellipsis',
-                                    opacity: isPast ? 0.7 : 1,
-                                    border: isPast ? '1px solid hsl(var(--border))' : 'none'
+                                    opacity: isRealizado ? 0.7 : 1,
+                                    border: isRealizado ? '1px solid hsl(var(--border))' : 'none'
                                   }}>
-                                     <span style={{ textDecoration: isPast ? 'line-through' : 'none', fontWeight: isPast ? 'normal' : '500' }}>{timeStr} - {a.paciente}</span>
+                                     <span style={{ textDecoration: isRealizado ? 'line-through' : 'none', fontWeight: isRealizado ? 'normal' : '500' }}>{timeStr} - {a.paciente}</span>
                                   </div>
                                 );
                               })}
@@ -329,27 +344,27 @@ export default function AgendaPage() {
                     const timeStr = `${h}:${m}`;
                     return timeStr === time;
                   }).map((a: any) => {
-                    const isPast = new Date(a.data) < new Date();
+                    const isRealizado = a.status === 'realizado' || a.status === 'cancelado' || a.status === 'falta';
                     return (
                       <div key={a._id} className="card" onClick={() => handleEditAgendamento(a)} style={{
                         padding: '0.6rem',
-                        backgroundColor: isPast
+                        backgroundColor: isRealizado
                           ? 'hsl(var(--secondary))'
                           : (a.tipo === 'Neuro' ? 'hsl(var(--success))' : 'hsl(var(--primary))'),
-                        color: isPast ? 'hsl(var(--foreground))' : (a.tipo === 'Neuro' ? '#fff' : 'hsl(var(--primary-foreground))'),
+                        color: isRealizado ? 'hsl(var(--foreground))' : (a.tipo === 'Neuro' ? '#fff' : 'hsl(var(--primary-foreground))'),
                         fontSize: '0.75rem',
-                        border: isPast ? '1px solid hsl(var(--border))' : 'none',
+                        border: isRealizado ? '1px solid hsl(var(--border))' : 'none',
                         borderRadius: '0.5rem',
-                        boxShadow: isPast ? 'none' : '0 4px 6px -1px rgba(0,0,0,0.1)',
+                        boxShadow: isRealizado ? 'none' : '0 4px 6px -1px rgba(0,0,0,0.1)',
                         marginBottom: '0.5rem',
                         cursor: 'pointer',
-                        opacity: isPast ? 0.7 : 1,
+                        opacity: isRealizado ? 0.7 : 1,
                       }}>
-                        <div style={{ fontWeight: '700', textDecoration: isPast ? 'line-through' : 'none', opacity: isPast ? 0.8 : 1 }}>{a.paciente}</div>
+                        <div style={{ fontWeight: '700', textDecoration: isRealizado ? 'line-through' : 'none', opacity: isRealizado ? 0.8 : 1 }}>{a.paciente}</div>
                         <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '0.4rem', opacity: 0.9 }}>
                           <span>{a.tipo}</span>
-                          {isPast
-                            ? <span style={{ fontSize: '0.6rem', fontWeight: '700', color: '#10b981' }}>✓ Realizado</span>
+                          {isRealizado
+                            ? <span style={{ fontSize: '0.65rem', fontWeight: '700', color: a.status === 'realizado' ? '#10b981' : 'inherit' }}>{a.status.charAt(0).toUpperCase() + a.status.slice(1)}</span>
                             : <span style={{ fontSize: '0.65rem' }}>{a.status === 'confirmado' ? '✓' : '?'}</span>
                           }
                         </div>
