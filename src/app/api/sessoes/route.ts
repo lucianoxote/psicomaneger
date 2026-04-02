@@ -30,6 +30,26 @@ export async function POST(request: Request) {
       createdAt: new Date()
     });
 
+    // Sincronizar com a agenda: criar o evento retroativo para aparecer na grade
+    try {
+      if (body.data) {
+        // Se a hora não for especificada no body, assume-se um horário padrão
+        const horaSessao = body.hora || '08:00';
+        const dataComHora = `${body.data}T${horaSessao}:00`;
+        
+        await db.collection('agendamentos').insertOne({
+           paciente: body.pacienteNome,
+           pacienteId: body.pacienteId,
+           data: dataComHora,
+           tipo: body.tipo?.includes('Neuro') ? 'Neuro' : 'Psi',
+           status: 'realizado', // automático pois vem do prontuário
+           createdAt: new Date()
+        });
+      }
+    } catch(err) {
+       console.log('Aviso: Erro ao sincronizar sessoes com agendamentos retroativos', err);
+    }
+
     return NextResponse.json({ success: true, id: result.insertedId });
   } catch (e) {
     return NextResponse.json({ error: 'Erro ao salvar sessão' }, { status: 500 });

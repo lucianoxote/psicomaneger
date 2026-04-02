@@ -4,6 +4,27 @@ import { useState, useEffect } from 'react';
 export default function AgendaPage() {
   const [agendamentos, setAgendamentos] = useState<any[]>([]);
   const [pacientes, setPacientes] = useState<any[]>([]);
+
+  // Função para parsear data ignorando fuso horário (preservando o que foi digitado)
+  const getSafeDate = (dataString: string | Date) => {
+    if (!dataString) return new Date();
+    if (dataString instanceof Date) return dataString;
+    
+    // Se for uma string de data (ex: 2026-04-02T10:30:00)
+    const iso = dataString.toString();
+    
+    // Se a string já vier com Z ou offset, o browser vai converter.
+    // Para manter literal o que foi salvo, vamos decompor se não tiver 'Z'
+    if (!iso.includes('Z') && iso.includes('T')) {
+      const [datePart, timePart] = iso.split('T');
+      const [y, m, d] = datePart.split('-').map(Number);
+      const [hh, mm] = timePart.split(':').map(Number);
+      return new Date(y, m - 1, d, hh, mm);
+    }
+    
+    return new Date(iso);
+  };
+  
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingAgendamentoId, setEditingAgendamentoId] = useState<string | null>(null);
   const [newAgendamento, setNewAgendamento] = useState({ paciente: '', data: new Date().toISOString().split('T')[0], hora: '08:00', tipo: 'Psi', pacienteId: '', status: 'agendado' });
@@ -94,7 +115,7 @@ export default function AgendaPage() {
   };
 
   const handleEditAgendamento = (a: any) => {
-    const d = new Date(a.data);
+    const d = getSafeDate(a.data);
     const yyyy = d.getFullYear();
     const mm = (d.getMonth() + 1).toString().padStart(2, '0');
     const dd = d.getDate().toString().padStart(2, '0');
@@ -263,7 +284,7 @@ export default function AgendaPage() {
                   return monthDays.map((d, index) => {
                      const isToday = d.date.toDateString() === new Date().toDateString();
                      const dayAgends = agendamentos.filter(a => {
-                        const aDate = new Date(a.data);
+                        const aDate = getSafeDate(a.data);
                         return aDate.getDate() === d.date.getDate() && aDate.getMonth() === d.date.getMonth() && aDate.getFullYear() === d.date.getFullYear();
                      });
                      return (
@@ -275,7 +296,7 @@ export default function AgendaPage() {
                            </div>
                            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
                               {dayAgends.map(a => {
-                                const aDate = new Date(a.data);
+                                const aDate = getSafeDate(a.data);
                                 const timeStr = `${aDate.getHours().toString().padStart(2, '0')}:${aDate.getMinutes().toString().padStart(2, '0')}`;
                                 const isRealizado = a.status === 'realizado' || a.status === 'cancelado' || a.status === 'falta';
                                 return (
@@ -330,7 +351,7 @@ export default function AgendaPage() {
               {[...Array(viewMode === 'week' ? 7 : 1)].map((_, i) => (
                 <div key={i} style={{ borderRight: (viewMode === 'week' && i < 6) ? '1px solid hsl(var(--border))' : 'none', minHeight: '5rem', padding: '0.4rem', position: 'relative' }}>
                   {agendamentos.filter((a: any) => {
-                    const aDate = new Date(a.data);
+                    const aDate = getSafeDate(a.data);
                     const colDate = getDayDate(i);
                     // Checa se é exatamente o mesmo dia, mês e ano da coluna e a mesma hora
                     if (aDate.getDate() !== colDate.getDate() || 
@@ -343,7 +364,7 @@ export default function AgendaPage() {
                     const slotHour = time.split(':')[0];
                     return h === slotHour;
                   }).map((a: any) => {
-                    const aDate = new Date(a.data);
+                    const aDate = getSafeDate(a.data);
                     const timeStr = `${aDate.getHours().toString().padStart(2, '0')}:${aDate.getMinutes().toString().padStart(2, '0')}`;
                     const isRealizado = a.status === 'realizado' || a.status === 'cancelado' || a.status === 'falta';
                     return (

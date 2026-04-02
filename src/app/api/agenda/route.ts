@@ -21,7 +21,6 @@ export async function POST(request: Request) {
     
     const result = await db.collection('agendamentos').insertOne({
       ...body,
-      data: new Date(body.data),
       status: body.status || 'pendente',
       createdAt: new Date()
     });
@@ -39,9 +38,9 @@ export async function PATCH(request: Request) {
     const client = await clientPromise;
     const db = client.db();
     
-    if (updateFields.data) {
-       updateFields.data = new Date(updateFields.data);
-    }
+    // if (updateFields.data) {
+    //    updateFields.data = new Date(updateFields.data);
+    // }
     
     await db.collection('agendamentos').updateOne(
       { _id: new ObjectId(id) },
