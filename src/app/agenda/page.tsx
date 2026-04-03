@@ -287,8 +287,31 @@ export default function AgendaPage() {
                         const aDate = getSafeDate(a.data);
                         return aDate.getDate() === d.date.getDate() && aDate.getMonth() === d.date.getMonth() && aDate.getFullYear() === d.date.getFullYear();
                      });
-                     return (
-                        <div key={index} style={{ borderRight: (index + 1) % 7 !== 0 ? '1px solid hsl(var(--border))' : 'none', borderBottom: index < 35 || remaining > 0 ? '1px solid hsl(var(--border))' : 'none', padding: '0.5rem', minHeight: '120px', backgroundColor: d.isCurrentMonth ? 'transparent' : 'hsl(var(--secondary)/0.5)', minWidth: 0, overflow: 'hidden' }}>
+                    return (
+                        <div 
+                          key={index} 
+                          onClick={() => {
+                            setCurrentDate(d.date);
+                            setViewMode('day');
+                          }}
+                          style={{ 
+                            borderRight: (index + 1) % 7 !== 0 ? '1px solid hsl(var(--border))' : 'none', 
+                            borderBottom: index < 35 || remaining > 0 ? '1px solid hsl(var(--border))' : 'none', 
+                            padding: '0.5rem', 
+                            minHeight: '120px', 
+                            backgroundColor: d.isCurrentMonth ? 'transparent' : 'hsl(var(--secondary)/0.5)', 
+                            minWidth: 0, 
+                            overflow: 'hidden',
+                            cursor: 'pointer',
+                            transition: 'background-color 0.2s'
+                          }}
+                          onMouseEnter={e => {
+                            if (d.isCurrentMonth) e.currentTarget.style.backgroundColor = 'hsl(var(--secondary)/0.3)';
+                          }}
+                          onMouseLeave={e => {
+                            if (d.isCurrentMonth) e.currentTarget.style.backgroundColor = 'transparent';
+                          }}
+                        >
                            <div style={{ textAlign: 'right', marginBottom: '0.5rem' }}>
                              <span style={{ display: 'inline-flex', width: '28px', height: '28px', alignItems: 'center', justifyContent: 'center', borderRadius: '50%', backgroundColor: isToday ? 'hsl(var(--primary))' : 'transparent', color: isToday ? 'hsl(var(--primary-foreground))' : (d.isCurrentMonth ? 'inherit' : 'gray'), fontSize: '0.875rem', fontWeight: isToday ? 'bold' : 'normal' }}>
                                {d.day}
@@ -300,19 +323,26 @@ export default function AgendaPage() {
                                 const timeStr = `${aDate.getHours().toString().padStart(2, '0')}:${aDate.getMinutes().toString().padStart(2, '0')}`;
                                 const isRealizado = a.status === 'realizado' || a.status === 'cancelado' || a.status === 'falta';
                                 return (
-                                  <div key={a._id} onClick={() => handleEditAgendamento(a)} style={{ 
-                                    fontSize: '0.7rem', 
-                                    padding: '0.3rem 0.5rem', 
-                                    backgroundColor: isRealizado ? 'hsl(var(--secondary))' : (a.tipo === 'Neuro' ? 'hsl(var(--success))' : 'hsl(var(--primary))'), 
-                                    color: isRealizado ? 'hsl(var(--foreground))' : (a.tipo === 'Neuro' ? '#fff' : 'hsl(var(--primary-foreground))'), 
-                                    borderRadius: '0.25rem', 
-                                    cursor: 'pointer', 
-                                    whiteSpace: 'nowrap', 
-                                    overflow: 'hidden', 
-                                    textOverflow: 'ellipsis',
-                                    opacity: isRealizado ? 0.7 : 1,
-                                    border: isRealizado ? '1px solid hsl(var(--border))' : 'none'
-                                  }}>
+                                  <div 
+                                    key={a._id} 
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      handleEditAgendamento(a);
+                                    }} 
+                                    style={{ 
+                                      fontSize: '0.7rem', 
+                                      padding: '0.3rem 0.5rem', 
+                                      backgroundColor: isRealizado ? 'hsl(var(--secondary))' : (a.tipo === 'Neuro' ? 'hsl(var(--success))' : 'hsl(var(--primary))'), 
+                                      color: isRealizado ? 'hsl(var(--foreground))' : (a.tipo === 'Neuro' ? '#fff' : 'hsl(var(--primary-foreground))'), 
+                                      borderRadius: '0.25rem', 
+                                      cursor: 'pointer', 
+                                      whiteSpace: 'nowrap', 
+                                      overflow: 'hidden', 
+                                      textOverflow: 'ellipsis',
+                                      opacity: isRealizado ? 0.7 : 1,
+                                      border: isRealizado ? '1px solid hsl(var(--border))' : 'none'
+                                    }}
+                                  >
                                      <span style={{ textDecoration: isRealizado ? 'line-through' : 'none', fontWeight: isRealizado ? 'normal' : '500' }}>{timeStr} - {a.paciente}</span>
                                   </div>
                                 );
