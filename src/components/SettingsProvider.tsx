@@ -68,19 +68,32 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
       const data = await res.json();
       if (data && !data.error) {
         setSettingsState(data);
-        // Apply theme
-        if (typeof document !== 'undefined') {
-          if (data.tema === 'Tema Escuro') {
-            document.documentElement.classList.add('dark');
-          } else {
-            document.documentElement.classList.remove('dark');
-          }
-        }
       }
     } catch (e) {
       console.error(e);
     }
   };
+
+  useEffect(() => {
+    if (typeof document !== 'undefined') {
+      const applyTheme = (theme: string) => {
+        if (theme === 'Tema Escuro') {
+          document.documentElement.classList.add('dark');
+        } else if (theme === 'Tema Claro' || theme === 'Tema Claro (Premium)') {
+          document.documentElement.classList.remove('dark');
+        } else if (theme === 'Automático (Sistema)') {
+          const isDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+          if (isDark) {
+            document.documentElement.classList.add('dark');
+          } else {
+            document.documentElement.classList.remove('dark');
+          }
+        }
+      };
+
+      applyTheme(settings.tema);
+    }
+  }, [settings.tema]);
 
   useEffect(() => {
     if (status === 'authenticated') {
