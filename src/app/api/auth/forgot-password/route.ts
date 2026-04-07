@@ -41,6 +41,11 @@ export async function POST(request: Request) {
     // Send email
     const resetUrl = `${process.env.NEXTAUTH_URL}/reset-password?token=${token}`;
 
+    // Check if e-mail system is configured
+    if (process.env.RESEND_API_KEY?.includes('dummy')) {
+       return NextResponse.json({ error: 'Configuração de e-mail pendente no servidor. Verifique as chaves na Vercel.' }, { status: 501 });
+    }
+
     await mailClient.emails.send({
       from: 'PsicoManager <onboarding@resend.dev>',
       to: email,
@@ -62,7 +67,7 @@ export async function POST(request: Request) {
 
     return NextResponse.json({ success: true });
   } catch (e: any) {
-    console.error('Erro forgot-password:', e);
-    return NextResponse.json({ error: 'Erro interno ao processar solicitação' }, { status: 500 });
+    console.error('Erro forgot-password detalhado:', e.message || e);
+    return NextResponse.json({ error: `Erro na solicitação: ${e.message || 'Erro interno'}` }, { status: 500 });
   }
 }

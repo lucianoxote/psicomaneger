@@ -9,9 +9,9 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   const { settings } = useSettings();
   const pathname = usePathname();
 
-  const isLoginPage = pathname === '/login';
-
-  if (isLoginPage) {
+  const isAuthPage = pathname?.startsWith('/login') || pathname === '/reset-password';
+  
+  if (isAuthPage) {
     return <>{children}</>;
   }
 
