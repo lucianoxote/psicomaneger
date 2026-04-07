@@ -30,7 +30,7 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
   return (
     <aside className={`sidebar ${isOpen ? 'sidebar-open' : ''}`}>
       <div style={{ marginBottom: '2rem', padding: '0 1rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-        <div style={{ padding: '0' }}>
+        <div style={{ padding: '0', position: 'relative', isolation: 'isolate', WebkitTransform: 'translate3d(0,0,0)', transform: 'translate3d(0,0,0)' }}>
           <img 
             src="/images/logo_livia_transparent.png" 
             alt="SynaPSIS Logo" 
@@ -134,6 +134,7 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
           display: block !important; 
           filter: contrast(150%) brightness(1.1) drop-shadow(0 0 2px rgba(255,255,255,0.1));
           mix-blend-mode: screen;
+          -webkit-mix-blend-mode: screen;
         }
       `}</style>
     </aside>
