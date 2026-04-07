@@ -50,6 +50,8 @@ export default function PatientDetailsPage({ params }: { params: { id: string } 
   const [sessions, setSessions] = useState<any[]>([]);
   const [transactions, setTransactions] = useState<any[]>([]);
   const [isFilterVisible, setIsFilterVisible] = useState(false);
+  const [attachments, setAttachments] = useState<any[]>([]);
+  const [isUploading, setIsUploading] = useState(false);
   const [sessionFilters, setSessionFilters] = useState({ tipo: 'Todos', dataInicio: '', dataFim: '' });
 
   const filteredSessions = sessions.filter(s => {
@@ -63,20 +65,23 @@ export default function PatientDetailsPage({ params }: { params: { id: string } 
   const fetchPatientData = async () => {
     setLoading(true);
     try {
-      const [pRes, sRes, tRes] = await Promise.all([
+      const [pRes, sRes, tRes, aRes] = await Promise.all([
         fetch(`/api/pacientes?id=${params.id}`),
         fetch(`/api/sessoes?pacienteId=${params.id}`),
-        fetch(`/api/financeiro?pacienteId=${params.id}`)
+        fetch(`/api/financeiro?pacienteId=${params.id}`),
+        fetch(`/api/pacientes/anexos?pacienteId=${params.id}`)
       ]);
-      const [pData, sData, tData] = await Promise.all([
+      const [pData, sData, tData, aData] = await Promise.all([
         pRes.json(),
         sRes.json(),
-        tRes.json()
+        tRes.json(),
+        aRes.json()
       ]);
       const found = Array.isArray(pData) ? pData.find((p: any) => p._id === params.id) : pData;
       setPatient(found);
       setSessions(sData);
       setTransactions(tData);
+      setAttachments(aData);
       if (found) {
         if (typeof found.anamnese === 'string') {
           setAnamneseContent((prev: any) => ({ ...prev, observacoes: found.anamnese }));
@@ -279,6 +284,43 @@ export default function PatientDetailsPage({ params }: { params: { id: string } 
       }
     } catch (e) {
       console.error(e);
+    }
+  };
+
+  const handleUploadAttachment = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setIsUploading(true);
+    const formData = new FormData();
+    formData.append('file', file);
+    formData.append('pacienteId', params.id);
+    formData.append('pacienteNome', patient.nome);
+
+    try {
+      const res = await fetch('/api/pacientes/anexos', {
+        method: 'POST',
+        body: formData
+      });
+      if (res.ok) {
+        fetchPatientData();
+      } else {
+        alert('Falha ao subir arquivo');
+      }
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setIsUploading(false);
+    }
+  };
+
+  const handleDeleteAttachment = async (id: string) => {
+    if (!confirm('Deseja excluir este anexo?')) return;
+    try {
+      const res = await fetch(`/api/pacientes/anexos?id=${id}`, { method: 'DELETE' });
+      if (res.ok) fetchPatientData();
+    } catch (err) {
+      console.error(err);
     }
   };
 
@@ -598,7 +640,7 @@ export default function PatientDetailsPage({ params }: { params: { id: string } 
       </header>
 
       <nav style={{ display: 'flex', gap: '2rem', borderBottom: '1px solid hsl(var(--border))', marginBottom: '2rem' }}>
-        {['resumo', 'anamnese', 'sessoes', 'documentos', 'financeiro'].map(tab => (
+        {['resumo', 'anamnese', 'sessoes', 'documentos', 'financeiro', 'anexos'].map(tab => (
           <button
             key={tab}
             onClick={() => setActiveTab(tab)}
@@ -924,6 +966,93 @@ export default function PatientDetailsPage({ params }: { params: { id: string } 
                   )}
                 </tbody>
               </table>
+            </div>
+          </div>
+        )}
+
+        {activeTab === 'anexos' && (
+          <div className="card fade-in">
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2.5rem' }}>
+              <h3 style={{ fontSize: '1.25rem', fontWeight: '600' }}>Anexos e Documentos Externos</h3>
+              <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
+                <input
+                  type="file"
+                  id="attachment-upload"
+                  style={{ display: 'none' }}
+                  onChange={handleUploadAttachment}
+                  disabled={isUploading}
+                />
+                <label
+                  htmlFor="attachment-upload"
+                  className="btn btn-primary"
+                  style={{ 
+                    fontSize: '0.8125rem', 
+                    cursor: isUploading ? 'not-allowed' : 'pointer', 
+                    display: 'inline-flex', 
+                    alignItems: 'center', 
+                    gap: '0.5rem',
+                    padding: '0.6rem 1.2rem',
+                    borderRadius: '8px'
+                  }}
+                >
+                  {isUploading ? (
+                    'Subindo arquivo...'
+                  ) : (
+                    <><span>📎</span> Adicionar Anexo</>
+                  )}
+                </label>
+              </div>
+            </div>
+
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: '2rem' }}>
+              {attachments.length === 0 ? (
+                <div style={{ gridColumn: '1 / -1', padding: '5rem', textAlign: 'center', opacity: 0.5, border: '2px dashed hsl(var(--border))', borderRadius: '12px' }}>
+                  <div style={{ fontSize: '3.5rem', marginBottom: '1.5rem' }}>📂</div>
+                  <h4 style={{ fontSize: '1.1rem', fontWeight: '600', marginBottom: '0.5rem' }}>O prontuário de anexos está vazio</h4>
+                  <p style={{ fontSize: '0.9rem' }}>Clique em "Adicionar Anexo" para centralizar exames, fotos ou documentos externos deste paciente.</p>
+                </div>
+              ) : (
+                attachments.map(anexo => (
+                  <div key={anexo._id} className="card" style={{ padding: '0', overflow: 'hidden', display: 'flex', flexDirection: 'column', transition: 'all 0.2s ease', border: '1px solid hsl(var(--border))' }}>
+                    <div style={{ height: '140px', backgroundColor: 'hsl(var(--secondary))', display: 'flex', alignItems: 'center', justifyContent: 'center', position: 'relative', overflow: 'hidden', borderBottom: '1px solid hsl(var(--border))' }}>
+                      {anexo.type?.startsWith('image/') ? (
+                        <img src={anexo.path} alt={anexo.originalName} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                      ) : (
+                        <div style={{ fontSize: '3.5rem', filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.1))' }}>
+                          {anexo.originalName.toLowerCase().endsWith('.pdf') ? '📕' : '📄'}
+                        </div>
+                      )}
+                    </div>
+                    <div style={{ padding: '1rem', flex: 1, display: 'flex', flexDirection: 'column' }}>
+                      <div style={{ fontSize: '0.875rem', fontWeight: '600', marginBottom: '0.25rem', color: 'hsl(var(--foreground))', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }} title={anexo.originalName}>
+                        {anexo.originalName}
+                      </div>
+                      <div style={{ fontSize: '0.75rem', opacity: 0.6, marginBottom: '1.25rem' }}>
+                        {new Date(anexo.createdAt).toLocaleDateString('pt-BR')} • {(anexo.size / (1024 * 1024)).toFixed(2)} MB
+                      </div>
+                      <div style={{ display: 'flex', gap: '0.5rem', marginTop: 'auto' }}>
+                        <a 
+                          href={anexo.path} 
+                          target="_blank" 
+                          rel="noopener noreferrer" 
+                          className="btn" 
+                          style={{ flex: 1, padding: '0.5rem', fontSize: '0.75rem', border: '1px solid hsl(var(--border))', textAlign: 'center', textDecoration: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: '500' }}
+                        >
+                          Visualizar
+                        </a>
+                        <button 
+                          onClick={() => handleDeleteAttachment(anexo._id)} 
+                          className="btn" 
+                          style={{ padding: '0.5rem', fontSize: '0.75rem', border: '1px solid hsl(var(--border))', color: 'hsl(var(--destructive))', width: '40px', display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'all 0.2s' }}
+                          title="Excluir anexo"
+                        >
+                          🗑️
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                ))
+              )}
             </div>
           </div>
         )}

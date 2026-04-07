@@ -1,15 +1,27 @@
 import { NextResponse } from 'next/server';
 import clientPromise from '@/lib/mongodb';
+import { auth } from '@/auth';
+
+export const dynamic = 'force-dynamic';
+
+const GLOBAL_CONFIG_ID = 'clinica_config_global';
 
 export async function GET() {
   try {
+    const session = await auth();
+    if (!session?.user?.id) {
+      return NextResponse.json({ error: 'Não autorizado' }, { status: 401 });
+    }
+
     const client = await clientPromise;
-    const db = client.db("psicomanager");
-    // We only ever have one settings document
-    const settings = await db.collection("configuracoes").findOne({});
+    const db = client.db();
+    
+    // Find global clinical settings
+    const settings = await db.collection("configuracoes").findOne({ configId: GLOBAL_CONFIG_ID });
+    
     return NextResponse.json(settings || {
-      nomeClinica: 'Lívia Brito Psicologia',
-      crp: '06/123456',
+      nomeClinica: 'PsicoManager',
+      crp: '',
       tema: 'Tema Claro (Premium)',
       idioma: 'Português (Brasil)'
     });
@@ -20,15 +32,20 @@ export async function GET() {
 
 export async function POST(request: Request) {
   try {
+    const session = await auth();
+    if (!session?.user?.id) {
+      return NextResponse.json({ error: 'Não autorizado' }, { status: 401 });
+    }
+
     const client = await clientPromise;
-    const db = client.db("psicomanager");
+    const db = client.db();
     const body = await request.json();
     const { _id, ...updateData } = body;
 
-    // Update the only settings document or create it if it doesn't exist
+    // Update global clinical settings using a fixed ID
     const result = await db.collection("configuracoes").updateOne(
-      {},
-      { $set: updateData },
+      { configId: GLOBAL_CONFIG_ID },
+      { $set: { ...updateData, configId: GLOBAL_CONFIG_ID, updatedAt: new Date() } },
       { upsert: true }
     );
     

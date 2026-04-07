@@ -12,11 +12,13 @@ export const authConfig = {
     authorized({ auth, request: { nextUrl } }) {
       const isLoggedIn = !!auth?.user;
       const isLoginPage = nextUrl.pathname === "/login";
+      const isRecoveryPage = nextUrl.pathname.startsWith("/login/forgot-password") || 
+                             nextUrl.pathname.startsWith("/reset-password");
       const isRegisterApi = nextUrl.pathname === "/api/auth/register";
 
       if (isRegisterApi) return true;
 
-      if (!isLoggedIn && !isLoginPage) {
+      if (!isLoggedIn && !isLoginPage && !isRecoveryPage) {
         return Response.redirect(new URL("/login", nextUrl));
       }
       

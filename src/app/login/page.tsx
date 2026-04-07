@@ -3,10 +3,13 @@
 import { useState, useEffect } from 'react';
 import { signIn } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 
 export default function LoginPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
+  const [rememberMe, setRememberMe] = useState(false);
   const [name, setName] = useState(''); // Only for first access
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
@@ -15,6 +18,13 @@ export default function LoginPage() {
   const router = useRouter();
 
   useEffect(() => {
+    // Check for remembered email
+    const savedEmail = localStorage.getItem('rememberedEmail');
+    if (savedEmail) {
+      setEmail(savedEmail);
+      setRememberMe(true);
+    }
+
     // Check if system has users
     fetch('/api/auth/register')
       .then(res => res.json())
@@ -42,6 +52,13 @@ export default function LoginPage() {
       if (result?.error) {
         setError('E-mail ou senha inválidos');
       } else {
+        // Handle Remember Me
+        if (rememberMe) {
+          localStorage.setItem('rememberedEmail', email);
+        } else {
+          localStorage.removeItem('rememberedEmail');
+        }
+        
         router.push('/');
         router.refresh();
       }
@@ -98,9 +115,32 @@ export default function LoginPage() {
     <div className="login-container">
       <div className="login-card glass">
         <div className="login-header">
-          <div className="logo-icon">✨</div>
-          <h1>PsicoManager</h1>
-          <p>{isRegistering ? 'Configuração de Primeiro Acesso' : 'Bem-vindo de volta'}</p>
+          <div className="logo-section" style={{ marginBottom: '1.5rem' }}>
+            <div className="logo-icon-wrapper" style={{ width: '280px', height: 'auto', background: 'none', boxShadow: 'none' }}>
+              <img 
+                src="/images/logo_livia_transparent.png" 
+                alt="Lívia Brito Psicóloga" 
+                className="light-logo"
+                style={{ 
+                  width: '100%', 
+                  height: 'auto', 
+                  display: 'block'
+                }} 
+              />
+              <img 
+                src="/images/logo_livia_white_text.png" 
+                alt="Lívia Brito Psicóloga" 
+                className="dark-logo"
+                style={{ 
+                  width: '100%', 
+                  height: 'auto',
+                  mixBlendMode: 'screen',
+                  clipPath: 'inset(2px)'
+                }} 
+              />
+            </div>
+          </div>
+          <p className="welcome-text" style={{ marginTop: '1rem' }}>{isRegistering ? 'Configuração de Primeiro Acesso' : 'Gestão Clínica de Excelência'}</p>
         </div>
 
         <form onSubmit={isRegistering ? handleRegister : handleLogin} className="login-form">
@@ -134,14 +174,44 @@ export default function LoginPage() {
 
           <div className="form-group">
             <label className="form-label">Senha</label>
-            <input
-              type="password"
-              className="form-input"
-              placeholder="••••••••"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              required
-            />
+            <div className="password-input-wrapper">
+              <input
+                type={showPassword ? "text" : "password"}
+                className="form-input password-input"
+                placeholder="••••••••"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                required
+              />
+              <button 
+                type="button" 
+                className="password-toggle"
+                onClick={() => setShowPassword(!showPassword)}
+                tabIndex={-1}
+              >
+                {showPassword ? (
+                  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 19c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path><line x1="1" y1="1" x2="23" y2="23"></line></svg>
+                ) : (
+                  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+                )}
+              </button>
+            </div>
+          </div>
+
+          <div className="form-options">
+            <label className="remember-me">
+              <input 
+                type="checkbox" 
+                checked={rememberMe} 
+                onChange={(e) => setRememberMe(e.target.checked)} 
+              />
+              <span>Lembrar-me</span>
+            </label>
+            {!isRegistering && (
+              <Link href="/login/forgot-password" title="Recuperar acesso ao sistema" className="forgot-password">
+                Esqueci minha senha
+              </Link>
+            )}
           </div>
 
           <button type="submit" className="login-button" disabled={loading}>
@@ -182,25 +252,59 @@ export default function LoginPage() {
 
         .login-header {
           text-align: center;
-          margin-bottom: 2rem;
+          margin-bottom: 2.5rem;
+        }
+
+        .logo-section {
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          gap: 0.75rem;
+          margin-bottom: 1.5rem;
+        }
+
+        .logo-icon-wrapper {
+          background: hsla(var(--primary), 0.1);
+          width: 64px;
+          height: 64px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          border-radius: 1.25rem;
+          position: relative;
         }
 
         .logo-icon {
           font-size: 2.5rem;
-          margin-bottom: 0.5rem;
           filter: drop-shadow(0 0 10px hsla(var(--primary), 0.5));
         }
 
-        .login-header h1 {
-          font-size: 1.75rem;
-          font-weight: 800;
-          margin-bottom: 0.25rem;
-          background: linear-gradient(to bottom right, hsl(var(--foreground)), hsla(var(--foreground), 0.7));
-          -webkit-background-clip: text;
-          -webkit-text-fill-color: transparent;
+        .brand-text {
+          display: flex;
+          flex-direction: column;
         }
 
-        .login-header p {
+        .brand-name {
+          font-family: inherit;
+          font-size: 2rem;
+          font-weight: 800;
+          letter-spacing: -0.04em;
+          background: linear-gradient(135deg, hsl(var(--foreground)) 0%, hsla(var(--foreground), 0.6) 100%);
+          -webkit-background-clip: text;
+          -webkit-text-fill-color: transparent;
+          line-height: 1;
+        }
+
+        .brand-subtitle {
+          font-size: 0.75rem;
+          text-transform: uppercase;
+          letter-spacing: 0.2em;
+          opacity: 0.5;
+          font-weight: 600;
+          margin-top: 0.25rem;
+        }
+
+        .welcome-text {
           font-size: 0.875rem;
           opacity: 0.6;
         }
@@ -221,22 +325,117 @@ export default function LoginPage() {
           border: 1px solid hsla(var(--destructive), 0.2);
         }
 
+        .password-input-wrapper {
+          position: relative;
+        }
+
+        .password-input {
+          padding-right: 3rem;
+        }
+
+        .password-toggle {
+          position: absolute;
+          right: 0.75rem;
+          top: 50%;
+          transform: translateY(-50%);
+          background: none;
+          border: none;
+          color: hsla(var(--foreground), 0.4);
+          cursor: pointer;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          padding: 0.25rem;
+          border-radius: 0.5rem;
+          transition: all 0.2s;
+        }
+
+        .password-toggle:hover {
+          color: hsl(var(--primary));
+          background: hsla(var(--primary), 0.1);
+        }
+
+        .form-options {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          font-size: 0.8125rem;
+          margin-top: -0.5rem;
+          position: relative;
+          z-index: 10;
+        }
+
+        .remember-me {
+          display: flex;
+          align-items: center;
+          gap: 0.5rem;
+          cursor: pointer;
+          user-select: none;
+          opacity: 0.7;
+          transition: opacity 0.2s;
+        }
+
+        .remember-me:hover {
+          opacity: 1;
+        }
+
+        .remember-me input {
+          width: 16px;
+          height: 16px;
+          border-radius: 4px;
+          accent-color: hsl(var(--primary));
+          cursor: pointer;
+        }
+
+        .forgot-password {
+          color: hsl(var(--primary));
+          text-decoration: none;
+          font-weight: 500;
+          transition: opacity 0.2s;
+          cursor: pointer;
+          position: relative;
+          z-index: 11;
+          padding: 0.5rem 0;
+        }
+
+        .forgot-password:hover {
+          opacity: 0.8;
+          text-decoration: underline;
+        }
+
         .login-button {
           margin-top: 0.5rem;
-          padding: 0.875rem;
-          background-color: hsl(var(--primary));
+          padding: 1rem;
+          background: linear-gradient(135deg, hsl(var(--primary)) 0%, hsl(221, 83%, 60%) 100%);
           color: white;
           border: none;
-          border-radius: 1rem;
+          border-radius: 1.25rem;
           font-weight: 600;
           cursor: pointer;
-          transition: all 0.2s;
-          box-shadow: 0 4px 6px -1px hsla(var(--primary), 0.3);
+          transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+          box-shadow: 0 4px 12px hsla(var(--primary), 0.3),
+                      inset 0 1px 1px hsla(0, 0%, 100%, 0.2);
+          position: relative;
+          overflow: hidden;
+        }
+
+        .login-button::after {
+          content: '';
+          position: absolute;
+          inset: 0;
+          background: linear-gradient(to bottom, rgba(255,255,255,0.2), transparent);
+          opacity: 0;
+          transition: opacity 0.2s;
         }
 
         .login-button:hover:not(:disabled) {
           transform: translateY(-2px);
-          box-shadow: 0 10px 15px -3px hsla(var(--primary), 0.4);
+          box-shadow: 0 12px 20px -5px hsla(var(--primary), 0.4),
+                      0 4px 8px -2px hsla(var(--primary), 0.2);
+        }
+
+        .login-button:hover:not(:disabled)::after {
+          opacity: 1;
         }
 
         .login-button:active:not(:disabled) {
@@ -249,7 +448,7 @@ export default function LoginPage() {
         }
 
         .login-footer {
-          margin-top: 2rem;
+          margin-top: 2.5rem;
           text-align: center;
           font-size: 0.75rem;
           opacity: 0.4;
@@ -258,9 +457,25 @@ export default function LoginPage() {
 
         .glass {
           background: rgba(255, 255, 255, 0.7);
-          backdrop-filter: blur(20px);
-          -webkit-backdrop-filter: blur(20px);
+          backdrop-filter: blur(25px);
+          -webkit-backdrop-filter: blur(25px);
           border: 1px solid rgba(255, 255, 255, 0.5);
+          box-shadow: 0 40px 80px -20px rgba(0, 0, 0, 0.15);
+        }
+
+        :global(.dark) .glass {
+          background: rgba(15, 23, 42, 0.7);
+          border: 1px solid rgba(255, 255, 255, 0.08);
+          box-shadow: 0 40px 100px -20px rgba(0, 0, 0, 0.5);
+        }
+
+        .light-logo { display: block !important; }
+        .dark-logo { display: none !important; }
+        :global(.dark) .light-logo { display: none !important; }
+        :global(.dark) .dark-logo { 
+          display: block !important; 
+          filter: contrast(150%) brightness(1.1) drop-shadow(0 0 2px rgba(255,255,255,0.1));
+          mix-blend-mode: screen;
         }
 
         :global(.dark) .glass {

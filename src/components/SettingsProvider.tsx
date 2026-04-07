@@ -1,5 +1,6 @@
 'use client';
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import { useSession } from 'next-auth/react';
 
 type Settings = {
   nomeClinica: string;
@@ -53,6 +54,7 @@ const translations: Record<string, Record<string, string>> = {
 };
 
 export function SettingsProvider({ children }: { children: ReactNode }) {
+  const { data: session, status } = useSession();
   const [settings, setSettingsState] = useState<Settings>({
     nomeClinica: 'PsicoManager',
     crp: '',
@@ -81,8 +83,10 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
   };
 
   useEffect(() => {
-    fetchSettings();
-  }, []);
+    if (status === 'authenticated') {
+      fetchSettings();
+    }
+  }, [status, session]);
 
   const t = (key: string) => {
     return translations[settings.idioma]?.[key] || key;

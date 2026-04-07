@@ -30,11 +30,34 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
   return (
     <aside className={`sidebar ${isOpen ? 'sidebar-open' : ''}`}>
       <div style={{ marginBottom: '2rem', padding: '0 1rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-        <div>
-          <h2 style={{ fontSize: '1.25rem', fontWeight: '700', color: 'hsl(var(--primary))' }}>
-            PsicoManager
-          </h2>
-          <div style={{ fontSize: '0.65rem', opacity: 0.5, marginTop: '0.2rem' }}>{settings.nomeClinica}</div>
+        <div style={{ padding: '0' }}>
+          <img 
+            src="/images/logo_livia_transparent.png" 
+            alt="PsicoManager Logo" 
+            className="sidebar-logo light-logo"
+            style={{ 
+              width: '100%', 
+              maxWidth: '185px', 
+              height: 'auto',
+              transition: 'all 0.3s ease'
+            }} 
+          />
+          <img 
+            src="/images/logo_livia_white_text.png" 
+            alt="PsicoManager Logo" 
+            className="sidebar-logo dark-logo"
+            style={{ 
+              width: '100%', 
+              maxWidth: '185px', 
+              height: 'auto',
+              transition: 'all 0.3s ease',
+              mixBlendMode: 'screen',
+              clipPath: 'inset(2px)'
+            }} 
+          />
+          <div style={{ fontSize: '0.625rem', opacity: 0.6, marginTop: '0', letterSpacing: '0.05em', fontWeight: '500' }}>
+            {settings.nomeClinica || 'Lívia Brito'} | {settings.crp || 'CRP 03/11745'}
+          </div>
         </div>
         {onClose && (
           <button className="mobile-close-btn" onClick={onClose} aria-label="Fechar menu">
@@ -74,6 +97,17 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
           <span>🚪</span> {t('Sair')}
         </button>
       </nav>
+
+      <style jsx>{`
+        .light-logo { display: block !important; }
+        .dark-logo { display: none !important; }
+        :global(.dark) .light-logo { display: none !important; }
+        :global(.dark) .dark-logo { 
+          display: block !important; 
+          filter: contrast(150%) brightness(1.1) drop-shadow(0 0 2px rgba(255,255,255,0.1));
+          mix-blend-mode: screen;
+        }
+      `}</style>
     </aside>
   );
 }
