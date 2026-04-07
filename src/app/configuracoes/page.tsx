@@ -3,7 +3,7 @@ import { useState, useEffect } from 'react';
 import { useSettings } from '@/components/SettingsProvider';
 
 export default function ConfiguracoesPage() {
-  const { settings, refreshSettings, t } = useSettings();
+  const { settings, setSettings, refreshSettings, t } = useSettings();
   const [localSettings, setLocalSettings] = useState(settings);
   const [saving, setSaving] = useState(false);
   
@@ -251,7 +251,12 @@ export default function ConfiguracoesPage() {
               <select 
                 className="form-input" 
                 value={localSettings.tema} 
-                onChange={e => setLocalSettings({...localSettings, tema: e.target.value})}
+                onChange={e => {
+                  const newTema = e.target.value;
+                  setLocalSettings({...localSettings, tema: newTema});
+                  // Instant preview without waiting for save
+                  setSettings({...settings, tema: newTema});
+                }}
               >
                 <option>Tema Claro (Premium)</option>
                 <option>Tema Escuro</option>
