@@ -29,9 +29,9 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
           </button>
           <div className="mobile-header-brand" style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
             <img 
-              src="/images/synapsis-icone.png" 
+              src="/images/livia_brain_icon.jpg" 
               alt="Logo" 
-              style={{ width: '32px', height: '32px', objectFit: 'contain' }} 
+              style={{ width: '32px', height: '32px', objectFit: 'contain', borderRadius: '4px' }} 
             />
             <span className="mobile-header-title">{settings.nomeClinica || 'SynaPSIS'}</span>
           </div>
