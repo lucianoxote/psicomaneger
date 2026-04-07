@@ -16,15 +16,21 @@ export async function GET() {
     const client = await clientPromise;
     const db = client.db();
     
-    // Find global clinical settings
-    const settings = await db.collection("configuracoes").findOne({ configId: GLOBAL_CONFIG_ID });
+    // Fetch global clinic settings (shared by all users)
+    const globalSettings = await db.collection("configuracoes").findOne({ configId: GLOBAL_CONFIG_ID });
     
-    return NextResponse.json(settings || {
-      nomeClinica: 'PsicoManager',
-      crp: '',
-      tema: 'Tema Claro (Premium)',
-      idioma: 'Português (Brasil)'
-    });
+    // Fetch per-user preferences (tema, idioma)
+    const userSettings = await db.collection("configuracoes_usuario").findOne({ userId: session.user.id });
+
+    // Merge: global clinic info + individual preferences
+    const merged = {
+      nomeClinica: globalSettings?.nomeClinica || 'PsicoManager',
+      crp: globalSettings?.crp || '',
+      tema: userSettings?.tema || 'Tema Claro (Premium)',
+      idioma: userSettings?.idioma || 'Português (Brasil)',
+    };
+
+    return NextResponse.json(merged);
   } catch (e) {
     return NextResponse.json({ error: 'Erro ao buscar configurações' }, { status: 500 });
   }
@@ -40,16 +46,22 @@ export async function POST(request: Request) {
     const client = await clientPromise;
     const db = client.db();
     const body = await request.json();
-    const { _id, ...updateData } = body;
 
-    // Update global clinical settings using a fixed ID
-    const result = await db.collection("configuracoes").updateOne(
+    // Save global clinic settings (nomeClinica, crp) — shared by all
+    await db.collection("configuracoes").updateOne(
       { configId: GLOBAL_CONFIG_ID },
-      { $set: { ...updateData, configId: GLOBAL_CONFIG_ID, updatedAt: new Date() } },
+      { $set: { nomeClinica: body.nomeClinica, crp: body.crp, configId: GLOBAL_CONFIG_ID, updatedAt: new Date() } },
+      { upsert: true }
+    );
+
+    // Save per-user preferences (tema, idioma) — individual
+    await db.collection("configuracoes_usuario").updateOne(
+      { userId: session.user.id },
+      { $set: { tema: body.tema, idioma: body.idioma, userId: session.user.id, updatedAt: new Date() } },
       { upsert: true }
     );
     
-    return NextResponse.json({ success: true, result });
+    return NextResponse.json({ success: true });
   } catch (e) {
     return NextResponse.json({ error: 'Erro ao salvar configurações' }, { status: 500 });
   }
