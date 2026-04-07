@@ -24,7 +24,7 @@ export async function GET() {
 
     // Merge: global clinic info + individual preferences
     const merged = {
-      nomeClinica: globalSettings?.nomeClinica || 'PsicoManager',
+      nomeClinica: globalSettings?.nomeClinica || 'SynaPSIS',
       crp: globalSettings?.crp || '',
       tema: userSettings?.tema || 'Tema Claro (Premium)',
       idioma: userSettings?.idioma || 'Português (Brasil)',

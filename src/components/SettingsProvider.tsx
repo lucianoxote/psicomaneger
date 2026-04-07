@@ -56,7 +56,7 @@ const translations: Record<string, Record<string, string>> = {
 export function SettingsProvider({ children }: { children: ReactNode }) {
   const { data: session, status } = useSession();
   const [settings, setSettingsState] = useState<Settings>({
-    nomeClinica: 'PsicoManager',
+    nomeClinica: 'SynaPSIS',
     crp: '',
     tema: 'Tema Claro (Premium)',
     idioma: 'Português (Brasil)'

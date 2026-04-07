@@ -33,7 +33,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
               alt="Logo" 
               style={{ width: '32px', height: '32px' }} 
             />
-            <span className="mobile-header-title">{settings.nomeClinica || 'PsicoManager'}</span>
+            <span className="mobile-header-title">{settings.nomeClinica || 'SynaPSIS'}</span>
           </div>
         </div>
       </div>

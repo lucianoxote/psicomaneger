@@ -33,7 +33,7 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
         <div style={{ padding: '0' }}>
           <img 
             src="/images/logo_livia_transparent.png" 
-            alt="PsicoManager Logo" 
+            alt="SynaPSIS Logo" 
             className="sidebar-logo light-logo"
             style={{ 
               width: '100%', 
@@ -44,7 +44,7 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
           />
           <img 
             src="/images/logo_livia_white_text.png" 
-            alt="PsicoManager Logo" 
+            alt="SynaPSIS Logo" 
             className="sidebar-logo dark-logo"
             style={{ 
               width: '100%', 
