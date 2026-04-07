@@ -41,6 +41,10 @@
   border-color: hsl(var(--border));
 }
 
+html {
+  font-size: 90%; /* Scales the entire app down by 10% natively to fit smaller laptop screens perfectly */
+}
+
 body {
   background-color: hsl(var(--background));
   color: hsl(var(--foreground));
