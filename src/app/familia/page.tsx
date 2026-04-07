@@ -11,6 +11,7 @@ export default function FamiliaPage() {
     pacienteId: '', 
     pacienteNome: '', 
     responsavel: '', 
+    telefone: '',
     conteudo: '', 
     data: new Date().toISOString().split('T')[0] 
   });
@@ -41,7 +42,7 @@ export default function FamiliaPage() {
 
   const handleOpenNew = () => {
     setEditingId(null);
-    setNewLog({ pacienteId: '', pacienteNome: '', responsavel: '', conteudo: '', data: new Date().toISOString().split('T')[0] });
+    setNewLog({ pacienteId: '', pacienteNome: '', responsavel: '', telefone: '', conteudo: '', data: new Date().toISOString().split('T')[0] });
     setIsModalOpen(true);
   };
 
@@ -51,6 +52,7 @@ export default function FamiliaPage() {
       pacienteId: log.pacienteId, 
       pacienteNome: log.pacienteNome, 
       responsavel: log.responsavel, 
+      telefone: log.telefone || '',
       conteudo: log.conteudo, 
       data: log.data 
     });
@@ -124,6 +126,12 @@ export default function FamiliaPage() {
                     <input type="text" className="form-input" placeholder="Ex: Mãe (Maria Silva)" value={newLog.responsavel} onChange={e => setNewLog({...newLog, responsavel: e.target.value})} required />
                   </div>
                   <div className="form-group">
+                    <label className="form-label">Telefone do Responsável</label>
+                    <input type="tel" className="form-input" placeholder="(71) 98833-9502" value={newLog.telefone} onChange={e => setNewLog({...newLog, telefone: e.target.value})} />
+                  </div>
+               </div>
+               <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '1rem' }}>
+                  <div className="form-group">
                     <label className="form-label">Data do Contato</label>
                     <input type="date" className="form-input" value={newLog.data} onChange={e => setNewLog({...newLog, data: e.target.value})} required />
                   </div>
@@ -160,8 +168,9 @@ export default function FamiliaPage() {
                 <div>
                   <span style={{ fontWeight: '700', fontSize: '1.125rem', color: 'hsl(var(--primary))' }}>{l.pacienteNome}</span>
                   <div style={{ fontSize: '0.8rem', opacity: 0.6, marginTop: '0.2rem' }}>Responsável: {l.responsavel}</div>
+                  {l.telefone && <div style={{ fontSize: '0.8rem', opacity: 0.6, marginTop: '0.1rem' }}>📞 {l.telefone}</div>}
                 </div>
-                <span className="badge badge-secondary" style={{ fontSize: '0.7rem' }}>{new Date(l.data).toLocaleDateString('pt-BR')}</span>
+                <span className="badge badge-secondary" style={{ fontSize: '0.7rem' }}>{l.data?.includes('T') ? new Date(l.data).toLocaleDateString('pt-BR') : l.data?.split('-').reverse().join('/')}</span>
               </div>
               <div style={{ padding: '1rem', backgroundColor: 'hsl(var(--secondary))', borderRadius: 'var(--radius)', fontSize: '0.9rem', lineHeight: '1.6', whiteSpace: 'pre-wrap' }}>
                 {l.conteudo}
