@@ -114,11 +114,12 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
           onMouseLeave={(e) => e.currentTarget.style.opacity = '0.5'}
           >
             <span style={{ display: 'block', marginBottom: '0.2rem' }}>Powered by</span>
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.3rem', fontWeight: '700', fontSize: '0.9rem', color: 'hsl(var(--primary))' }}>
-               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <path d="M12 2C6.48 2 2 6.48 2 12C2 17.52 6.48 22 12 22C17.52 22 22 17.52 22 12C22 6.48 17.52 2 12 2ZM12 20C7.59 20 4 16.41 4 12C4 7.59 7.59 4 12 4C16.41 4 20 7.59 20 12C20 16.41 16.41 20 12 20Z" fill="currentColor"/>
-                  <path d="M15 11H13V9C13 8.45 12.55 8 12 8C11.45 8 11 8.45 11 9V11H9C8.45 11 8 11.45 8 12C8 12.55 8.45 13 9 13H11V15C11 15.55 11.45 16 12 16C12.55 16 13 15.55 13 15V13H15C15.55 13 16 12.55 16 12C16 11.45 15.55 11 15 11Z" fill="currentColor"/>
-               </svg>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.4rem', fontWeight: '700', fontSize: '0.9rem', color: 'hsl(var(--primary))' }}>
+               <img 
+                 src="/images/synapsis-icone.png" 
+                 alt="Ícone SynaPSIS" 
+                 style={{ width: '16px', height: '16px', objectFit: 'contain' }} 
+               />
                SynaPSIS
             </div>
           </div>
