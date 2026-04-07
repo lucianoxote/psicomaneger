@@ -37,7 +37,10 @@ export default function Home() {
   }, []);
 
   const todayStr = new Date().toISOString().split('T')[0];
-  const sessoesHoje = (agendamentos || []).filter(a => a.data?.includes(todayStr));
+  const sessoesHoje = (agendamentos || []).filter(a => 
+    a.data?.includes(todayStr) && 
+    !['realizado', 'cancelado', 'falta'].includes(a.status?.toLowerCase())
+  );
   const pendenciasCount = (tarefas || []).filter(t => t.status === 'pendente').length;
   const pacientesRecentes = pacientes?.length ? [...pacientes].reverse().slice(0, 8) : [];
   const proximasSessoes = sessoesHoje.slice(0, 3);
