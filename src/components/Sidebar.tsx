@@ -54,7 +54,7 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
               clipPath: 'inset(2px)'
             }} 
           />
-          <div style={{ fontSize: '0.625rem', opacity: 0.6, marginTop: '0', letterSpacing: '0.05em', fontWeight: '500' }}>
+          <div style={{ fontSize: '0.7rem', opacity: 1, marginTop: '0.15rem', letterSpacing: '0.05em', fontWeight: '600', color: 'hsl(25 30% 30%)' }}>
             {settings.nomeClinica || 'Lívia Brito'} | {settings.crp || 'CRP 03/11745'}
           </div>
         </div>
