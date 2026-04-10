@@ -226,12 +226,14 @@ export default function LoginPage() {
 
       <style jsx>{`
         .login-container {
+          --brand-brown: 25 45% 42%;
+          --brand-brown-light: 25 45% 50%;
           min-height: 100vh;
           display: flex;
           align-items: center;
           justify-content: center;
-          background: radial-gradient(circle at top left, hsla(var(--primary), 0.15), transparent),
-                      radial-gradient(circle at bottom right, hsla(var(--primary), 0.1), transparent),
+          background: radial-gradient(circle at top left, hsla(var(--brand-brown), 0.10), transparent),
+                      radial-gradient(circle at bottom right, hsla(var(--brand-brown), 0.05), transparent),
                       hsl(var(--background));
           padding: 1.5rem;
         }
@@ -264,7 +266,7 @@ export default function LoginPage() {
         }
 
         .logo-icon-wrapper {
-          background: hsla(var(--primary), 0.1);
+          background: hsla(var(--brand-brown), 0.1);
           width: 64px;
           height: 64px;
           display: flex;
@@ -276,7 +278,7 @@ export default function LoginPage() {
 
         .logo-icon {
           font-size: 2.5rem;
-          filter: drop-shadow(0 0 10px hsla(var(--primary), 0.5));
+          filter: drop-shadow(0 0 10px hsla(var(--brand-brown), 0.5));
         }
 
         .brand-text {
@@ -351,8 +353,8 @@ export default function LoginPage() {
         }
 
         .password-toggle:hover {
-          color: hsl(var(--primary));
-          background: hsla(var(--primary), 0.1);
+          color: hsl(var(--brand-brown));
+          background: hsla(var(--brand-brown), 0.1);
         }
 
         .form-options {
@@ -383,12 +385,12 @@ export default function LoginPage() {
           width: 16px;
           height: 16px;
           border-radius: 4px;
-          accent-color: hsl(var(--primary));
+          accent-color: hsl(var(--brand-brown));
           cursor: pointer;
         }
 
         .forgot-password {
-          color: hsl(var(--primary));
+          color: hsl(var(--brand-brown));
           text-decoration: none;
           font-weight: 500;
           transition: opacity 0.2s;
@@ -406,14 +408,14 @@ export default function LoginPage() {
         .login-button {
           margin-top: 0.5rem;
           padding: 1rem;
-          background: linear-gradient(135deg, hsl(var(--primary)) 0%, hsl(221, 83%, 60%) 100%);
+          background: linear-gradient(135deg, hsl(var(--brand-brown)) 0%, hsl(var(--brand-brown-light)) 100%);
           color: white;
           border: none;
           border-radius: 1.25rem;
           font-weight: 600;
           cursor: pointer;
           transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-          box-shadow: 0 4px 12px hsla(var(--primary), 0.3),
+          box-shadow: 0 4px 12px hsla(var(--brand-brown), 0.3),
                       inset 0 1px 1px hsla(0, 0%, 100%, 0.2);
           position: relative;
           overflow: hidden;
@@ -430,8 +432,8 @@ export default function LoginPage() {
 
         .login-button:hover:not(:disabled) {
           transform: translateY(-2px);
-          box-shadow: 0 12px 20px -5px hsla(var(--primary), 0.4),
-                      0 4px 8px -2px hsla(var(--primary), 0.2);
+          box-shadow: 0 12px 20px -5px hsla(var(--brand-brown), 0.4),
+                      0 4px 8px -2px hsla(var(--brand-brown), 0.2);
         }
 
         .login-button:hover:not(:disabled)::after {
@@ -456,11 +458,11 @@ export default function LoginPage() {
         }
 
         .glass {
-          background: rgba(255, 255, 255, 0.7);
+          background: rgba(255, 255, 255, 0.85);
           backdrop-filter: blur(25px);
           -webkit-backdrop-filter: blur(25px);
           border: 1px solid rgba(255, 255, 255, 0.5);
-          box-shadow: 0 40px 80px -20px rgba(0, 0, 0, 0.15);
+          box-shadow: 0 40px 80px -20px rgba(92, 60, 44, 0.15);
         }
 
         :global(.dark) .glass {
@@ -476,11 +478,6 @@ export default function LoginPage() {
           display: block !important; 
           filter: contrast(150%) brightness(1.1) drop-shadow(0 0 2px rgba(255,255,255,0.1));
           mix-blend-mode: screen;
-        }
-
-        :global(.dark) .glass {
-          background: rgba(15, 23, 42, 0.6);
-          border: 1px solid rgba(255, 255, 255, 0.05);
         }
       `}</style>
     </div>
