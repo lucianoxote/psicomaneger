@@ -112,7 +112,7 @@ export default function LoginPage() {
   if (hasUsers === null) return null;
 
   return (
-    <div className="login-container">
+    <div className="login-container" style={{ backgroundColor: 'hsl(28, 30%, 93%)' }}>
       <div className="login-card glass">
         <div className="login-header">
           <div className="logo-section" style={{ marginBottom: '1.5rem' }}>
