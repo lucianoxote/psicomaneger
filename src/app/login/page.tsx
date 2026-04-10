@@ -232,9 +232,9 @@ export default function LoginPage() {
           display: flex;
           align-items: center;
           justify-content: center;
-          background: radial-gradient(circle at top left, hsla(var(--brand-brown), 0.10), transparent),
-                      radial-gradient(circle at bottom right, hsla(var(--brand-brown), 0.05), transparent),
-                      hsl(var(--background));
+          background: radial-gradient(circle at top left, hsla(var(--brand-brown), 0.12), transparent),
+                      radial-gradient(circle at bottom right, hsla(var(--brand-brown), 0.08), transparent),
+                      hsl(28 30% 93%);
           padding: 1.5rem;
         }
 
