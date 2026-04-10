@@ -54,7 +54,7 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
               clipPath: 'inset(2px)'
             }} 
           />
-          <div style={{ fontSize: '0.7rem', opacity: 1, marginTop: '0.15rem', letterSpacing: '0.05em', fontWeight: '600', color: 'hsl(25 30% 30%)' }}>
+          <div className="clinic-name-text" style={{ fontSize: '0.7rem', opacity: 1, marginTop: '0.15rem', letterSpacing: '0.05em', fontWeight: '600' }}>
             {settings.nomeClinica || 'Lívia Brito'} | {settings.crp || 'CRP 03/11745'}
           </div>
         </div>
@@ -133,6 +133,8 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
           display: block !important; 
           filter: contrast(150%) brightness(1.1) drop-shadow(0 0 2px rgba(255,255,255,0.1));
         }
+        .clinic-name-text { color: hsl(25 30% 30%); }
+        :global(.dark) .clinic-name-text { color: rgba(255, 255, 255, 0.85); }
       `}</style>
     </aside>
   );
