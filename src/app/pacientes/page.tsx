@@ -8,6 +8,8 @@ export default function PacientesPage() {
   const [loading, setLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
+  const [targetSearch, setTargetSearch] = useState('');
+
   useEffect(() => {
     fetchPacientes();
   }, []);
@@ -21,6 +23,11 @@ export default function PacientesPage() {
         setLoading(false);
       });
   };
+
+  const filteredPacientes = (pacientes || []).filter((p: any) => 
+    p.nome?.toLowerCase().includes(targetSearch.toLowerCase()) || 
+    p.cpf?.includes(targetSearch)
+  );
 
   const handleSavePatient = async (patientData: any) => {
     try {
@@ -62,6 +69,8 @@ export default function PacientesPage() {
               placeholder="Buscar por nome ou CPF..." 
               className="form-input"
               style={{ paddingLeft: '2.5rem', backgroundColor: 'hsl(var(--background))' }}
+              value={targetSearch}
+              onChange={(e) => setTargetSearch(e.target.value)}
             />
           </div>
           <button className="btn" style={{ border: '1px solid hsl(var(--border))', backgroundColor: 'hsl(var(--background))' }}>Filtros</button>
@@ -83,15 +92,15 @@ export default function PacientesPage() {
                 </tr>
               </thead>
               <tbody>
-                {pacientes.length === 0 ? (
+                {filteredPacientes.length === 0 ? (
                   <tr>
                     <td colSpan={4} style={{ padding: '4rem', textAlign: 'center' }}>
                       <div style={{ opacity: 0.4, marginBottom: '1rem', fontSize: '2rem' }}>👥</div>
-                      <div style={{ opacity: 0.5 }}>Nenhum paciente cadastrado ainda.</div>
+                      <div style={{ opacity: 0.5 }}>{targetSearch ? 'Nenhum paciente encontrado para esta busca.' : 'Nenhum paciente cadastrado ainda.'}</div>
                     </td>
                   </tr>
                 ) : (
-                  pacientes.map((p: any) => (
+                  filteredPacientes.map((p: any) => (
                     <tr key={p._id} style={{ borderBottom: '1px solid hsl(var(--border))', transition: 'background 0.2s' }} className="table-row-hover">
                       <td style={{ padding: '1rem 1.5rem' }}>
                         <div style={{ fontWeight: '600', color: 'hsl(var(--foreground))' }}>{p.nome}</div>
