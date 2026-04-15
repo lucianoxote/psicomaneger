@@ -69,7 +69,8 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
                 maxWidth: '185px', 
                 height: 'auto',
                 marginBottom: '0.5rem',
-                filter: 'drop-shadow(0px 0px 8px rgba(255,255,255,0.6))',
+                filter: 'invert(1) hue-rotate(180deg) brightness(1.7)',
+                mixBlendMode: 'screen',
                 transition: 'all 0.3s ease'
               }} 
             />
@@ -78,7 +79,7 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
               <span style={{ fontSize: '2rem', fontWeight: 'bold' }}>{settings.nomeClinica ? settings.nomeClinica.charAt(0).toUpperCase() : '🧠'}</span>
             </div>
           )}
-          <div className="clinic-name-text" style={{ fontSize: '0.7rem', opacity: 1, marginTop: '0.15rem', letterSpacing: '0.05em', fontWeight: '600', textAlign: isLivia ? 'left' : 'center' }}>
+          <div className="clinic-name-text" style={{ fontSize: '0.7rem', opacity: 1, marginTop: '0.15rem', letterSpacing: '0.05em', fontWeight: '600', textAlign: 'left' }}>
             {settings.nomeClinica || session?.user?.name || 'Profissional'} {settings.crp ? `| ${settings.crp}` : ''}
           </div>
         </div>
