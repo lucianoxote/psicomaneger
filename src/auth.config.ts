@@ -43,4 +43,7 @@ export const authConfig = {
       return token;
     },
   },
+  session: {
+    strategy: "jwt",
+  },
 } satisfies NextAuthConfig;
