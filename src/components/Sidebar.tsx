@@ -69,7 +69,7 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
                 maxWidth: '185px', 
                 height: 'auto',
                 marginBottom: '0.5rem',
-                filter: 'drop-shadow(0px 2px 4px rgba(255,255,255,0.15))',
+                filter: 'drop-shadow(0px 0px 8px rgba(255,255,255,0.6))',
                 transition: 'all 0.3s ease'
               }} 
             />
