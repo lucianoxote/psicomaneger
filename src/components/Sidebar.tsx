@@ -64,13 +64,12 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
             <img 
               src={settings.logoUrl} 
               alt={settings.nomeClinica || "Logo da Clínica"} 
+              className="custom-logo"
               style={{ 
                 width: '100%', 
                 maxWidth: '185px', 
                 height: 'auto',
                 marginBottom: '0.5rem',
-                filter: 'invert(1) hue-rotate(180deg) brightness(1.7)',
-                mixBlendMode: 'screen',
                 transition: 'all 0.3s ease'
               }} 
             />
@@ -151,6 +150,13 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
       </nav>
 
       <style jsx>{`
+        .custom-logo {
+          mix-blend-mode: multiply;
+        }
+        :global(.dark) .custom-logo {
+          mix-blend-mode: screen;
+          filter: invert(1) hue-rotate(180deg) brightness(1.7) !important;
+        }
         .light-logo { display: block !important; }
         .dark-logo { display: none !important; }
         :global(.dark) .light-logo { display: none !important; }
