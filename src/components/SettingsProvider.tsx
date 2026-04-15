@@ -7,6 +7,7 @@ type Settings = {
   crp: string;
   tema: string;
   idioma: string;
+  logoUrl?: string;
 };
 
 type SettingsContextType = {

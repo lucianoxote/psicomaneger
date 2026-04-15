@@ -23,6 +23,7 @@ export async function GET() {
       crp: settings?.crp || '',
       tema: settings?.tema || 'Tema Claro (Premium)',
       idioma: settings?.idioma || 'Português (Brasil)',
+      logoUrl: settings?.logoUrl || '',
     };
 
     return NextResponse.json(response);
@@ -51,6 +52,7 @@ export async function POST(request: Request) {
           crp: body.crp, 
           tema: body.tema,
           idioma: body.idioma,
+          logoUrl: body.logoUrl,
           userId: session.user.id, 
           updatedAt: new Date() 
         } 

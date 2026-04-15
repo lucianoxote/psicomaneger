@@ -60,6 +60,18 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
                 }} 
               />
             </>
+          ) : settings.logoUrl ? (
+            <img 
+              src={settings.logoUrl} 
+              alt={settings.nomeClinica || "Logo da Clínica"} 
+              style={{ 
+                width: '100%', 
+                maxWidth: '185px', 
+                height: 'auto',
+                marginBottom: '0.5rem',
+                transition: 'all 0.3s ease'
+              }} 
+            />
           ) : (
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: '70px', height: '70px', margin: '0 auto 0.5rem auto', backgroundColor: 'hsl(var(--primary)/0.1)', borderRadius: '50%', color: 'hsl(var(--primary))', boxShadow: '0 4px 10px rgba(0,0,0,0.05)', border: '2px solid hsl(var(--primary)/0.2)' }}>
               <span style={{ fontSize: '2rem', fontWeight: 'bold' }}>{settings.nomeClinica ? settings.nomeClinica.charAt(0).toUpperCase() : '🧠'}</span>

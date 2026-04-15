@@ -136,6 +136,16 @@ export default function ConfiguracoesPage() {
                 onChange={e => setLocalSettings({...localSettings, crp: e.target.value})} 
               />
             </div>
+            <div className="form-group">
+              <label className="form-label">Caminho da Logomarca (Opcional)</label>
+              <input 
+                type="text" 
+                className="form-input" 
+                placeholder="Ex: /images/minha-marca.png"
+                value={localSettings.logoUrl || ''} 
+                onChange={e => setLocalSettings({...localSettings, logoUrl: e.target.value})} 
+              />
+            </div>
           </div>
         </div>
 
