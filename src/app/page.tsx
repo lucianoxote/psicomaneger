@@ -2,9 +2,11 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { useSession } from "next-auth/react";
 
 export default function Home() {
   const router = useRouter();
+  const { data: session } = useSession();
   const [pacientes, setPacientes] = useState<any[]>([]);
   const [agendamentos, setAgendamentos] = useState<any[]>([]);
   const [tarefas, setTarefas] = useState<any[]>([]);
@@ -50,7 +52,7 @@ export default function Home() {
   return (
     <div className="dashboard">
       <header style={{ marginBottom: '2rem' }}>
-        <h1 style={{ fontSize: '2rem', fontWeight: '700' }}>Olá, Lívia Brito!</h1>
+        <h1 style={{ fontSize: '2rem', fontWeight: '700' }}>Olá, {session?.user?.name?.split(' ')[0] || 'Profissional'}!</h1>
         <p style={{ opacity: 0.65, marginTop: '0.25rem', fontSize: '1rem', fontWeight: '400' }}>Confira seu panorama clínico.</p>
       </header>
 

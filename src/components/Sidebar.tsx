@@ -2,7 +2,7 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useSettings } from './SettingsProvider';
-import { signOut } from 'next-auth/react';
+import { signOut, useSession } from 'next-auth/react';
 
 interface SidebarProps {
   isOpen?: boolean;
@@ -12,6 +12,9 @@ interface SidebarProps {
 export default function Sidebar({ isOpen, onClose }: SidebarProps) {
   const pathname = usePathname();
   const { t, settings } = useSettings();
+  const { data: session } = useSession();
+  
+  const isLivia = session?.user?.email === 'psi.liviabrito@gmail.com';
 
   const handleSignOut = () => {
     signOut({ callbackUrl: '/login' });
@@ -30,32 +33,40 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
   return (
     <aside className={`sidebar ${isOpen ? 'sidebar-open' : ''}`}>
       <div style={{ marginBottom: '2rem', padding: '0 1rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-        <div style={{ padding: '0' }}>
-          <img 
-            src="/images/logo_livia_transparent.png" 
-            alt="SynaPSIS Logo" 
-            className="sidebar-logo light-logo"
-            style={{ 
-              width: '100%', 
-              maxWidth: '185px', 
-              height: 'auto',
-              transition: 'all 0.3s ease'
-            }} 
-          />
-          <img 
-            src="/images/logo_livia_white_text_v2.png" 
-            alt="SynaPSIS Logo" 
-            className="sidebar-logo dark-logo"
-            style={{ 
-              width: '100%', 
-              maxWidth: '185px', 
-              height: 'auto',
-              transition: 'all 0.3s ease',
-              clipPath: 'inset(2px)'
-            }} 
-          />
-          <div className="clinic-name-text" style={{ fontSize: '0.7rem', opacity: 1, marginTop: '0.15rem', letterSpacing: '0.05em', fontWeight: '600' }}>
-            {settings.nomeClinica || 'Lívia Brito'} | {settings.crp || 'CRP 03/11745'}
+        <div style={{ padding: '0', width: '100%' }}>
+          {isLivia ? (
+            <>
+              <img 
+                src="/images/logo_livia_transparent.png" 
+                alt="SynaPSIS Logo" 
+                className="sidebar-logo light-logo"
+                style={{ 
+                  width: '100%', 
+                  maxWidth: '185px', 
+                  height: 'auto',
+                  transition: 'all 0.3s ease'
+                }} 
+              />
+              <img 
+                src="/images/logo_livia_white_text_v2.png" 
+                alt="SynaPSIS Logo" 
+                className="sidebar-logo dark-logo"
+                style={{ 
+                  width: '100%', 
+                  maxWidth: '185px', 
+                  height: 'auto',
+                  transition: 'all 0.3s ease',
+                  clipPath: 'inset(2px)'
+                }} 
+              />
+            </>
+          ) : (
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: '100%', height: '60px', backgroundColor: 'hsl(var(--primary)/0.1)', borderRadius: 'var(--radius)', marginBottom: '0.5rem', color: 'hsl(var(--primary))' }}>
+              <span style={{ fontSize: '1.5rem', fontWeight: 'bold' }}>{settings.nomeClinica ? settings.nomeClinica.charAt(0).toUpperCase() : '🧠'}</span>
+            </div>
+          )}
+          <div className="clinic-name-text" style={{ fontSize: '0.7rem', opacity: 1, marginTop: '0.15rem', letterSpacing: '0.05em', fontWeight: '600', textAlign: isLivia ? 'left' : 'center' }}>
+            {settings.nomeClinica || session?.user?.name || 'Profissional'} {settings.crp ? `| ${settings.crp}` : ''}
           </div>
         </div>
         {onClose && (
