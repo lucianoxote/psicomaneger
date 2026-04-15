@@ -30,11 +30,9 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
           id: user._id.toString(),
           email: user.email,
           name: user.name,
+          role: user.role || 'user',
         };
       },
     }),
   ],
-  session: {
-    strategy: "jwt",
-  },
 });
