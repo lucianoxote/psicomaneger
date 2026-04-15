@@ -24,9 +24,9 @@ export default function Home() {
           aRes.json(),
           tRes.json()
         ]);
-        setPacientes(pData);
-        setAgendamentos(aData);
-        setTarefas(tData);
+        setPacientes(Array.isArray(pData) ? pData : []);
+        setAgendamentos(Array.isArray(aData) ? aData : []);
+        setTarefas(Array.isArray(tData) ? tData : []);
       } catch (e) {
         console.error("Erro ao carregar dashboard:", e);
       } finally {

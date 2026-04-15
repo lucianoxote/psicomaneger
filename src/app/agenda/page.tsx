@@ -75,8 +75,8 @@ export default function AgendaPage() {
       agRes.json(),
       pacRes.json()
     ]);
-    setAgendamentos(agData);
-    setPacientes(pacData);
+    setAgendamentos(Array.isArray(agData) ? agData : []);
+    setPacientes(Array.isArray(pacData) ? pacData : []);
   };
 
   const closeModal = () => {
