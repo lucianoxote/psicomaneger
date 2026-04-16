@@ -1,5 +1,5 @@
 'use client';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 
 export default function AgendaPage() {
   const [agendamentos, setAgendamentos] = useState<any[]>([]);
@@ -28,6 +28,11 @@ export default function AgendaPage() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingAgendamentoId, setEditingAgendamentoId] = useState<string | null>(null);
   const [newAgendamento, setNewAgendamento] = useState({ paciente: '', data: new Date().toISOString().split('T')[0], hora: '08:00', tipo: 'Psi', pacienteId: '', status: 'agendado' });
+
+  const parsedAgendamentos = useMemo(() => agendamentos.map(a => ({
+    ...a,
+    dateObj: getSafeDate(a.data)
+  })), [agendamentos]);
   
   // Funções de data para gerenciar a semana atual
   const getStartOfWeek = (d: Date) => {
@@ -283,8 +288,8 @@ export default function AgendaPage() {
                   
                   return monthDays.map((d, index) => {
                      const isToday = d.date.toDateString() === new Date().toDateString();
-                     const dayAgends = agendamentos.filter(a => {
-                        const aDate = getSafeDate(a.data);
+                     const dayAgends = parsedAgendamentos.filter(a => {
+                        const aDate = a.dateObj;
                         return aDate.getDate() === d.date.getDate() && aDate.getMonth() === d.date.getMonth() && aDate.getFullYear() === d.date.getFullYear();
                      });
                     return (
@@ -380,8 +385,8 @@ export default function AgendaPage() {
               <div style={{ padding: '1rem', textAlign: 'right', fontSize: '0.75rem', borderRight: '1px solid hsl(var(--border))', opacity: 0.4, fontWeight: '500' }}>{time}</div>
               {[...Array(viewMode === 'week' ? 7 : 1)].map((_, i) => (
                 <div key={i} style={{ borderRight: (viewMode === 'week' && i < 6) ? '1px solid hsl(var(--border))' : 'none', minHeight: '5rem', padding: '0.4rem', position: 'relative' }}>
-                  {agendamentos.filter((a: any) => {
-                    const aDate = getSafeDate(a.data);
+                  {parsedAgendamentos.filter((a: any) => {
+                    const aDate = a.dateObj;
                     const colDate = getDayDate(i);
                     // Checa se é exatamente o mesmo dia, mês e ano da coluna e a mesma hora
                     if (aDate.getDate() !== colDate.getDate() || 
@@ -394,7 +399,7 @@ export default function AgendaPage() {
                     const slotHour = time.split(':')[0];
                     return h === slotHour;
                   }).map((a: any) => {
-                    const aDate = getSafeDate(a.data);
+                    const aDate = a.dateObj;
                     const timeStr = `${aDate.getHours().toString().padStart(2, '0')}:${aDate.getMinutes().toString().padStart(2, '0')}`;
                     const isRealizado = a.status === 'realizado' || a.status === 'cancelado' || a.status === 'falta';
                     return (

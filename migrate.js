@@ -75,14 +75,37 @@ async function migrate() {
   );
   console.log(`Tarefas migrated: ${tarefasResult.modifiedCount}`);
 
-  // Migrate familia
-  const familiaResult = await db.collection('familia').updateMany(
+  // Migrate comunicacao_familia
+  const familiaResult = await db.collection('comunicacao_familia').updateMany(
     { tenantId: { $exists: false }, userId: { $exists: true } },
     [{ $set: { tenantId: '$userId' } }]
   );
-  console.log(`Familia migrated: ${familiaResult.modifiedCount}`);
+  console.log(`Comunicacao_familia migrated: ${familiaResult.modifiedCount}`);
 
-  console.log('Migration completed successfully!');
+  // Migrate configuracoes
+  const configResult = await db.collection('configuracoes').updateMany(
+    { tenantId: { $exists: false }, userId: { $exists: true } },
+    [{ $set: { tenantId: '$userId' } }]
+  );
+  console.log(`Configuracoes migrated: ${configResult.modifiedCount}`);
+
+  // Migrate anexos (lookup approach)
+  const anexosWithoutTenant = await db.collection('anexos').find({ tenantId: { $exists: false } }).toArray();
+  let anexosMigrated = 0;
+
+  for (const anexo of anexosWithoutTenant) {
+    if (anexo.pacienteId) {
+      const paciente = await db.collection('pacientes').findOne({ _id: anexo.pacienteId });
+      if (paciente && paciente.tenantId) {
+        await db.collection('anexos').updateOne(
+          { _id: anexo._id },
+          { $set: { tenantId: paciente.tenantId } }
+        );
+        anexosMigrated++;
+      }
+    }
+  }
+  console.log(`Anexos migrated: ${anexosMigrated}`);
 }
 
 migrate().catch(console.error);

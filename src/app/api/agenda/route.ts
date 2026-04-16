@@ -21,8 +21,8 @@ export async function GET() {
     const serializableAgendamentos = agendamentos.map((agendamento: any) => ({
       ...agendamento,
       _id: agendamento._id.toString(),
-      createdAt: agendamento.createdAt?.toISOString?.(),
-      data: agendamento.data?.toISOString?.(),
+      createdAt: agendamento.createdAt ? (agendamento.createdAt instanceof Date ? agendamento.createdAt.toISOString() : agendamento.createdAt.toString()) : undefined,
+      data: agendamento.data ? (agendamento.data instanceof Date ? agendamento.data.toISOString() : agendamento.data.toString()) : undefined,
     }));
 
     return NextResponse.json(serializableAgendamentos);
@@ -45,6 +45,7 @@ export async function POST(request: Request) {
     const result = await db.collection('agendamentos').insertOne({
       ...body,
       tenantId: session.user.tenantId,
+      data: body.data ? new Date(body.data) : new Date(),
       status: body.status || 'pendente',
       createdAt: new Date()
     });
@@ -67,6 +68,10 @@ export async function PATCH(request: Request) {
     const client = await clientPromise;
     const db = client.db();
     
+    if (updateFields.data) {
+      updateFields.data = new Date(updateFields.data);
+    }
+
     await db.collection('agendamentos').updateOne(
       { _id: new ObjectId(id), tenantId: session.user.tenantId },
       { $set: { ...updateFields, updatedAt: new Date() } }
