@@ -17,7 +17,15 @@ export async function GET() {
     const pacientes = await db.collection('pacientes')
       .find({ tenantId: session.user.tenantId })
       .toArray();
-    return NextResponse.json(pacientes);
+
+    const serializablePacientes = pacientes.map((paciente: any) => ({
+      ...paciente,
+      _id: paciente._id.toString(),
+      createdAt: paciente.createdAt?.toISOString?.(),
+      updatedAt: paciente.updatedAt?.toISOString?.(),
+    }));
+
+    return NextResponse.json(serializablePacientes);
   } catch (e) {
     return NextResponse.json({ error: 'Falha ao conectar ao banco' }, { status: 500 });
   }

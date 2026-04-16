@@ -14,14 +14,18 @@ export default function PacientesPage() {
     fetchPacientes();
   }, []);
 
-  const fetchPacientes = () => {
+  const fetchPacientes = async () => {
     setLoading(true);
-    fetch('/api/pacientes')
-      .then(res => res.json())
-      .then(data => {
-        setPacientes(data);
-        setLoading(false);
-      });
+    try {
+      const res = await fetch('/api/pacientes');
+      const data = await res.json();
+      setPacientes(Array.isArray(data) ? data : []);
+    } catch (error) {
+      console.error('Erro ao carregar pacientes:', error);
+      setPacientes([]);
+    } finally {
+      setLoading(false);
+    }
   };
 
   const filteredPacientes = (pacientes || []).filter((p: any) => 
@@ -101,14 +105,14 @@ export default function PacientesPage() {
                   </tr>
                 ) : (
                   filteredPacientes.map((p: any) => (
-                    <tr key={p._id} style={{ borderBottom: '1px solid hsl(var(--border))', transition: 'background 0.2s' }} className="table-row-hover">
+                    <tr key={p._id || Math.random()} style={{ borderBottom: '1px solid hsl(var(--border))', transition: 'background 0.2s' }} className="table-row-hover">
                       <td style={{ padding: '1rem 1.5rem' }}>
-                        <div style={{ fontWeight: '600', color: 'hsl(var(--foreground))' }}>{p.nome}</div>
+                        <div style={{ fontWeight: '600', color: 'hsl(var(--foreground))' }}>{p.nome || 'Nome não informado'}</div>
                         <div style={{ fontSize: '0.75rem', opacity: 0.5 }}>{p.cpf || 'Documento não informado'}</div>
                       </td>
                       <td style={{ padding: '1rem 1.5rem', fontSize: '0.875rem' }}>
-                        <div>{p.telefone}</div>
-                        <div style={{ fontSize: '0.75rem', opacity: 0.5 }}>{p.email}</div>
+                        <div>{p.telefone || 'Telefone não informado'}</div>
+                        <div style={{ fontSize: '0.75rem', opacity: 0.5 }}>{p.email || 'E-mail não informado'}</div>
                       </td>
                       <td style={{ padding: '1rem 1.5rem' }}>
                         <span className={`badge ${p.status === 'ativo' ? 'badge-success' : 'badge-outline'}`}>
