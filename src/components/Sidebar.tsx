@@ -112,6 +112,17 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
             <span>⚙️</span> {t('Configurações')}
           </Link>
 
+          {session?.user?.email === 'lucianoxote@hotmail.com' && (
+            <Link
+              href="/admin"
+              className={`nav-link ${pathname === '/admin' ? 'active' : ''}`}
+              onClick={onClose}
+              style={{ color: 'hsl(var(--primary))', fontWeight: 'bold' }}
+            >
+              <span>🚀</span> {t('Painel SaaS')}
+            </Link>
+          )}
+
           <button
             onClick={handleSignOut}
             className="nav-link"
