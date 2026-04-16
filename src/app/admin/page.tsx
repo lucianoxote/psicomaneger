@@ -14,6 +14,7 @@ export default function AdminDashboard() {
   const [metrics, setMetrics] = useState<any>(null);
   const [tenants, setTenants] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [lastUpdatedAt, setLastUpdatedAt] = useState<string>('');
 
   useEffect(() => {
     if (status === 'unauthenticated') {
@@ -38,6 +39,7 @@ export default function AdminDashboard() {
         const data = await response.json();
         setMetrics(data.metrics);
         setTenants(data.tenants);
+        setLastUpdatedAt(new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }));
       } else {
         console.error('Failed to fetch metrics');
       }
@@ -80,7 +82,14 @@ export default function AdminDashboard() {
               <p>Visão global em tempo real da plataforma SynaPSIS</p>
             </div>
           </div>
-          <span className="dashboard-pill">{showLoadingTag ? 'Carregando dados...' : 'Atualizado agora'}</span>
+          <button
+            type="button"
+            className="dashboard-pill dashboard-refresh-button"
+            onClick={fetchMetrics}
+            disabled={isLoading}
+          >
+            {isLoading ? '⏳ Carregando...' : lastUpdatedAt ? `🔄 Atualizado às ${lastUpdatedAt}` : '🔄 Atualizar agora'}
+          </button>
         </section>
 
         <section className="dashboard-grid">
