@@ -37,6 +37,7 @@ export async function POST(request: Request) {
       email,
       password: hashedPassword,
       name,
+      tenantId: result.insertedId.toString(), // Cada usuário novo é seu próprio tenant inicialmente
       createdAt: new Date(),
     });
 
