@@ -1,4 +1,6 @@
-"use client";
+﻿"use client";
+
+export const dynamic = 'force-dynamic';
 
 import React, { useState, useEffect } from 'react';
 import { useSession } from 'next-auth/react';
@@ -14,7 +16,6 @@ export default function AdminDashboard() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Proteger a Rota no Frontend: Apenas o lucianoxote pode ver essa página
     if (status === 'unauthenticated') {
       router.push('/login');
     } else if (status === 'authenticated' && session?.user?.email !== 'lucianoxote@hotmail.com') {
@@ -32,7 +33,7 @@ export default function AdminDashboard() {
         setMetrics(data.metrics);
         setTenants(data.tenants);
       } else {
-        console.error("Failed to fetch metrics");
+        console.error('Failed to fetch metrics');
       }
     } catch (e) {
       console.error(e);
@@ -41,167 +42,223 @@ export default function AdminDashboard() {
     }
   };
 
-  if (loading) return (
-    <div className="flex h-full items-center justify-center">
-      <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
-    </div>
-  );
+  if (loading) {
+    return (
+      <div className="dashboard-loading">
+        <div className="dashboard-loader" />
+        <p>Carregando painel...</p>
+      </div>
+    );
+  }
 
   if (!metrics) return null;
 
-  // Dados para os Gráficos
   const chartData = [
-    { name: 'Clínicas (Users)', count: metrics.totalUsers },
-    { name: 'Pacientes Globais', count: metrics.totalPacientes },
-    { name: 'Sessões Registradas', count: metrics.totalAgendamentos },
+    { name: 'Clínicas', count: metrics.totalUsers },
+    { name: 'Pacientes', count: metrics.totalPacientes },
+    { name: 'Sessões', count: metrics.totalAgendamentos },
   ];
 
   const pieData = [
-    { name: 'Atendimentos Mês', value: metrics.atendimentosMensais },
-    { name: 'Atendimentos Antigos', value: metrics.totalAgendamentos - metrics.atendimentosMensais }
+    { name: 'Recentes', value: metrics.atendimentosMensais },
+    { name: 'Histórico', value: metrics.totalAgendamentos - metrics.atendimentosMensais }
   ];
-  const COLORS = ['#0ea5e9', '#3b82f6', '#10b981']; // SynaPSIS Colors
+
+  const chartColors = ['#3B82F6', '#10B981', '#F59E0B'];
 
   return (
-    <div className="p-6 max-w-7xl mx-auto space-y-8 animate-fade-in">
-      
-      <div className="flex flex-col space-y-2">
-        <h1 className="text-3xl font-bold tracking-tight text-slate-900 dark:text-white">
-          Sala de Comando SaaS
-        </h1>
-        <p className="text-slate-500 dark:text-slate-400">
-          Visão global da plataforma SynaPSIS Precision Clinical Solutions.
-        </p>
-      </div>
-
-      {/* Cards de Métricas */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        <div className="bg-white dark:bg-slate-800 p-6 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700/50 flex flex-col items-center justify-center text-center">
-          <span className="text-sm font-medium text-slate-500 dark:text-slate-400 uppercase letter-spacing-wider">Total de Clínicas</span>
-          <span className="text-5xl font-black text-primary mt-2">{metrics.totalUsers}</span>
-        </div>
-        
-        <div className="bg-white dark:bg-slate-800 p-6 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700/50 flex flex-col items-center justify-center text-center">
-          <span className="text-sm font-medium text-slate-500 dark:text-slate-400 uppercase letter-spacing-wider">Pacientes Gerenciados</span>
-          <span className="text-5xl font-black text-blue-500 mt-2">{metrics.totalPacientes}</span>
-        </div>
-
-        <div className="bg-white dark:bg-slate-800 p-6 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700/50 flex flex-col items-center justify-center text-center">
-          <span className="text-sm font-medium text-slate-500 dark:text-slate-400 uppercase letter-spacing-wider">Sessões Totais</span>
-          <span className="text-5xl font-black text-indigo-500 mt-2">{metrics.totalAgendamentos}</span>
-        </div>
-
-        <div className="bg-white dark:bg-slate-800 p-6 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700/50 flex flex-col items-center justify-center text-center relative overflow-hidden">
-          <div className="absolute top-0 right-0 w-16 h-16 bg-green-500/10 rounded-bl-full"></div>
-          <span className="text-sm font-medium text-slate-500 dark:text-slate-400 uppercase letter-spacing-wider">Volume (Mensal)</span>
-          <span className="text-5xl font-black text-green-500 mt-2">{metrics.atendimentosMensais}</span>
-        </div>
-      </div>
-
-      {/* Gráficos */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Gráfico de Barras */}
-        <div className="lg:col-span-2 bg-white dark:bg-slate-800 p-6 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700/50">
-          <h3 className="text-lg font-semibold text-slate-800 dark:text-slate-100 mb-6">Crescimento de Uso da Plataforma</h3>
-          <div className="h-80 w-full">
-            <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={chartData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
-                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#334155" opacity={0.3} />
-                <XAxis dataKey="name" tick={{fill: '#64748b'}} axisLine={false} tickLine={false} />
-                <YAxis tick={{fill: '#64748b'}} axisLine={false} tickLine={false} />
-                <Tooltip 
-                  cursor={{fill: 'transparent'}}
-                  contentStyle={{ backgroundColor: '#1e293b', border: 'none', borderRadius: '8px', color: '#fff' }}
-                />
-                <Bar dataKey="count" radius={[6, 6, 0, 0]}>
-                  {
-                    chartData.map((entry, index) => (
-                      <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                    ))
-                  }
-                </Bar>
-              </BarChart>
-            </ResponsiveContainer>
+    <div className="dashboard-page">
+      <div className="dashboard-container">
+        <section className="dashboard-header">
+          <div className="dashboard-title-bar">
+            <div className="dashboard-badge-icon">📊</div>
+            <div>
+              <h1>Painel de Comando</h1>
+              <p>Visão global em tempo real da plataforma SynaPSIS</p>
+            </div>
           </div>
-        </div>
+          <span className="dashboard-pill">Atualizado agora</span>
+        </section>
 
-        {/* Gráfico de Pizza */}
-        <div className="bg-white dark:bg-slate-800 p-6 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700/50 flex flex-col">
-          <h3 className="text-lg font-semibold text-slate-800 dark:text-slate-100 mb-2">Engajamento de Sessões</h3>
-          <p className="text-xs text-slate-500 mb-6">Atividade de consultas geradas no último mês vs Antigos.</p>
-          <div className="flex-1 w-full flex items-center justify-center">
-            <ResponsiveContainer width="100%" height={240}>
-              <PieChart>
-                <Pie
-                  data={pieData}
-                  cx="50%"
-                  cy="50%"
-                  innerRadius={60}
-                  outerRadius={80}
-                  paddingAngle={5}
-                  dataKey="value"
-                  stroke="none"
-                >
-                  {pieData.map((entry, index) => (
-                    <Cell key={`cell-${index}`} fill={index === 0 ? '#10b981' : '#334155'} />
+        <section className="dashboard-grid">
+          <article className="dashboard-card dashboard-card-blue">
+            <div className="card-top">
+              <div>
+                <p className="card-label">Clínicas Ativas</p>
+                <h2>{metrics.totalUsers}</h2>
+              </div>
+              <div className="card-icon">🏥</div>
+            </div>
+            <p className="card-small">↑ 12% vs mês anterior</p>
+            <div className="card-progress"><span className="progress-fill blue" style={{ width: '75%' }} /></div>
+          </article>
+
+          <article className="dashboard-card dashboard-card-green">
+            <div className="card-top">
+              <div>
+                <p className="card-label">Pacientes</p>
+                <h2>{metrics.totalPacientes}</h2>
+              </div>
+              <div className="card-icon">👥</div>
+            </div>
+            <p className="card-small">↑ 8% vs mês anterior</p>
+            <div className="card-progress"><span className="progress-fill green" style={{ width: '68%' }} /></div>
+          </article>
+
+          <article className="dashboard-card dashboard-card-amber">
+            <div className="card-top">
+              <div>
+                <p className="card-label">Sessões Totais</p>
+                <h2>{metrics.totalAgendamentos}</h2>
+              </div>
+              <div className="card-icon">📋</div>
+            </div>
+            <p className="card-small">↑ 15% vs mês anterior</p>
+            <div className="card-progress"><span className="progress-fill amber" style={{ width: '82%' }} /></div>
+          </article>
+
+          <article className="dashboard-card dashboard-card-purple">
+            <div className="card-top">
+              <div>
+                <p className="card-label">Este Mês</p>
+                <h2>{metrics.atendimentosMensais}</h2>
+              </div>
+              <div className="card-icon">⚡</div>
+            </div>
+            <p className="card-small">Em crescimento contínuo</p>
+            <div className="card-progress"><span className="progress-fill purple" style={{ width: '90%' }} /></div>
+          </article>
+        </section>
+
+        <section className="dashboard-chart-grid">
+          <article className="dashboard-card dashboard-chart-card">
+            <div className="chart-card-heading">
+              <div>
+                <h3>Crescimento da Plataforma</h3>
+                <p>Estatísticas gerais</p>
+              </div>
+              <div className="chart-labels">
+                <span className="chart-dot blue" />
+                <span className="chart-dot green" />
+                <span className="chart-dot amber" />
+              </div>
+            </div>
+            <div className="chart-wrapper">
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart data={chartData} margin={{ top: 10, right: 10, left: -25, bottom: 10 }}>
+                  <defs>
+                    <linearGradient id="heroGradient1" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="5%" stopColor="#3B82F6" stopOpacity={0.9} />
+                      <stop offset="95%" stopColor="#3B82F6" stopOpacity={0.1} />
+                    </linearGradient>
+                  </defs>
+                  <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e5e7eb" opacity={0.5} />
+                  <XAxis dataKey="name" tick={{ fill: '#475569', fontSize: 12 }} axisLine={false} tickLine={false} />
+                  <YAxis tick={{ fill: '#475569', fontSize: 12 }} axisLine={false} tickLine={false} />
+                  <Tooltip
+                    cursor={{ fill: 'transparent' }}
+                    contentStyle={{ backgroundColor: '#0f172a', border: '1px solid #334155', borderRadius: '12px', color: '#fff' }}
+                    formatter={(value) => `${value} registros`}
+                  />
+                  <Bar dataKey="count" radius={[8, 8, 0, 0]} fill="url(#heroGradient1)">
+                    {chartData.map((entry, index) => (
+                      <Cell key={`cell-${index}`} fill={chartColors[index % chartColors.length]} />
+                    ))}
+                  </Bar>
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
+          </article>
+
+          <article className="dashboard-card dashboard-chart-card">
+            <div>
+              <h3>Engajamento de Sessões</h3>
+              <p>Consultas recentes vs histórico</p>
+            </div>
+            <div className="chart-small-wrapper">
+              <ResponsiveContainer width="100%" height={240}>
+                <PieChart>
+                  <Pie
+                    data={pieData}
+                    cx="50%"
+                    cy="50%"
+                    innerRadius={60}
+                    outerRadius={82}
+                    paddingAngle={4}
+                    dataKey="value"
+                    stroke="none"
+                  >
+                    {pieData.map((entry, index) => (
+                      <Cell key={`cell-${index}`} fill={index === 0 ? '#10B981' : '#CBD5E1'} />
+                    ))}
+                  </Pie>
+                  <Tooltip
+                    contentStyle={{ backgroundColor: '#0f172a', border: '1px solid #334155', borderRadius: '12px', color: '#fff' }}
+                    formatter={(value) => `${value} sessões`}
+                  />
+                </PieChart>
+              </ResponsiveContainer>
+            </div>
+            <div className="engagement-grid">
+              <div className="engagement-card engagement-card-positive">
+                <span>Recentes</span>
+                <strong>{metrics.atendimentosMensais}</strong>
+              </div>
+              <div className="engagement-card">
+                <span>Histórico</span>
+                <strong>{metrics.totalAgendamentos - metrics.atendimentosMensais}</strong>
+              </div>
+            </div>
+          </article>
+        </section>
+
+        <section className="dashboard-card dashboard-table-card">
+          <div className="table-header">
+            <div>
+              <h3>Clientes Ativos</h3>
+              <p>Profissionais da plataforma</p>
+            </div>
+            <span className="dashboard-pill">{tenants.length} registros</span>
+          </div>
+
+          {tenants.length > 0 ? (
+            <div className="table-scroll">
+              <table className="dashboard-table">
+                <thead>
+                  <tr>
+                    <th>Clínica</th>
+                    <th>Responsável</th>
+                    <th>E-mail</th>
+                    <th>Pacientes</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {tenants.slice(0, 15).map((t) => (
+                    <tr key={t.id}>
+                      <td>
+                        <div className="clinic-cell">
+                          <div className="clinic-avatar">{t.clinica?.charAt(0) || 'C'}</div>
+                          <span>{t.clinica}</span>
+                        </div>
+                      </td>
+                      <td>{t.name}</td>
+                      <td>{t.email}</td>
+                      <td className="text-center">
+                        <span className="badge">{t.pacientes}</span>
+                      </td>
+                    </tr>
                   ))}
-                </Pie>
-                <Tooltip 
-                  contentStyle={{ backgroundColor: '#1e293b', border: 'none', borderRadius: '8px', color: '#fff' }}
-                />
-              </PieChart>
-            </ResponsiveContainer>
-          </div>
-          <div className="flex justify-center gap-4 mt-2">
-            <div className="flex items-center gap-2"><div className="w-3 h-3 rounded bg-emerald-500"></div><span className="text-xs text-slate-400">Recentes</span></div>
-            <div className="flex items-center gap-2"><div className="w-3 h-3 rounded bg-slate-600"></div><span className="text-xs text-slate-400">Histórico</span></div>
-          </div>
-        </div>
+                </tbody>
+              </table>
+            </div>
+          ) : (
+            <div className="empty-state">
+              <div className="empty-icon">📭</div>
+              <p>Nenhum profissional encontrado</p>
+            </div>
+          )}
+        </section>
       </div>
-
-      {/* Tabela de Inquilinos (Tenants) */}
-      <div className="bg-white dark:bg-slate-800 p-6 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700/50">
-        <div className="flex justify-between items-center mb-6">
-          <h3 className="text-lg font-semibold text-slate-800 dark:text-slate-100">Clientes Ativos (Profissionais)</h3>
-          <span className="bg-primary/10 text-primary text-xs font-semibold px-2 py-1 rounded-md">15 Mais Recentes</span>
-        </div>
-        
-        <div className="overflow-x-auto">
-          <table className="w-full text-left border-collapse">
-            <thead>
-              <tr className="border-b border-slate-200 dark:border-slate-700">
-                <th className="py-3 px-4 text-sm font-medium text-slate-500 dark:text-slate-400 uppercase">Clínica / Responsável</th>
-                <th className="py-3 px-4 text-sm font-medium text-slate-500 dark:text-slate-400 uppercase">E-mail</th>
-                <th className="py-3 px-4 text-sm font-medium text-slate-500 dark:text-slate-400 uppercase text-center">Volume de Pacientes</th>
-              </tr>
-            </thead>
-            <tbody>
-              {tenants.map((t) => (
-                <tr key={t.id} className="border-b border-slate-100 dark:border-slate-700/30 hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors">
-                  <td className="py-4 px-4">
-                    <div className="flex flex-col">
-                      <span className="font-semibold text-slate-800 dark:text-slate-200">{t.clinica}</span>
-                      <span className="text-xs text-slate-500">{t.name}</span>
-                    </div>
-                  </td>
-                  <td className="py-4 px-4 text-sm text-slate-600 dark:text-slate-300">{t.email}</td>
-                  <td className="py-4 px-4 text-center">
-                    <span className="inline-flex items-center justify-center bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400 font-bold px-3 py-1 text-xs rounded-full">
-                      {t.pacientes} 
-                    </span>
-                  </td>
-                </tr>
-              ))}
-              {tenants.length === 0 && (
-                <tr>
-                  <td colSpan={3} className="py-8 text-center text-slate-500 italic">Nenhum profissional encontrado.</td>
-                </tr>
-              )}
-            </tbody>
-          </table>
-        </div>
-      </div>
-
     </div>
   );
 }
