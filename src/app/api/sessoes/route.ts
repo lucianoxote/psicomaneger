@@ -8,7 +8,7 @@ export const dynamic = 'force-dynamic';
 export async function GET(request: Request) {
   try {
     const session = await auth();
-    if (!session?.user?.id) {
+    if (!session?.user?.tenantId) {
       return NextResponse.json({ error: 'Não autorizado' }, { status: 401 });
     }
 
@@ -21,10 +21,18 @@ export async function GET(request: Request) {
     const client = await clientPromise;
     const db = client.db();
     const sessoes = await db.collection('sessoes')
-      .find({ pacienteId, userId: session.user.id })
+      .find({ pacienteId, tenantId: session.user.tenantId })
       .sort({ data: -1 })
       .toArray();
-    return NextResponse.json(sessoes);
+
+    const serializableSessoes = sessoes.map((sessao: any) => ({
+      ...sessao,
+      _id: sessao._id.toString(),
+      createdAt: sessao.createdAt?.toISOString?.(),
+      data: sessao.data?.toISOString?.(),
+    }));
+
+    return NextResponse.json(serializableSessoes);
   } catch (e) {
     return NextResponse.json({ error: 'Falha ao conectar ao banco' }, { status: 500 });
   }
@@ -33,7 +41,7 @@ export async function GET(request: Request) {
 export async function POST(request: Request) {
   try {
     const session = await auth();
-    if (!session?.user?.id) {
+    if (!session?.user?.tenantId) {
       return NextResponse.json({ error: 'Não autorizado' }, { status: 401 });
     }
 
@@ -43,7 +51,7 @@ export async function POST(request: Request) {
     
     const result = await db.collection('sessoes').insertOne({
       ...body,
-      userId: session.user.id,
+      tenantId: session.user.tenantId,
       createdAt: new Date()
     });
 
@@ -76,7 +84,7 @@ export async function POST(request: Request) {
 export async function PATCH(request: Request) {
   try {
     const session = await auth();
-    if (!session?.user?.id) {
+    if (!session?.user?.tenantId) {
       return NextResponse.json({ error: 'Não autorizado' }, { status: 401 });
     }
 
@@ -86,7 +94,7 @@ export async function PATCH(request: Request) {
     const db = client.db();
     
     await db.collection('sessoes').updateOne(
-      { _id: new ObjectId(id), userId: session.user.id },
+      { _id: new ObjectId(id), tenantId: session.user.tenantId },
       { $set: updateFields }
     );
     return NextResponse.json({ success: true });
@@ -98,7 +106,7 @@ export async function PATCH(request: Request) {
 export async function DELETE(request: Request) {
   try {
     const session = await auth();
-    if (!session?.user?.id) {
+    if (!session?.user?.tenantId) {
       return NextResponse.json({ error: 'Não autorizado' }, { status: 401 });
     }
 
@@ -110,7 +118,7 @@ export async function DELETE(request: Request) {
     const db = client.db();
     await db.collection('sessoes').deleteOne({ 
       _id: new ObjectId(id),
-      userId: session.user.id 
+      tenantId: session.user.tenantId 
     });
     return NextResponse.json({ success: true });
   } catch (e) {

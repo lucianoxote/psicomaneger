@@ -8,17 +8,25 @@ export const dynamic = 'force-dynamic';
 export async function GET() {
   try {
     const session = await auth();
-    if (!session?.user?.id) {
+    if (!session?.user?.tenantId) {
       return NextResponse.json({ error: 'Não autorizado' }, { status: 401 });
     }
 
     const client = await clientPromise;
     const db = client.db();
     const logs = await db.collection("comunicacao_familia")
-      .find({ userId: session.user.id })
+      .find({ tenantId: session.user.tenantId })
       .sort({ data: -1 })
       .toArray();
-    return NextResponse.json(logs);
+
+    const serializableLogs = logs.map((log: any) => ({
+      ...log,
+      _id: log._id.toString(),
+      createdAt: log.createdAt?.toISOString?.(),
+      data: log.data?.toISOString?.(),
+    }));
+
+    return NextResponse.json(serializableLogs);
   } catch (e) {
     return NextResponse.json({ error: 'Erro ao buscar logs' }, { status: 500 });
   }
@@ -27,7 +35,7 @@ export async function GET() {
 export async function POST(request: Request) {
   try {
     const session = await auth();
-    if (!session?.user?.id) {
+    if (!session?.user?.tenantId) {
       return NextResponse.json({ error: 'Não autorizado' }, { status: 401 });
     }
 
@@ -37,7 +45,7 @@ export async function POST(request: Request) {
     
     const result = await db.collection("comunicacao_familia").insertOne({
       ...body,
-      userId: session.user.id,
+      tenantId: session.user.tenantId,
       createdAt: new Date()
     });
     
@@ -50,7 +58,7 @@ export async function POST(request: Request) {
 export async function PATCH(request: Request) {
   try {
     const session = await auth();
-    if (!session?.user?.id) {
+    if (!session?.user?.tenantId) {
       return NextResponse.json({ error: 'Não autorizado' }, { status: 401 });
     }
 
@@ -61,7 +69,7 @@ export async function PATCH(request: Request) {
     if (!id) return NextResponse.json({ error: 'ID necessário' }, { status: 400 });
 
     await db.collection("comunicacao_familia").updateOne(
-      { _id: new ObjectId(id), userId: session.user.id },
+      { _id: new ObjectId(id), tenantId: session.user.tenantId },
       { $set: updateData }
     );
     
@@ -74,7 +82,7 @@ export async function PATCH(request: Request) {
 export async function DELETE(request: Request) {
   try {
     const session = await auth();
-    if (!session?.user?.id) {
+    if (!session?.user?.tenantId) {
       return NextResponse.json({ error: 'Não autorizado' }, { status: 401 });
     }
 
@@ -86,7 +94,7 @@ export async function DELETE(request: Request) {
     const db = client.db();
     await db.collection("comunicacao_familia").deleteOne({ 
       _id: new ObjectId(id),
-      userId: session.user.id 
+      tenantId: session.user.tenantId 
     });
     return NextResponse.json({ success: true });
   } catch (e) {

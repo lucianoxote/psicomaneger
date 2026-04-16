@@ -2,20 +2,32 @@ import { NextResponse } from 'next/server';
 import clientPromise from '@/lib/mongodb';
 import { ObjectId } from 'mongodb';
 import { put, del } from '@vercel/blob';
+import { auth } from '@/auth';
 
 export const dynamic = 'force-dynamic';
 
 export async function GET(request: Request) {
   try {
+    const session = await auth();
+    if (!session?.user?.tenantId) {
+      return NextResponse.json({ error: 'Não autorizado' }, { status: 401 });
+    }
+
     const { searchParams } = new URL(request.url);
     const pacienteId = searchParams.get('pacienteId');
     if (!pacienteId) return NextResponse.json({ error: 'Paciente ID obrigatório' }, { status: 400 });
 
     const client = await clientPromise;
     const db = client.db();
-    const anexos = await db.collection('anexos').find({ pacienteId }).sort({ createdAt: -1 }).toArray();
+    const anexos = await db.collection('anexos').find({ pacienteId, tenantId: session.user.tenantId }).sort({ createdAt: -1 }).toArray();
     
-    return NextResponse.json(anexos);
+    const serializableAnexos = anexos.map((anexo: any) => ({
+      ...anexo,
+      _id: anexo._id.toString(),
+      createdAt: anexo.createdAt?.toISOString?.(),
+    }));
+
+    return NextResponse.json(serializableAnexos);
   } catch (e) {
     return NextResponse.json({ error: 'Erro ao listar anexos' }, { status: 500 });
   }
@@ -23,6 +35,11 @@ export async function GET(request: Request) {
 
 export async function POST(request: Request) {
   try {
+    const session = await auth();
+    if (!session?.user?.tenantId) {
+      return NextResponse.json({ error: 'Não autorizado' }, { status: 401 });
+    }
+
     const formData = await request.formData();
     const file = formData.get('file') as File;
     const pacienteId = formData.get('pacienteId') as string;
@@ -44,6 +61,7 @@ export async function POST(request: Request) {
     const result = await db.collection('anexos').insertOne({
       pacienteId,
       pacienteNome,
+      tenantId: session.user.tenantId,
       originalName,
       url: blob.url,
       path: blob.url, // Keep path for compatibility
@@ -61,6 +79,11 @@ export async function POST(request: Request) {
 
 export async function DELETE(request: Request) {
   try {
+    const session = await auth();
+    if (!session?.user?.tenantId) {
+      return NextResponse.json({ error: 'Não autorizado' }, { status: 401 });
+    }
+
     const { searchParams } = new URL(request.url);
     const id = searchParams.get('id');
     if (!id) return NextResponse.json({ error: 'ID obrigatório' }, { status: 400 });
@@ -68,7 +91,7 @@ export async function DELETE(request: Request) {
     const client = await clientPromise;
     const db = client.db();
     
-    const anexo = await db.collection('anexos').findOne({ _id: new ObjectId(id) });
+    const anexo = await db.collection('anexos').findOne({ _id: new ObjectId(id), tenantId: session.user.tenantId });
     if (!anexo) return NextResponse.json({ error: 'Anexo não encontrado' }, { status: 404 });
 
     // Delete from Vercel Blob if URL exists
@@ -81,7 +104,7 @@ export async function DELETE(request: Request) {
     }
 
     // Delete from DB
-    await db.collection('anexos').deleteOne({ _id: new ObjectId(id) });
+    await db.collection('anexos').deleteOne({ _id: new ObjectId(id), tenantId: session.user.tenantId });
     
     return NextResponse.json({ success: true });
   } catch (e) {

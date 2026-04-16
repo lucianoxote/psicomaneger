@@ -8,13 +8,13 @@ export const dynamic = 'force-dynamic';
 export async function GET(request: Request) {
   try {
     const session = await auth();
-    if (!session?.user?.id) {
+    if (!session?.user?.tenantId) {
       return NextResponse.json({ error: 'Não autorizado' }, { status: 401 });
     }
 
     const { searchParams } = new URL(request.url);
     const pacienteId = searchParams.get('pacienteId');
-    const query: any = { userId: session.user.id };
+    const query: any = { tenantId: session.user.tenantId };
     if (pacienteId) query.pacienteId = pacienteId;
 
     const client = await clientPromise;
@@ -23,7 +23,15 @@ export async function GET(request: Request) {
       .find(query)
       .sort({ data: -1 })
       .toArray();
-    return NextResponse.json(financeiro);
+
+    const serializableFinanceiro = financeiro.map((item: any) => ({
+      ...item,
+      _id: item._id.toString(),
+      createdAt: item.createdAt?.toISOString?.(),
+      data: item.data?.toISOString?.(),
+    }));
+
+    return NextResponse.json(serializableFinanceiro);
   } catch (e) {
     return NextResponse.json({ error: 'Falha ao conectar ao banco' }, { status: 500 });
   }
@@ -32,7 +40,7 @@ export async function GET(request: Request) {
 export async function POST(request: Request) {
   try {
     const session = await auth();
-    if (!session?.user?.id) {
+    if (!session?.user?.tenantId) {
       return NextResponse.json({ error: 'Não autorizado' }, { status: 401 });
     }
 
@@ -42,7 +50,7 @@ export async function POST(request: Request) {
     
     const result = await db.collection('financeiro').insertOne({
       ...body,
-      userId: session.user.id,
+      tenantId: session.user.tenantId,
       data: new Date(body.data || new Date()),
       createdAt: new Date()
     });

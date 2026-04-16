@@ -8,17 +8,25 @@ export const dynamic = 'force-dynamic';
 export async function GET() {
   try {
     const session = await auth();
-    if (!session?.user?.id) {
+    if (!session?.user?.tenantId) {
       return NextResponse.json({ error: 'Não autorizado' }, { status: 401 });
     }
 
     const client = await clientPromise;
     const db = client.db();
     const tarefas = await db.collection('tarefas')
-      .find({ userId: session.user.id })
+      .find({ tenantId: session.user.tenantId })
       .sort({ data: -1 })
       .toArray();
-    return NextResponse.json(tarefas);
+
+    const serializableTarefas = tarefas.map((tarefa: any) => ({
+      ...tarefa,
+      _id: tarefa._id.toString(),
+      createdAt: tarefa.createdAt?.toISOString?.(),
+      data: tarefa.data?.toISOString?.(),
+    }));
+
+    return NextResponse.json(serializableTarefas);
   } catch (e) {
     return NextResponse.json({ error: 'Falha ao conectar ao banco' }, { status: 500 });
   }
@@ -27,7 +35,7 @@ export async function GET() {
 export async function POST(request: Request) {
   try {
     const session = await auth();
-    if (!session?.user?.id) {
+    if (!session?.user?.tenantId) {
       return NextResponse.json({ error: 'Não autorizado' }, { status: 401 });
     }
 
@@ -37,7 +45,7 @@ export async function POST(request: Request) {
     
     const result = await db.collection('tarefas').insertOne({
       ...body,
-      userId: session.user.id,
+      tenantId: session.user.tenantId,
       status: 'pendente',
       createdAt: new Date()
     });

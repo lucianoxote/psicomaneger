@@ -8,16 +8,24 @@ export const dynamic = 'force-dynamic';
 export async function GET() {
   try {
     const session = await auth();
-    if (!session?.user?.id) {
+    if (!session?.user?.tenantId) {
       return NextResponse.json({ error: 'Não autorizado' }, { status: 401 });
     }
 
     const client = await clientPromise;
     const db = client.db();
     const agendamentos = await db.collection('agendamentos')
-      .find({ userId: session.user.id })
+      .find({ tenantId: session.user.tenantId })
       .toArray();
-    return NextResponse.json(agendamentos);
+
+    const serializableAgendamentos = agendamentos.map((agendamento: any) => ({
+      ...agendamento,
+      _id: agendamento._id.toString(),
+      createdAt: agendamento.createdAt?.toISOString?.(),
+      data: agendamento.data?.toISOString?.(),
+    }));
+
+    return NextResponse.json(serializableAgendamentos);
   } catch (e) {
     return NextResponse.json({ error: 'Falha ao conectar ao banco' }, { status: 500 });
   }
@@ -26,7 +34,7 @@ export async function GET() {
 export async function POST(request: Request) {
   try {
     const session = await auth();
-    if (!session?.user?.id) {
+    if (!session?.user?.tenantId) {
       return NextResponse.json({ error: 'Não autorizado' }, { status: 401 });
     }
 
@@ -36,7 +44,7 @@ export async function POST(request: Request) {
     
     const result = await db.collection('agendamentos').insertOne({
       ...body,
-      userId: session.user.id,
+      tenantId: session.user.tenantId,
       status: body.status || 'pendente',
       createdAt: new Date()
     });
@@ -50,7 +58,7 @@ export async function POST(request: Request) {
 export async function PATCH(request: Request) {
   try {
     const session = await auth();
-    if (!session?.user?.id) {
+    if (!session?.user?.tenantId) {
       return NextResponse.json({ error: 'Não autorizado' }, { status: 401 });
     }
 
@@ -60,7 +68,7 @@ export async function PATCH(request: Request) {
     const db = client.db();
     
     await db.collection('agendamentos').updateOne(
-      { _id: new ObjectId(id), userId: session.user.id },
+      { _id: new ObjectId(id), tenantId: session.user.tenantId },
       { $set: { ...updateFields, updatedAt: new Date() } }
     );
 
@@ -73,7 +81,7 @@ export async function PATCH(request: Request) {
 export async function DELETE(request: Request) {
   try {
     const session = await auth();
-    if (!session?.user?.id) {
+    if (!session?.user?.tenantId) {
       return NextResponse.json({ error: 'Não autorizado' }, { status: 401 });
     }
 
@@ -85,7 +93,7 @@ export async function DELETE(request: Request) {
     const db = client.db();
     await db.collection('agendamentos').deleteOne({ 
       _id: new ObjectId(id),
-      userId: session.user.id 
+      tenantId: session.user.tenantId 
     });
     return NextResponse.json({ success: true });
   } catch (e) {
