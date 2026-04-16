@@ -1,7 +1,34 @@
-const clientPromise = require('./lib/mongodb.js').default;
+const { MongoClient } = require('mongodb');
+const fs = require('fs');
+const path = require('path');
+
+function loadEnv() {
+  const envPath = path.resolve(process.cwd(), '.env.local');
+  if (!fs.existsSync(envPath)) {
+    throw new Error('.env.local não encontrado');
+  }
+
+  const envContent = fs.readFileSync(envPath, 'utf8');
+  const env = {};
+  envContent.split(/\r?\n/).forEach((line) => {
+    const match = line.match(/^([A-Za-z0-9_]+)=(.*)$/);
+    if (match) {
+      env[match[1]] = match[2];
+    }
+  });
+
+  return env;
+}
 
 async function migrate() {
-  const client = await clientPromise;
+  const env = loadEnv();
+  const uri = env.MONGODB_URI;
+  if (!uri) {
+    throw new Error('MONGODB_URI não encontrada em .env.local');
+  }
+
+  const client = new MongoClient(uri, { useNewUrlParser: true, useUnifiedTopology: true });
+  await client.connect();
   const db = client.db();
 
   console.log('Starting migration...');
