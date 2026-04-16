@@ -14,7 +14,6 @@ export default function AdminDashboard() {
   const [metrics, setMetrics] = useState<any>(null);
   const [tenants, setTenants] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
-  const [lastUpdatedAt, setLastUpdatedAt] = useState<string>('');
 
   useEffect(() => {
     if (status === 'unauthenticated') {
@@ -39,7 +38,6 @@ export default function AdminDashboard() {
         const data = await response.json();
         setMetrics(data.metrics);
         setTenants(data.tenants);
-        setLastUpdatedAt(new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }));
       } else {
         console.error('Failed to fetch metrics');
       }
@@ -88,7 +86,7 @@ export default function AdminDashboard() {
             onClick={fetchMetrics}
             disabled={isLoading}
           >
-            {isLoading ? '⏳ Carregando...' : lastUpdatedAt ? `🔄 Atualizado às ${lastUpdatedAt}` : '🔄 Atualizar agora'}
+            🔄
           </button>
         </section>
 
