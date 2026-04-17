@@ -31,7 +31,7 @@ export async function GET() {
     return NextResponse.json(response);
   } catch (e: any) {
     console.error("Erro ao buscar configurações:", e);
-    return NextResponse.json({ error: 'Erro ao buscar: ' + e.message }, { status: 500 });
+    return NextResponse.json({ error: 'Erro ao buscar configurações' }, { status: 500 });
   }
 }
 
@@ -59,6 +59,7 @@ export async function POST(request: Request) {
           idioma: body.idioma,
           logoUrl: body.logoUrl,
           tenantId: tenantId, 
+          userId: tenantId, // Adicionado para satisfazer o índice único no banco de dados
           updatedAt: new Date() 
         } 
       },
@@ -68,6 +69,6 @@ export async function POST(request: Request) {
     return NextResponse.json({ success: true });
   } catch (e: any) {
     console.error("Erro ao salvar configurações:", e);
-    return NextResponse.json({ error: 'Erro técnico: ' + e.message }, { status: 500 });
+    return NextResponse.json({ error: 'Erro ao salvar configurações' }, { status: 500 });
   }
 }
