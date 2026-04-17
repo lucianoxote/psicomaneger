@@ -33,13 +33,27 @@ export async function POST(request: Request) {
 
     const hashedPassword = await bcrypt.hash(password, 12);
 
+    const now = new Date();
+    const trialEndsAt = new Date();
+    trialEndsAt.setDate(now.getDate() + 15);
+
     const result = await db.collection("users").insertOne({
       email,
       password: hashedPassword,
       name,
-      tenantId: result.insertedId.toString(), // Cada usuário novo é seu próprio tenant inicialmente
-      createdAt: new Date(),
+      role: 'user', // Default role for new signups
+      tenantId: "", // Temporary, will update below
+      plan: 'Trial',
+      subscriptionStatus: 'Ativo',
+      trialEndsAt,
+      createdAt: now,
     });
+
+    // Self-reference tenantId with the new ID
+    await db.collection("users").updateOne(
+      { _id: result.insertedId },
+      { $set: { tenantId: result.insertedId.toString() } }
+    );
 
     return NextResponse.json({ success: true, id: result.insertedId });
   } catch (e: any) {

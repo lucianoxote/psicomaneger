@@ -218,6 +218,44 @@ export default function ConfiguracoesPage() {
         )}
 
         <div className="card">
+          <h3 style={{ fontSize: '1.125rem', fontWeight: '600', marginBottom: '1.5rem' }}>Gestão de Assinatura</h3>
+          <div style={{ padding: '1.25rem', borderRadius: '12px', background: 'hsla(var(--primary), 0.05)', border: '1px solid hsla(var(--primary), 0.1)', marginBottom: '1.5rem' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
+              <div>
+                <div style={{ fontSize: '0.75rem', fontWeight: '700', textTransform: 'uppercase', opacity: 0.6, letterSpacing: '0.05em' }}>Plano Atual</div>
+                <div style={{ fontSize: '1.5rem', fontWeight: '800', color: 'hsl(var(--primary))' }}>
+                  {(session?.user as any)?.plan || 'Gratuito'}
+                </div>
+              </div>
+              <div style={{ 
+                padding: '0.4rem 0.8rem', borderRadius: '99px', fontSize: '0.75rem', fontWeight: '700',
+                background: (session?.user as any)?.subscriptionStatus === 'Ativo' ? '#10B981' : '#EF4444',
+                color: 'white'
+              }}>
+                {(session?.user as any)?.subscriptionStatus || 'Ativo'}
+              </div>
+            </div>
+
+            {(session?.user as any)?.plan === 'Trial' && (
+              <div style={{ fontSize: '0.875rem', color: 'hsl(var(--muted-foreground))' }}>
+                Seu período de teste expira em: <b>{ (session?.user as any)?.trialEndsAt ? new Date((session?.user as any)?.trialEndsAt).toLocaleDateString() : '--/--/----' }</b>
+              </div>
+            )}
+          </div>
+          
+          <div style={{ fontSize: '0.875rem' }}>
+            <p style={{ marginBottom: '1rem', opacity: 0.8 }}>Deseja fazer um upgrade ou tem dúvidas sobre sua fatura?</p>
+            <button 
+              className="btn" 
+              style={{ width: '100%', background: 'hsl(var(--foreground))', color: 'hsl(var(--background))' }}
+              onClick={() => alert('Entre em contato com o suporte: lucianoxote@hotmail.com')}
+            >
+              Falar com Consultor
+            </button>
+          </div>
+        </div>
+
+        <div className="card">
           <h3 style={{ fontSize: '1.125rem', fontWeight: '600', marginBottom: '1.5rem' }}>Mudar Minha Senha</h3>
           <form onSubmit={handleChangePassword} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
             <div className="form-group" style={{ marginBottom: '0.5rem' }}>

@@ -18,7 +18,7 @@ export async function GET(request: Request) {
     const trintaDiasAtras = new Date();
     trintaDiasAtras.setDate(trintaDiasAtras.getDate() - 30);
 
-    const [totalUsers, totalPacientes, totalAgendamentos, atendimentosMensais] = await Promise.all([
+    const [totalUsers, totalPacientes, totalAgendamentos, atendimentosMensais, plansDistribution] = await Promise.all([
       db.collection("users").countDocuments(),
       db.collection("pacientes").countDocuments(),
       db.collection("agendamentos").countDocuments(),
@@ -26,18 +26,18 @@ export async function GET(request: Request) {
         status: 'realizado',
         data: { $gte: trintaDiasAtras.toISOString() } 
       }),
+      db.collection("users").aggregate([
+        { $group: { _id: "$plan", count: { $sum: 1 } } }
+      ]).toArray(),
     ]);
 
     // Corrigir o N+1: usar aggregation pipeline em UMA única query
-    // em vez de fazer 2 queries por usuário (o problema anterior!)
     const tenants = await db.collection("users").aggregate([
       { $sort: { _id: -1 } },
-      { $limit: 15 },
+      { $limit: 20 },
       {
         $lookup: {
           from: "configuracoes",
-          // configuracoes.userId é String, mas users._id é ObjectId
-          // Precisamos converter com $toString para o join funcionar
           let: { uid: { $toString: "$_id" } },
           pipeline: [
             { $match: { $expr: { $eq: ["$userId", "$$uid"] } } },
@@ -62,6 +62,9 @@ export async function GET(request: Request) {
           id: { $toString: "$_id" },
           name: { $ifNull: ["$name", "Sem Nome"] },
           email: 1,
+          plan: { $ifNull: ["$plan", "Gratuito"] },
+          status: { $ifNull: ["$subscriptionStatus", "Ativo"] },
+          createdAt: 1,
           clinica: { 
             $ifNull: [{ $arrayElemAt: ["$config.nomeClinica", 0] }, "Não configurada"] 
           },
@@ -73,7 +76,13 @@ export async function GET(request: Request) {
     ]).toArray();
     
     const response = NextResponse.json({
-      metrics: { totalUsers, totalPacientes, totalAgendamentos, atendimentosMensais },
+      metrics: { 
+        totalUsers, 
+        totalPacientes, 
+        totalAgendamentos, 
+        atendimentosMensais,
+        plans: plansDistribution.map(p => ({ name: p._id || 'Gratuito', value: p.count }))
+      },
       tenants
     });
     

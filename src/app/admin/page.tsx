@@ -55,7 +55,8 @@ export default function AdminDashboard() {
     { name: 'Pacientes', count: metrics?.totalPacientes ?? 0 },
     { name: 'Sessões', count: metrics?.totalAgendamentos ?? 0 },
   ];
-  const pieData = [
+  const planData = metrics?.plans || [];
+  const engagementData = [
     { name: 'Recentes', value: metrics?.atendimentosMensais ?? 0 },
     { name: 'Histórico', value: (metrics?.totalAgendamentos ?? 0) - (metrics?.atendimentosMensais ?? 0) }
   ];
@@ -239,8 +240,8 @@ export default function AdminDashboard() {
             <div style={{ flex: 1, position: 'relative', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                <ResponsiveContainer width="100%" height={200}>
                 <PieChart>
-                  <Pie data={pieData} cx="50%" cy="50%" innerRadius={60} outerRadius={85} paddingAngle={6} dataKey="value" stroke="none">
-                    {pieData.map((_, i) => <Cell key={i} fill={i === 0 ? '#10B981' : pieGray} />)}
+                  <Pie data={engagementData} cx="50%" cy="50%" innerRadius={60} outerRadius={85} paddingAngle={6} dataKey="value" stroke="none">
+                    {engagementData.map((_, i) => <Cell key={i} fill={i === 0 ? '#10B981' : pieGray} />)}
                   </Pie>
                   <Tooltip
                     contentStyle={tooltipStyle}
@@ -275,6 +276,52 @@ export default function AdminDashboard() {
                 {val((metrics?.totalAgendamentos ?? 0) - (metrics?.atendimentosMensais ?? 0))}
               </p>
             </div>
+          </div>
+        </div>
+
+        {/* Plan Distribution Chart */}
+        <div className="interactive-card" style={{
+          background: 'hsl(var(--card))',
+          border: '1px solid hsl(var(--border))',
+          borderRadius: '20px',
+          padding: '1.75rem',
+          display: 'flex', flexDirection: 'column',
+        }}>
+          <h3 style={{ fontSize: '1.1rem', fontWeight: 700, color: 'hsl(var(--foreground))' }}>Distribuição de Planos</h3>
+          <p style={{ fontSize: '0.85rem', color: 'hsl(var(--muted-foreground))', marginBottom: '1.25rem' }}>Perfil comercial</p>
+          {isLoading ? (
+            <div style={{ flex: 1, background: 'hsl(var(--secondary))', borderRadius: '12px', animation: 'pulse 1.5s infinite' }} />
+          ) : (
+            <div style={{ flex: 1, position: 'relative', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+               <ResponsiveContainer width="100%" height={200}>
+                <PieChart>
+                  <Pie data={planData} cx="50%" cy="50%" innerRadius={60} outerRadius={85} paddingAngle={6} dataKey="value" stroke="none">
+                    {planData.map((p: any, i: number) => {
+                      const colors: any = { 'Trial': '#8B5CF6', 'Plus': '#3B82F6', 'Pro': '#F59E0B', 'Gratuito': '#64748b' };
+                      return <Cell key={i} fill={colors[p.name] || '#64748b'} />;
+                    })}
+                  </Pie>
+                  <Tooltip
+                    contentStyle={tooltipStyle}
+                    labelStyle={{ color: isDark ? '#94a3b8' : '#475569', fontWeight: 600 }}
+                    itemStyle={{ color: isDark ? '#f1f5f9' : '#0f172a' }}
+                    formatter={(v) => [`${v} usuários`, '']}
+                  />
+                </PieChart>
+              </ResponsiveContainer>
+              <div style={{ position: 'absolute', textAlign: 'center', pointerEvents: 'none' }}>
+                <p style={{ fontSize: '1.5rem', fontWeight: 800, color: 'hsl(var(--foreground))' }}>{planData.length}</p>
+                <p style={{ fontSize: '0.75rem', color: 'hsl(var(--muted-foreground))', textTransform: 'uppercase', fontWeight: 700 }}>Tiers</p>
+              </div>
+            </div>
+          )}
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '0.5rem', marginTop: '1rem' }}>
+            {planData.map((p: any) => (
+              <div key={p.name} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.75rem' }}>
+                <div style={{ width: '8px', height: '8px', borderRadius: '50%', background: p.name === 'Trial' ? '#8B5CF6' : p.name === 'Plus' ? '#3B82F6' : p.name === 'Pro' ? '#F59E0B' : '#64748b' }} />
+                <span style={{ color: 'hsl(var(--muted-foreground))' }}>{p.name}: <b>{p.value}</b></span>
+              </div>
+            ))}
           </div>
         </div>
       </div>
@@ -313,8 +360,8 @@ export default function AdminDashboard() {
             <table style={{ width: '100%', borderCollapse: 'separate', borderSpacing: '0 0.5rem' }}>
               <thead>
                 <tr>
-                  {['CLÍNICA', 'RESPONSÁVEL', 'E-MAIL', 'PACIENTES'].map(h => (
-                    <th key={h} style={{ padding: '0 1rem 0.75rem', textAlign: 'left', fontSize: '0.75rem', fontWeight: 700, letterSpacing: '0.1em', color: 'hsl(var(--muted-foreground))', textTransform: 'uppercase' }}>{h}</th>
+                  {['CLÍNICA', 'RESPONSÁVEL', 'PLANO / STATUS', 'PACIENTES'].map(h => (
+                    <th key={h} style={{ padding: '0 1rem 0.75rem', textAlign: h === 'PLANO / STATUS' ? 'center' : 'left', fontSize: '0.75rem', fontWeight: 700, letterSpacing: '0.1em', color: 'hsl(var(--muted-foreground))', textTransform: 'uppercase' }}>{h}</th>
                   ))}
                 </tr>
               </thead>
@@ -336,8 +383,28 @@ export default function AdminDashboard() {
                         <span style={{ fontWeight: 600, color: 'hsl(var(--foreground))', fontSize: '0.95rem' }}>{t.clinica}</span>
                       </div>
                     </td>
-                    <td style={{ padding: '0.85rem 1rem', border: '1px solid hsl(var(--border))', borderLeft: 'none', borderRight: 'none', color: 'hsl(var(--foreground))', fontWeight: 500 }}>{t.name}</td>
-                    <td style={{ padding: '0.85rem 1rem', border: '1px solid hsl(var(--border))', borderLeft: 'none', borderRight: 'none', color: 'hsl(var(--muted-foreground))', fontSize: '0.9rem' }}>{t.email}</td>
+                    <td style={{ padding: '0.85rem 1rem', border: '1px solid hsl(var(--border))', borderLeft: 'none', borderRight: 'none', color: 'hsl(var(--foreground))', fontWeight: 500 }}>
+                      <div>{t.name}</div>
+                      <div style={{ fontSize: '0.75rem', color: 'hsl(var(--muted-foreground))', fontWeight: 400 }}>{t.email}</div>
+                    </td>
+                    <td style={{ padding: '0.85rem 1rem', border: '1px solid hsl(var(--border))', borderLeft: 'none', borderRight: 'none', textAlign: 'center' }}>
+                      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.25rem' }}>
+                        <span style={{ 
+                          fontSize: '0.75rem', fontWeight: 700, px: '0.5rem', borderRadius: '4px',
+                          color: t.plan === 'Pro' ? '#F59E0B' : t.plan === 'Plus' ? '#3B82F6' : t.plan === 'Trial' ? '#8B5CF6' : 'inherit'
+                        }}>
+                          {t.plan.toUpperCase()}
+                        </span>
+                        <span style={{ 
+                          fontSize: '0.65rem', padding: '0.1rem 0.4rem', borderRadius: '99px',
+                          background: t.status === 'Ativo' ? 'rgba(16,185,129,0.1)' : 'rgba(239,68,68,0.1)',
+                          color: t.status === 'Ativo' ? '#10B981' : '#EF4444',
+                          border: `1px solid ${t.status === 'Ativo' ? 'rgba(16,185,129,0.2)' : 'rgba(239,68,68,0.2)'}`
+                        }}>
+                          {t.status}
+                        </span>
+                      </div>
+                    </td>
                     <td style={{ padding: '0.85rem 1rem', borderRadius: '0 12px 12px 0', border: '1px solid hsl(var(--border))', borderLeft: 'none', textAlign: 'center' }}>
                       <span style={{
                         background: 'hsl(var(--primary)/0.1)',

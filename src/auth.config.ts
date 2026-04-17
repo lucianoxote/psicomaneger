@@ -33,6 +33,9 @@ export const authConfig = {
         session.user.id = (token.sub as string) || (token.id as string);
         (session.user as any).role = token.role as string;
         (session.user as any).tenantId = token.tenantId as string;
+        (session.user as any).plan = token.plan as string;
+        (session.user as any).subscriptionStatus = token.subscriptionStatus as string;
+        (session.user as any).trialEndsAt = token.trialEndsAt as string;
       }
       return session;
     },
@@ -41,6 +44,9 @@ export const authConfig = {
         token.id = user.id;
         token.role = (user as any).role;
         token.tenantId = (user as any).tenantId;
+        token.plan = (user as any).plan;
+        token.subscriptionStatus = (user as any).subscriptionStatus;
+        token.trialEndsAt = (user as any).trialEndsAt;
       }
       return token;
     },
