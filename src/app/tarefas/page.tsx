@@ -95,22 +95,8 @@ export default function TarefasPage() {
   return (
     <div className="tarefas-container" style={{ padding: '2rem', maxWidth: '1200px', margin: '0 auto' }}>
       <style>{`
-        @keyframes fadeIn {
-          from { opacity: 0; transform: translateY(10px); }
-          to { opacity: 1; transform: translateY(0); }
-        }
-        .animate-in {
-          animation: fadeIn 0.5s ease-out forwards;
-        }
         .task-row {
           transition: all 0.2s ease;
-        }
-        .task-row:hover {
-          background-color: hsl(var(--primary)/0.04) !important;
-          transform: scale(1.002);
-        }
-        .dark .task-row:hover {
-          background-color: rgba(255, 255, 255, 0.03) !important;
         }
         .modal-overlay {
           background: rgba(0, 0, 0, 0.4);
@@ -119,7 +105,6 @@ export default function TarefasPage() {
           top: 0; left: 0; right: 0; bottom: 0;
           display: flex; align-items: center; justify-content: center;
           z-index: 50;
-          animation: fadeIn 0.2s ease-out;
         }
         .modal-content {
           background: hsl(var(--card));
@@ -184,7 +169,7 @@ export default function TarefasPage() {
         </div>
       )}
 
-      <header className="animate-in" style={{ marginBottom: '3rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+      <header style={{ marginBottom: '3rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         <div>
           <h1 style={{ fontSize: '2.25rem', fontWeight: '800', color: 'hsl(var(--foreground))', letterSpacing: '-0.02em' }}>Tarefas Terapêuticas</h1>
           <p style={{ color: 'hsl(var(--muted-foreground))', marginTop: '0.5rem' }}>Acompanhe os exercícios propostos para os pacientes realizarem entre as sessões.</p>
@@ -192,7 +177,14 @@ export default function TarefasPage() {
         <button className="btn btn-primary" style={{ padding: '0.75rem 1.75rem', borderRadius: '12px', boxShadow: '0 4px 12px hsl(var(--primary)/0.25)' }} onClick={() => setIsModalOpen(true)}>+ Nova Tarefa</button>
       </header>
 
-      <div className="card animate-in" style={{ padding: '0', overflow: 'hidden', border: '1px solid hsl(var(--border))', borderRadius: '20px', animationDelay: '0.1s' }}>
+      {loading ? (
+        <div style={{ padding: '6rem', textAlign: 'center', opacity: 0.5 }}>
+           <div className="spinner" style={{ width: '30px', height: '30px', border: '3px solid hsl(var(--primary)/0.1)', borderTopColor: 'hsl(var(--primary))', borderRadius: '50%', animation: 'spin 1s linear infinite', margin: '0 auto 1.5rem' }} />
+           <p style={{ fontWeight: '500', fontSize: '1rem' }}>Sincronizando tarefas...</p>
+        </div>
+      ) : (
+      <>
+      <div className="card" style={{ padding: '0', overflow: 'hidden', border: '1px solid hsl(var(--border))', borderRadius: '20px' }}>
         <table style={{ width: '100%', borderCollapse: 'collapse' }}>
           <thead>
             <tr style={{ textAlign: 'left', borderBottom: '2px solid hsl(var(--border))', backgroundColor: 'hsl(var(--secondary)/0.3)' }}>
@@ -204,15 +196,7 @@ export default function TarefasPage() {
             </tr>
           </thead>
           <tbody>
-            {loading ? (
-              [1, 2, 3].map(i => (
-                <tr key={i} style={{ borderBottom: '1px solid hsl(var(--border))' }}>
-                  <td colSpan={5} style={{ padding: '1.5rem' }}>
-                    <div style={{ height: '20px', background: 'hsl(var(--secondary))', borderRadius: '4px', animation: 'pulse 1.5s infinite', width: '100%' }} />
-                  </td>
-                </tr>
-              ))
-            ) : tasks.length === 0 ? (
+            {tasks.length === 0 ? (
               <tr>
                 <td colSpan={5} style={{ padding: '4rem', textAlign: 'center', color: 'hsl(var(--muted-foreground))' }}>
                   <div style={{ fontSize: '2.5rem', marginBottom: '1rem' }}>📋</div>
@@ -283,16 +267,18 @@ export default function TarefasPage() {
         </table>
       </div>
 
-      <div className="animate-in" style={{ marginTop: '3rem', animationDelay: '0.3s' }}>
+      <div style={{ marginTop: '3rem' }}>
         <h2 style={{ fontSize: '1.25rem', fontWeight: '700', marginBottom: '1.5rem', color: 'hsl(var(--foreground))' }}>Reabilitação Neuropsicológica</h2>
         <div className="card" style={{ padding: '3rem', textAlign: 'center', border: '1px dashed hsl(var(--border))', background: 'hsl(var(--secondary)/0.2)' }}>
            <div style={{ fontSize: '2.5rem', marginBottom: '1rem', opacity: 0.5 }}>🧩</div>
            <p style={{ color: 'hsl(var(--muted-foreground))', fontWeight: '500' }}>Módulo de acompanhamento de reabilitação cognitiva em breve.</p>
         </div>
       </div>
+      </>
+      )}
 
       <style>{`
-        @keyframes pulse { 0% { opacity: 0.6; } 50% { opacity: 0.3; } 100% { opacity: 0.6; } }
+        @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
       `}</style>
     </div>
   );
