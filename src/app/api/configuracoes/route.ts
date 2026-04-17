@@ -17,9 +17,7 @@ export async function GET() {
     const db = client.db();
     
     // Fetch per-tenant clinic settings and preferences
-    const settings = await db.collection("configuracoes").findOne({ 
-      $or: [ { tenantId: tenantId }, { userId: tenantId } ]
-    });
+    const settings = await db.collection("configuracoes").findOne({ tenantId });
 
     // Merged response: database values or defaults
     const response = {
@@ -31,8 +29,9 @@ export async function GET() {
     };
 
     return NextResponse.json(response);
-  } catch (e) {
-    return NextResponse.json({ error: 'Erro ao buscar configurações' }, { status: 500 });
+  } catch (e: any) {
+    console.error("Erro ao buscar configurações:", e);
+    return NextResponse.json({ error: 'Erro ao buscar: ' + e.message }, { status: 500 });
   }
 }
 
@@ -51,7 +50,7 @@ export async function POST(request: Request) {
 
     // Save settings per tenant
     await db.collection("configuracoes").updateOne(
-      { $or: [ { tenantId: tenantId }, { userId: tenantId } ] },
+      { tenantId },
       { 
         $set: {
           nomeClinica: body.nomeClinica, 
@@ -67,7 +66,8 @@ export async function POST(request: Request) {
     );
     
     return NextResponse.json({ success: true });
-  } catch (e) {
-    return NextResponse.json({ error: 'Erro ao salvar configurações' }, { status: 500 });
+  } catch (e: any) {
+    console.error("Erro ao salvar configurações:", e);
+    return NextResponse.json({ error: 'Erro técnico: ' + e.message }, { status: 500 });
   }
 }
