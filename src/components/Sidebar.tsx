@@ -14,7 +14,7 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
   const { t, settings } = useSettings();
   const { data: session } = useSession();
   
-  const isLivia = session?.user?.email === 'psi.liviabrito@gmail.com';
+  const isMaster = session?.user?.email === 'psi.liviabrito@gmail.com' || session?.user?.email === 'lucianoxote@hotmail.com';
 
   const handleSignOut = () => {
     signOut({ callbackUrl: '/login' });
@@ -34,11 +34,11 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
     <aside className={`sidebar ${isOpen ? 'sidebar-open' : ''}`}>
       <div style={{ marginBottom: '2rem', padding: '0 1rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         <div style={{ padding: '0', width: '100%' }}>
-          {isLivia ? (
+          {isMaster && !settings.logoUrl ? (
             <>
               <img 
                 src="/images/logo_livia_transparent.png" 
-                alt="SynaPSIS Logo" 
+                alt="Logo Lívia" 
                 className="sidebar-logo light-logo"
                 style={{ 
                   width: '100%', 
@@ -49,7 +49,7 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
               />
               <img 
                 src="/images/logo_livia_white_text_v2.png" 
-                alt="SynaPSIS Logo" 
+                alt="Logo Lívia" 
                 className="sidebar-logo dark-logo"
                 style={{ 
                   width: '100%', 
@@ -61,18 +61,21 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
               />
             </>
           ) : settings.logoUrl ? (
-            <img 
-              src={settings.logoUrl} 
-              alt={settings.nomeClinica || "Logo da Clínica"} 
-              className="custom-logo"
-              style={{ 
-                width: '100%', 
-                maxWidth: '185px', 
-                height: 'auto',
-                marginBottom: '0.5rem',
-                transition: 'all 0.3s ease'
-              }} 
-            />
+            <div style={{ marginBottom: '1rem', display: 'flex', justifyContent: 'center' }}>
+               <img 
+                 src={settings.logoUrl} 
+                 alt={settings.nomeClinica || "Logo da Clínica"} 
+                 className="custom-logo"
+                 style={{ 
+                   width: '100%', 
+                   maxWidth: '180px', 
+                   maxHeight: '85px',
+                   height: 'auto',
+                   objectFit: 'contain',
+                   transition: 'all 0.3s ease'
+                 }} 
+               />
+            </div>
           ) : (
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: '70px', height: '70px', margin: '0 auto 0.5rem auto', backgroundColor: 'hsl(var(--primary)/0.1)', borderRadius: '50%', color: 'hsl(var(--primary))', boxShadow: '0 4px 10px rgba(0,0,0,0.05)', border: '2px solid hsl(var(--primary)/0.2)' }}>
               <span style={{ fontSize: '2rem', fontWeight: 'bold' }}>{settings.nomeClinica ? settings.nomeClinica.charAt(0).toUpperCase() : '🧠'}</span>
@@ -162,11 +165,12 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
 
       <style jsx>{`
         .custom-logo {
-          mix-blend-mode: multiply;
+          filter: drop-shadow(0 2px 4px rgba(0,0,0,0.05));
         }
         :global(.dark) .custom-logo {
-          mix-blend-mode: screen;
-          filter: invert(1) hue-rotate(180deg) brightness(1.7) !important;
+          filter: brightness(1.1) drop-shadow(0 0 1px rgba(255,255,255,0.8));
+          /* Se for uma logo escura em fundo escuro, tentamos inverter inteligentemente se necessário */
+          /* mix-blend-mode: plus-lighter; */
         }
         .light-logo { display: block !important; }
         .dark-logo { display: none !important; }

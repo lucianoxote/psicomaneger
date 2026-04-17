@@ -16,10 +16,12 @@ export default function ConfiguracoesPage() {
   const [showAddUser, setShowAddUser] = useState(false);
   const [creatingUser, setCreatingUser] = useState(false);
 
-  // Password Change State
   const [passwords, setPasswords] = useState({ current: '', new: '', confirm: '' });
   const [changingPass, setChangingPass] = useState(false);
   const [showSupport, setShowSupport] = useState(false);
+
+  // Logo Upload State
+  const [uploadingLogo, setUploadingLogo] = useState(false);
 
   useEffect(() => {
     setLocalSettings(settings);
@@ -33,6 +35,39 @@ export default function ConfiguracoesPage() {
       if (data.users) setUsers(data.users);
     } catch (e) {
       console.error("Erro ao carregar usuários:", e);
+    }
+  };
+
+  const handleLogoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    // Fast check for image size (limit to 2MB)
+    if (file.size > 2 * 1024 * 1024) {
+      alert("A imagem deve ter no máximo 2MB.");
+      return;
+    }
+
+    setUploadingLogo(true);
+    try {
+      const response = await fetch(`/api/upload?filename=${file.name}`, {
+        method: 'POST',
+        body: file,
+      });
+
+      const newBlob = await response.json();
+      if (newBlob.url) {
+        setLocalSettings({ ...localSettings, logoUrl: newBlob.url });
+        // Instant preview
+        setSettings({ ...settings, logoUrl: newBlob.url });
+      } else {
+        alert('Falha no upload. Verifique sua conexão ou se o Vercel Blob está ativo.');
+      }
+    } catch (error) {
+      console.error(error);
+      alert('Erro ao enviar imagem para o servidor.');
+    } finally {
+      setUploadingLogo(false);
     }
   };
 
@@ -144,14 +179,46 @@ export default function ConfiguracoesPage() {
               />
             </div>
             <div className="form-group">
-              <label className="form-label">Caminho da Logomarca (Opcional)</label>
-              <input 
-                type="text" 
-                className="form-input" 
-                placeholder="Ex: /images/minha-marca.png"
-                value={localSettings.logoUrl || ''} 
-                onChange={e => setLocalSettings({...localSettings, logoUrl: e.target.value})} 
-              />
+              <label className="form-label">Logomarca da Clínica</label>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginTop: '0.5rem' }}>
+                <div style={{ 
+                  width: '60px', height: '60px', 
+                  backgroundColor: 'hsl(var(--secondary)/0.5)', 
+                  borderRadius: '12px', 
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  overflow: 'hidden',
+                  border: '1px solid hsl(var(--border))'
+                }}>
+                  {uploadingLogo ? (
+                    <div className="spinner" style={{ width: '20px', height: '20px', border: '2px solid hsl(var(--primary)/0.2)', borderTopColor: 'hsl(var(--primary))', borderRadius: '50%', animation: 'spin 1s linear infinite' }} />
+                  ) : localSettings.logoUrl ? (
+                    <img src={localSettings.logoUrl} alt="Logo" style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
+                  ) : (
+                    <span style={{ fontSize: '1.5rem', opacity: 0.3 }}>🖼️</span>
+                  )}
+                </div>
+                <div style={{ flex: 1 }}>
+                  <input 
+                    type="file" 
+                    id="logo-input"
+                    accept="image/*"
+                    onChange={handleLogoUpload}
+                    style={{ display: 'none' }}
+                  />
+                  <label htmlFor="logo-input" className="btn" style={{ 
+                    display: 'inline-block',
+                    padding: '0.4rem 1rem', 
+                    fontSize: '0.85rem',
+                    border: '1px solid hsl(var(--border))', 
+                    borderRadius: '8px',
+                    cursor: 'pointer',
+                    background: 'hsl(var(--background))' 
+                  }}>
+                    {uploadingLogo ? 'Sincronizando...' : localSettings.logoUrl ? 'Trocar Marca' : 'Selecionar Marca'}
+                  </label>
+                  <p style={{ fontSize: '0.7rem', opacity: 0.5, marginTop: '0.4rem' }}>PNG transparente recomendado (Estilo Lívia).</p>
+                </div>
+              </div>
             </div>
           </div>
         </div>
