@@ -37,6 +37,7 @@ export async function GET() {
 }
 
 export async function POST(request: Request) {
+  try {
     const session = await auth();
     const tenantId = (session?.user as any)?.tenantId || (session?.user as any)?.id;
 
