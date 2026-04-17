@@ -66,7 +66,7 @@ export default function TarefasPage() {
         patient: task.patient || '',
         patientId: task.patientId || '',
         task: task.task || '',
-        date: task.date ? new Date(task.date).toISOString().split('T')[0] : new Date().toISOString().split('T')[0]
+        date: task.date ? task.date.split('T')[0] : new Date().toISOString().split('T')[0]
     });
     setEditingTaskId(task._id);
     setIsModalOpen(true);
@@ -155,7 +155,7 @@ export default function TarefasPage() {
                 <tr key={t._id} style={{ borderBottom: idx === tasks.length - 1 ? 'none' : '1px solid hsl(var(--border))' }}>
                   <td style={{ padding: '1rem 1.5rem', fontWeight: '600' }}>{t.patient}</td>
                   <td style={{ padding: '1rem 1.5rem' }}>{t.task}</td>
-                  <td style={{ padding: '1rem 1.5rem', opacity: 0.6, fontSize: '0.875rem' }}>{new Date(t.date).toLocaleDateString('pt-BR')}</td>
+                  <td style={{ padding: '1rem 1.5rem', opacity: 0.6, fontSize: '0.875rem' }}>{t.date ? new Date(t.date + 'T12:00:00').toLocaleDateString('pt-BR') : '-'}</td>
                   <td style={{ padding: '1rem 1.5rem' }}>
                     <button 
                       className={`badge ${t.status === 'concluído' ? 'badge-success' : 'badge-warning'}`}
