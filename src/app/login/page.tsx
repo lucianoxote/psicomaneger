@@ -50,7 +50,12 @@ export default function LoginPage() {
       });
 
       if (result?.error) {
-        setError('E-mail ou senha inválidos');
+        if (result.error.includes('STATUS_BLOCKED')) {
+          const status = result.error.split(':')[1] || 'pendente';
+          setError(`Acesso negado: Sua conta está com status ${status.toLowerCase()}. Entre em contato com o suporte.`);
+        } else {
+          setError('E-mail ou senha inválidos');
+        }
       } else {
         // Handle Remember Me
         if (rememberMe) {

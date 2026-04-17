@@ -26,6 +26,16 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
 
         if (!isPasswordCorrect) return null;
 
+        // Trava de Segurança: Bloqueio de assinaturas não ativas
+        // O administrador mestre tem bypass permanente
+        const adminEmail = 'lucianoxote@hotmail.com';
+        const isStatusBlocked = user.subscriptionStatus && user.subscriptionStatus !== 'Ativo';
+        
+        if (user.email !== adminEmail && isStatusBlocked) {
+          // Lançamos um erro específico que o front-end possa identificar
+          throw new Error(`STATUS_BLOCKED:${user.subscriptionStatus}`);
+        }
+
         return {
           id: user._id.toString(),
           email: user.email,
