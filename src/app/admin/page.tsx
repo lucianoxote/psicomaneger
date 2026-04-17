@@ -40,7 +40,7 @@ export default function AdminDashboard() {
   const fetchMetrics = async () => {
     setLoading(true);
     try {
-      const response = await fetch('/api/admin/metrics');
+      const response = await fetch('/api/admin/metrics', { cache: 'no-store' });
       if (response.ok) {
         const data = await response.json();
         setMetrics(data.metrics);
@@ -63,7 +63,10 @@ export default function AdminDashboard() {
     }
 
     try {
-      const res = await fetch(`/api/auth/register?id=${id}`, { method: 'DELETE' });
+      const res = await fetch(`/api/auth/register?id=${id}`, { 
+        method: 'DELETE',
+        cache: 'no-store'
+      });
       if (res.ok) {
         fetchMetrics();
       } else {
@@ -98,6 +101,7 @@ export default function AdminDashboard() {
       });
       if (res.ok) {
         setIsSubModalOpen(false);
+        alert('Assinatura atualizada com sucesso!');
         fetchMetrics();
       } else {
         const data = await res.json();
