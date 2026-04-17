@@ -180,44 +180,85 @@ export default function ConfiguracoesPage() {
             </div>
             <div className="form-group">
               <label className="form-label">Logomarca da Clínica</label>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginTop: '0.5rem' }}>
-                <div style={{ 
-                  width: '60px', height: '60px', 
-                  backgroundColor: 'hsl(var(--secondary)/0.5)', 
-                  borderRadius: '12px', 
-                  display: 'flex', alignItems: 'center', justifyContent: 'center',
-                  overflow: 'hidden',
-                  border: '1px solid hsl(var(--border))'
-                }}>
-                  {uploadingLogo ? (
-                    <div className="spinner" style={{ width: '20px', height: '20px', border: '2px solid hsl(var(--primary)/0.2)', borderTopColor: 'hsl(var(--primary))', borderRadius: '50%', animation: 'spin 1s linear infinite' }} />
-                  ) : localSettings.logoUrl ? (
-                    <img src={localSettings.logoUrl} alt="Logo" style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
-                  ) : (
-                    <span style={{ fontSize: '1.5rem', opacity: 0.3 }}>🖼️</span>
-                  )}
-                </div>
-                <div style={{ flex: 1 }}>
-                  <input 
-                    type="file" 
-                    id="logo-input"
-                    accept="image/*"
-                    onChange={handleLogoUpload}
-                    style={{ display: 'none' }}
-                  />
-                  <label htmlFor="logo-input" className="btn" style={{ 
-                    display: 'inline-block',
-                    padding: '0.4rem 1rem', 
-                    fontSize: '0.85rem',
-                    border: '1px solid hsl(var(--border))', 
-                    borderRadius: '8px',
-                    cursor: 'pointer',
-                    background: 'hsl(var(--background))' 
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', marginTop: '1rem' }}>
+                
+                {/* Área de Seleção e Upload */}
+                <div style={{ display: 'flex', alignItems: 'center', gap: '1.5rem' }}>
+                  <div style={{ 
+                    width: '80px', height: '80px', 
+                    backgroundColor: 'hsl(var(--secondary)/0.5)', 
+                    borderRadius: '16px', 
+                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    overflow: 'hidden',
+                    border: '1px solid hsl(var(--border))',
+                    boxShadow: 'inset 0 2px 4px rgba(0,0,0,0.05)'
                   }}>
-                    {uploadingLogo ? 'Sincronizando...' : localSettings.logoUrl ? 'Trocar Marca' : 'Selecionar Marca'}
-                  </label>
-                  <p style={{ fontSize: '0.7rem', opacity: 0.5, marginTop: '0.4rem' }}>PNG transparente recomendado (Estilo Lívia).</p>
+                    {uploadingLogo ? (
+                      <div className="spinner" style={{ width: '24px', height: '24px', border: '3px solid hsl(var(--primary)/0.2)', borderTopColor: 'hsl(var(--primary))', borderRadius: '50%', animation: 'spin 1s linear infinite' }} />
+                    ) : localSettings.logoUrl ? (
+                      <img src={localSettings.logoUrl} alt="Logo" style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
+                    ) : (
+                      <span style={{ fontSize: '2rem', opacity: 0.3 }}>🖼️</span>
+                    )}
+                  </div>
+                  
+                  <div style={{ flex: 1 }}>
+                    <input 
+                      type="file" 
+                      id="logo-input"
+                      accept="image/*"
+                      onChange={handleLogoUpload}
+                      style={{ display: 'none' }}
+                    />
+                    <label htmlFor="logo-input" className="btn" style={{ 
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: '0.5rem',
+                      padding: '0.6rem 1.2rem', 
+                      fontSize: '0.9rem',
+                      fontWeight: '600',
+                      border: '1px solid hsl(var(--border))', 
+                      borderRadius: '10px',
+                      cursor: 'pointer',
+                      background: 'hsl(var(--background))',
+                      transition: 'all 0.2s ease'
+                    }}>
+                      <span>{uploadingLogo ? 'Sincronizando...' : localSettings.logoUrl ? '🔄 Trocar Marca' : '📤 Selecionar Marca'}</span>
+                    </label>
+                    <p style={{ fontSize: '0.75rem', opacity: 0.6, marginTop: '0.6rem', lineHeight: '1.4' }}>
+                      💡 <strong>Dica Premium:</strong> Para um visual limpo sem quadrado branco, use uma imagem <strong>PNG Transparente</strong>.
+                    </p>
+                  </div>
                 </div>
+
+                {/* Simulador de Visual no Menu */}
+                {localSettings.logoUrl && (
+                  <div style={{ 
+                    marginTop: '0.5rem', 
+                    padding: '1.2rem', 
+                    background: 'linear-gradient(135deg, #1a1c2e 0%, #121421 100%)', 
+                    borderRadius: '16px',
+                    border: '1px solid rgba(255,255,255,0.1)',
+                    boxShadow: '0 10px 25px -10px rgba(0,0,0,0.3)'
+                  }}>
+                    <p style={{ color: 'rgba(255,255,255,0.5)', fontSize: '0.7rem', fontWeight: 'bold', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '1rem' }}>
+                      Prévia no Menu Lateral (Modo Escuro)
+                    </p>
+                    <div style={{ display: 'flex', justifyContent: 'center', padding: '1rem' }}>
+                      <img 
+                        src={localSettings.logoUrl} 
+                        alt="Preview Menu" 
+                        style={{ 
+                          maxWidth: '160px', 
+                          maxHeight: '70px', 
+                          objectFit: 'contain',
+                          mixBlendMode: 'screen',
+                          filter: 'invert(1) hue-rotate(180deg) brightness(1.7) !important'
+                        }} 
+                      />
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
           </div>
