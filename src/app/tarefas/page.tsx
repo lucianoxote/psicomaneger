@@ -5,6 +5,7 @@ export default function TarefasPage() {
   const [tasks, setTasks] = useState<any[]>([]);
   const [pacientes, setPacientes] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [updating, setUpdating] = useState<string | null>(null); // Track specific task being updated
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [newTask, setNewTask] = useState({ patient: '', patientId: '', task: '', date: new Date().toISOString().split('T')[0] });
   const [editingTaskId, setEditingTaskId] = useState<string | null>(null);
@@ -16,26 +17,33 @@ export default function TarefasPage() {
   };
 
   useEffect(() => {
-    fetchData();
+    // Carregar dados iniciais (apenas uma vez o esqueleto aparece)
+    const loadAll = async () => {
+      setLoading(true);
+      try {
+        const [tRes, pRes] = await Promise.all([
+          fetch('/api/tarefas'),
+          fetch('/api/pacientes')
+        ]);
+        const [tData, pData] = await Promise.all([tRes.json(), pRes.json()]);
+        setTasks(tData);
+        setPacientes(pData);
+      } catch (e) {
+        console.error(e);
+      } finally {
+        setLoading(false);
+      }
+    };
+    loadAll();
   }, []);
 
-  const fetchData = async () => {
-    setLoading(true);
+  const fetchTasksSilently = async () => {
     try {
-      const [tRes, pRes] = await Promise.all([
-        fetch('/api/tarefas'),
-        fetch('/api/pacientes')
-      ]);
-      const [tData, pData] = await Promise.all([
-        tRes.json(),
-        pRes.json()
-      ]);
-      setTasks(tData);
-      setPacientes(pData);
+      const res = await fetch('/api/tarefas');
+      const data = await res.json();
+      setTasks(data);
     } catch (e) {
       console.error(e);
-    } finally {
-      setLoading(false);
     }
   };
 
@@ -54,7 +62,7 @@ export default function TarefasPage() {
       });
       if (res.ok) {
         closeModal();
-        fetchData();
+        fetchTasksSilently();
       }
     } catch (e) {
       console.error(e);
@@ -77,7 +85,7 @@ export default function TarefasPage() {
     try {
       const res = await fetch(`/api/tarefas?id=${id}`, { method: 'DELETE' });
       if (res.ok) {
-        fetchData();
+        fetchTasksSilently();
       }
     } catch (e) {
       console.error(e);
@@ -220,18 +228,46 @@ export default function TarefasPage() {
                   <td style={{ padding: '1.25rem 1.5rem' }}>
                     <button 
                       className={`badge ${t.status === 'concluído' ? 'badge-success' : 'badge-warning'}`}
-                      style={{ cursor: 'pointer', border: 'none', padding: '0.4rem 0.8rem', borderRadius: '99px', fontSize: '0.75rem', fontWeight: '700' }}
+                      style={{ 
+                        cursor: updating === t._id ? 'wait' : 'pointer', 
+                        border: 'none', padding: '0.4rem 0.8rem', borderRadius: '99px', fontSize: '0.75rem', fontWeight: '700',
+                        opacity: updating === t._id ? 0.6 : 1,
+                        transition: 'all 0.2s ease'
+                      }}
+                      disabled={updating === t._id}
                       onClick={async () => {
                         const newStatus = t.status === 'pendente' ? 'concluído' : 'pendente';
-                        await fetch('/api/tarefas', {
-                          method: 'PATCH',
-                          headers: { 'Content-Type': 'application/json' },
-                          body: JSON.stringify({ id: t._id, status: newStatus })
-                        });
-                        fetchData();
+                        
+                        // --- UPDATE OTIMISTA (INSTANTÂNEO) ---
+                        setTasks(prev => prev.map(task => 
+                          task._id === t._id ? { ...task, status: newStatus } : task
+                        ));
+                        setUpdating(t._id);
+
+                        try {
+                          const res = await fetch('/api/tarefas', {
+                            method: 'PATCH',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ id: t._id, status: newStatus })
+                          });
+                          
+                          if (!res.ok) {
+                            // Reverter se falhar
+                            setTasks(prev => prev.map(task => 
+                              task._id === t._id ? { ...task, status: t.status } : task
+                            ));
+                            alert('Erro ao sincronizar status com o servidor.');
+                          }
+                        } catch (e) {
+                          setTasks(prev => prev.map(task => 
+                            task._id === t._id ? { ...task, status: t.status } : task
+                          ));
+                        } finally {
+                          setUpdating(null);
+                        }
                       }}
                     >
-                      {t.status.charAt(0).toUpperCase() + t.status.slice(1)}
+                      {updating === t._id ? '✦' : (t.status.charAt(0).toUpperCase() + t.status.slice(1))}
                     </button>
                   </td>
                   <td style={{ padding: '1.25rem 1.5rem', textAlign: 'right' }}>

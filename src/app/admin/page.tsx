@@ -47,6 +47,28 @@ export default function AdminDashboard() {
     }
   };
 
+  const handleDeleteUser = async (id: string, name: string) => {
+    if (!confirm(`TEM CERTEZA? Isso excluirá permanentemente a conta de "${name}" E TODOS os seus dados (pacientes, agendas, etc). Esta ação não pode ser desfeita.`)) {
+      return;
+    }
+    
+    if (!confirm(`CONFIRMAÇÃO FINAL: Deseja mesmo deletar todos os dados de "${name}"?`)) {
+      return;
+    }
+
+    try {
+      const res = await fetch(`/api/auth/register?id=${id}`, { method: 'DELETE' });
+      if (res.ok) {
+        fetchMetrics();
+      } else {
+        const data = await res.json();
+        alert(data.error || 'Erro ao excluir usuário.');
+      }
+    } catch (e) {
+      alert('Erro de rede ao tentar excluir.');
+    }
+  };
+
   const val = (v?: number) => loading ? '--' : (v ?? 0);
   const isLoading = loading || status === 'loading';
 
@@ -360,8 +382,8 @@ export default function AdminDashboard() {
             <table style={{ width: '100%', borderCollapse: 'separate', borderSpacing: '0 0.5rem' }}>
               <thead>
                 <tr>
-                  {['CLÍNICA', 'RESPONSÁVEL', 'PLANO / STATUS', 'PACIENTES'].map(h => (
-                    <th key={h} style={{ padding: '0 1rem 0.75rem', textAlign: h === 'PLANO / STATUS' ? 'center' : 'left', fontSize: '0.75rem', fontWeight: 700, letterSpacing: '0.1em', color: 'hsl(var(--muted-foreground))', textTransform: 'uppercase' }}>{h}</th>
+                  {['CLÍNICA', 'RESPONSÁVEL', 'PLANO / STATUS', 'PACIENTES', 'AÇÕES'].map(h => (
+                    <th key={h} style={{ padding: h === 'AÇÕES' ? '0 1rem 0.75rem' : '0 1rem 0.75rem', textAlign: (h === 'PLANO / STATUS' || h === 'AÇÕES') ? 'center' : 'left', fontSize: '0.75rem', fontWeight: 700, letterSpacing: '0.1em', color: 'hsl(var(--muted-foreground))', textTransform: 'uppercase' }}>{h}</th>
                   ))}
                 </tr>
               </thead>
@@ -405,7 +427,7 @@ export default function AdminDashboard() {
                         </span>
                       </div>
                     </td>
-                    <td style={{ padding: '0.85rem 1rem', borderRadius: '0 12px 12px 0', border: '1px solid hsl(var(--border))', borderLeft: 'none', textAlign: 'center' }}>
+                    <td style={{ padding: '0.85rem 1rem', border: '1px solid hsl(var(--border))', borderLeft: 'none', borderRight: 'none', textAlign: 'center' }}>
                       <span style={{
                         background: 'hsl(var(--primary)/0.1)',
                         color: 'hsl(var(--primary))',
@@ -414,6 +436,22 @@ export default function AdminDashboard() {
                         fontWeight: 800, fontSize: '0.85rem',
                         border: '1px solid hsl(var(--primary)/0.15)'
                       }}>{t.pacientes}</span>
+                    </td>
+                    <td style={{ padding: '0.85rem 1rem', borderRadius: '0 12px 12px 0', border: '1px solid hsl(var(--border))', borderLeft: 'none', textAlign: 'center' }}>
+                      <button
+                        onClick={() => handleDeleteUser(t.id, t.name)}
+                        style={{
+                          background: 'none', border: 'none', cursor: 'pointer',
+                          fontSize: '1.2rem', padding: '0.4rem', borderRadius: '8px',
+                          transition: 'all 0.2s ease', color: 'hsl(var(--destructive))',
+                          opacity: t.email === 'lucianoxote@hotmail.com' ? 0.2 : 1,
+                        }}
+                        disabled={t.email === 'lucianoxote@hotmail.com'}
+                        title="Excluir Definitivamente"
+                        className="delete-btn-hover"
+                      >
+                        🗑️
+                      </button>
                     </td>
                   </tr>
                 ))}
@@ -429,6 +467,10 @@ export default function AdminDashboard() {
       </div>
 
       <style>{`
+        .delete-btn-hover:hover {
+          background: rgba(239, 68, 68, 0.1) !important;
+          transform: scale(1.1);
+        }
         @keyframes spin { to { transform: rotate(360deg); } }
       `}</style>
     </div>

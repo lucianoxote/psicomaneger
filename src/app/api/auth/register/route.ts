@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import clientPromise from "@/lib/mongodb";
 import bcrypt from "bcryptjs";
 import { auth } from "@/auth";
+import { ObjectId } from "mongodb";
 
 export async function POST(request: Request) {
   try {
@@ -74,5 +75,62 @@ export async function GET() {
     });
   } catch (e) {
     return NextResponse.json({ error: 'Erro ao buscar usuários' }, { status: 500 });
+  }
+}
+
+export async function DELETE(request: Request) {
+  try {
+    const session = await auth();
+    // Apenas o Luciano (master admin) pode deletar contas
+    if (!session?.user?.email || session.user.email !== 'lucianoxote@hotmail.com') {
+      return NextResponse.json({ error: 'Acesso negado.' }, { status: 401 });
+    }
+
+    const { searchParams } = new URL(request.url);
+    const userId = searchParams.get('id');
+
+    if (!userId) {
+      return NextResponse.json({ error: 'ID não fornecido.' }, { status: 400 });
+    }
+
+    const client = await clientPromise;
+    const db = client.db();
+
+    // 1. Impedir deletar a própria conta master
+    const targetUser = await db.collection("users").findOne({ _id: new ObjectId(userId) });
+    if (!targetUser) {
+      return NextResponse.json({ error: 'Usuário não encontrado.' }, { status: 404 });
+    }
+    
+    if (targetUser.email === 'lucianoxote@hotmail.com') {
+      return NextResponse.json({ error: 'Você não pode deletar a conta mestre do sistema.' }, { status: 403 });
+    }
+
+    const tenantId = userId; // tenantId é o ID do usuário como string
+
+    // 2. Executar deleção em CASCATA para limpar o banco
+    const collectionsToClean = [
+      'pacientes', 
+      'agendamentos', 
+      'tarefas', 
+      'configuracoes', 
+      'financeiro', 
+      'sessoes', 
+      'familia', 
+      'reabilitacao'
+    ];
+
+    await Promise.all([
+      db.collection("users").deleteOne({ _id: new ObjectId(userId) }),
+      ...collectionsToClean.map(coll => db.collection(coll).deleteMany({ 
+        $or: [{ tenantId: tenantId }, { userId: userId }] 
+      }))
+    ]);
+
+    return NextResponse.json({ success: true });
+
+  } catch (error) {
+    console.error("Erro na exclusão definitiva:", error);
+    return NextResponse.json({ error: 'Erro interno na exclusão.' }, { status: 500 });
   }
 }
