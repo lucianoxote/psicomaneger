@@ -14,7 +14,8 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
   const { t, settings } = useSettings();
   const { data: session } = useSession();
   
-  const isMaster = session?.user?.email === 'psi.liviabrito@gmail.com' || session?.user?.email === 'lucianoxote@hotmail.com';
+  const isLivia = session?.user?.email === 'psi.liviabrito@gmail.com';
+  const isLuciano = session?.user?.email === 'lucianoxote@hotmail.com';
 
   const handleSignOut = () => {
     signOut({ callbackUrl: '/login' });
@@ -34,7 +35,7 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
     <aside className={`sidebar ${isOpen ? 'sidebar-open' : ''}`}>
       <div style={{ marginBottom: '2rem', padding: '0 1rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         <div style={{ padding: '0', width: '100%' }}>
-          {isMaster && !settings.logoUrl ? (
+          {isLivia && !settings.logoUrl ? (
             <>
               <img 
                 src="/images/logo_livia_transparent.png" 
@@ -166,11 +167,13 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
       <style jsx>{`
         .custom-logo {
           filter: drop-shadow(0 2px 4px rgba(0,0,0,0.05));
+          mix-blend-mode: multiply; /* Faz o fundo branco desaparecer no modo claro */
         }
         :global(.dark) .custom-logo {
           filter: brightness(1.1) drop-shadow(0 0 1px rgba(255,255,255,0.8));
-          /* Se for uma logo escura em fundo escuro, tentamos inverter inteligentemente se necessário */
-          /* mix-blend-mode: plus-lighter; */
+          mix-blend-mode: screen; /* Faz o fundo preto desaparecer no modo escuro */
+          /* Se a logo for escura demais no modo escuro, o filtro abaixo ajuda */
+          /* filter: invert(1) hue-rotate(180deg) brightness(1.5); */
         }
         .light-logo { display: block !important; }
         .dark-logo { display: none !important; }
