@@ -389,9 +389,30 @@ export default function ConfiguracoesPage() {
                 </div>
                 <button 
                   onClick={() => setShowSupport(false)}
-                  style={{ width: '100%', marginTop: '0.75rem', fontSize: '0.7rem', opacity: 0.5, background: 'none', border: 'none', cursor: 'pointer', textDecoration: 'underline' }}
+                  style={{ 
+                    width: '100%', 
+                    marginTop: '0.8rem', 
+                    fontSize: '0.75rem', 
+                    fontWeight: '600',
+                    color: 'hsl(var(--muted-foreground))',
+                    background: 'hsla(var(--muted-foreground), 0.05)', 
+                    border: '1px solid hsla(var(--muted-foreground), 0.15)', 
+                    borderRadius: '8px',
+                    padding: '0.4rem',
+                    cursor: 'pointer',
+                    transition: 'all 0.2s ease',
+                    textAlign: 'center'
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.background = 'hsla(var(--muted-foreground), 0.1)';
+                    e.currentTarget.style.borderColor = 'hsla(var(--muted-foreground), 0.3)';
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.background = 'hsla(var(--muted-foreground), 0.05)';
+                    e.currentTarget.style.borderColor = 'hsla(var(--muted-foreground), 0.15)';
+                  }}
                 >
-                  Fechar
+                  Ocultar Detalhes
                 </button>
               </div>
             )}
