@@ -72,10 +72,14 @@ export async function GET(request: Request) {
       }
     ]).toArray();
     
-    return NextResponse.json({
+    const response = NextResponse.json({
       metrics: { totalUsers, totalPacientes, totalAgendamentos, atendimentosMensais },
       tenants
     });
+    
+    // Cache privado por 30s pois são dados sensíveis de admin
+    response.headers.set('Cache-Control', 'private, max-age=30, stale-while-revalidate=60');
+    return response;
 
   } catch (error) {
     console.error("Erro na API Admin Metrics:", error);

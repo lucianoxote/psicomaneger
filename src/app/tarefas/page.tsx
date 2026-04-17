@@ -85,81 +85,142 @@ export default function TarefasPage() {
   };
 
   return (
-    <div className="tarefas-container">
+    <div className="tarefas-container" style={{ padding: '2rem', maxWidth: '1200px', margin: '0 auto' }}>
+      <style>{`
+        @keyframes fadeIn {
+          from { opacity: 0; transform: translateY(10px); }
+          to { opacity: 1; transform: translateY(0); }
+        }
+        .animate-in {
+          animation: fadeIn 0.5s ease-out forwards;
+        }
+        .task-row {
+          transition: all 0.2s ease;
+        }
+        .task-row:hover {
+          background-color: hsl(var(--primary)/0.04) !important;
+          transform: scale(1.002);
+        }
+        .dark .task-row:hover {
+          background-color: rgba(255, 255, 255, 0.03) !important;
+        }
+        .modal-overlay {
+          background: rgba(0, 0, 0, 0.4);
+          backdrop-filter: blur(4px);
+          position: fixed;
+          top: 0; left: 0; right: 0; bottom: 0;
+          display: flex; align-items: center; justify-content: center;
+          z-index: 50;
+          animation: fadeIn 0.2s ease-out;
+        }
+        .modal-content {
+          background: hsl(var(--card));
+          border: 1px solid hsl(var(--border));
+          border-radius: 20px;
+          box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+          width: 100%; maxWidth: 500px;
+          overflow: hidden;
+        }
+      `}</style>
+
       {isModalOpen && (
         <div className="modal-overlay" onClick={closeModal}>
-          <div className="modal-content" onClick={e => e.stopPropagation()} style={{ maxWidth: '500px' }}>
+          <div className="modal-content" onClick={e => e.stopPropagation()}>
             <header style={{ padding: '1.5rem', borderBottom: '1px solid hsl(var(--border))', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-              <h2 style={{ fontSize: '1.25rem', fontWeight: '600' }}>{editingTaskId ? 'Editar Tarefa' : 'Atribuir Nova Tarefa'}</h2>
-              <button onClick={closeModal} style={{ background: 'none', border: 'none', fontSize: '1.5rem', cursor: 'pointer', opacity: 0.5 }}>&times;</button>
+              <h2 style={{ fontSize: '1.25rem', fontWeight: '700', color: 'hsl(var(--foreground))' }}>{editingTaskId ? 'Editar Tarefa' : 'Atribuir Nova Tarefa'}</h2>
+              <button onClick={closeModal} style={{ background: 'none', border: 'none', fontSize: '1.5rem', cursor: 'pointer', color: 'hsl(var(--muted-foreground))' }}>&times;</button>
             </header>
-            <form style={{ padding: '1.5rem' }} onSubmit={handleSaveTask}>
-              <div className="form-group">
-                <label className="form-label">Paciente</label>
-                <select className="form-input" required value={newTask.patientId} onChange={e => {
-                  const p = pacientes.find(p => p._id === e.target.value);
-                  setNewTask({...newTask, patientId: e.target.value, patient: p ? p.nome : ''});
-                }}>
+            <form style={{ padding: '2rem' }} onSubmit={handleSaveTask}>
+              <div style={{ marginBottom: '1.5rem' }}>
+                <label style={{ display: 'block', fontSize: '0.875rem', fontWeight: '600', marginBottom: '0.5rem', color: 'hsl(var(--muted-foreground))' }}>PACIENTE</label>
+                <select 
+                  style={{ width: '100%', padding: '0.75rem', borderRadius: '10px', border: '1px solid hsl(var(--border))', background: 'hsl(var(--background))', color: 'hsl(var(--foreground))' }}
+                  required value={newTask.patientId} onChange={e => {
+                    const p = pacientes.find(p => p._id === e.target.value);
+                    setNewTask({...newTask, patientId: e.target.value, patient: p ? p.nome : ''});
+                  }}
+                >
                   <option value="">Selecione um paciente...</option>
                   {pacientes.map(p => (
                     <option key={p._id} value={p._id}>{p.nome}</option>
                   ))}
                 </select>
               </div>
-              <div className="form-group">
-                <label className="form-label">Tarefa / Exercício Terapêutico</label>
-                <input type="text" className="form-input" placeholder="Ex: Diário de Pensamentos..." value={newTask.task} onChange={e => setNewTask({...newTask, task: e.target.value})} required />
+              <div style={{ marginBottom: '1.5rem' }}>
+                <label style={{ display: 'block', fontSize: '0.875rem', fontWeight: '600', marginBottom: '0.5rem', color: 'hsl(var(--muted-foreground))' }}>TAREFA / EXERCÍCIO</label>
+                <input 
+                  type="text" 
+                  style={{ width: '100%', padding: '0.75rem', borderRadius: '10px', border: '1px solid hsl(var(--border))', background: 'hsl(var(--background))', color: 'hsl(var(--foreground))' }}
+                  placeholder="Ex: Diário de Pensamentos..." 
+                  value={newTask.task} 
+                  onChange={e => setNewTask({...newTask, task: e.target.value})} 
+                  required 
+                />
               </div>
-              <div className="form-group">
-                <label className="form-label">Data Limite</label>
-                <input type="date" className="form-input" value={newTask.date} onChange={e => setNewTask({...newTask, date: e.target.value})} required />
+              <div style={{ marginBottom: '1.5rem' }}>
+                <label style={{ display: 'block', fontSize: '0.875rem', fontWeight: '600', marginBottom: '0.5rem', color: 'hsl(var(--muted-foreground))' }}>DATA LIMITE</label>
+                <input 
+                  type="date" 
+                  style={{ width: '100%', padding: '0.75rem', borderRadius: '10px', border: '1px solid hsl(var(--border))', background: 'hsl(var(--background))', color: 'hsl(var(--foreground))' }}
+                  value={newTask.date} 
+                  onChange={e => setNewTask({...newTask, date: e.target.value})} 
+                  required 
+                />
               </div>
-              <footer style={{ marginTop: '2rem', display: 'flex', justifyContent: 'flex-end', gap: '1rem' }}>
-                <button type="button" className="btn" onClick={closeModal} style={{ border: '1px solid hsl(var(--border))' }}>Cancelar</button>
-                <button type="submit" className="btn btn-primary">{editingTaskId ? 'Salvar Alterações' : 'Atribuir Tarefa'}</button>
+              <footer style={{ marginTop: '2.5rem', display: 'flex', gap: '1rem' }}>
+                <button type="button" className="btn" onClick={closeModal} style={{ flex: 1, border: '1px solid hsl(var(--border))' }}>Cancelar</button>
+                <button type="submit" className="btn btn-primary" style={{ flex: 1 }}>{editingTaskId ? 'Salvar' : 'Atribuir'}</button>
               </footer>
             </form>
           </div>
         </div>
       )}
-      <header style={{ marginBottom: '2.5rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+
+      <header className="animate-in" style={{ marginBottom: '3rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         <div>
-          <h1 style={{ fontSize: '2rem', fontWeight: '700' }}>Tarefas Terapêuticas</h1>
-          <p style={{ opacity: 0.6 }}>Acompanhe os exercícios propostos para os pacientes realizarem entre as sessões.</p>
+          <h1 style={{ fontSize: '2.25rem', fontWeight: '800', color: 'hsl(var(--foreground))', letterSpacing: '-0.02em' }}>Tarefas Terapêuticas</h1>
+          <p style={{ color: 'hsl(var(--muted-foreground))', marginTop: '0.5rem' }}>Acompanhe os exercícios propostos para os pacientes realizarem entre as sessões.</p>
         </div>
-        <button className="btn btn-primary" style={{ padding: '0.75rem 1.5rem' }} onClick={() => setIsModalOpen(true)}>+ Atribuir Nova Tarefa</button>
+        <button className="btn btn-primary" style={{ padding: '0.75rem 1.75rem', borderRadius: '12px', boxShadow: '0 4px 12px hsl(var(--primary)/0.25)' }} onClick={() => setIsModalOpen(true)}>+ Nova Tarefa</button>
       </header>
 
-      <div className="card" style={{ padding: '0', overflow: 'hidden', border: '1px solid hsl(var(--border))' }}>
+      <div className="card animate-in" style={{ padding: '0', overflow: 'hidden', border: '1px solid hsl(var(--border))', borderRadius: '20px', animationDelay: '0.1s' }}>
         <table style={{ width: '100%', borderCollapse: 'collapse' }}>
           <thead>
-            <tr style={{ textAlign: 'left', borderBottom: '1px solid hsl(var(--border))', backgroundColor: 'hsl(var(--secondary))' }}>
-              <th style={{ padding: '1rem 1.5rem', fontSize: '0.75rem', fontWeight: '600', opacity: 0.5 }}>PACIENTE</th>
-              <th style={{ padding: '1rem 1.5rem', fontSize: '0.75rem', fontWeight: '600', opacity: 0.5 }}>TAREFA / EXERCÍCIO</th>
-              <th style={{ padding: '1rem 1.5rem', fontSize: '0.75rem', fontWeight: '600', opacity: 0.5 }}>DATA LIMITE</th>
-              <th style={{ padding: '1rem 1.5rem', fontSize: '0.75rem', fontWeight: '600', opacity: 0.5 }}>STATUS</th>
-              <th style={{ padding: '1rem 1.5rem', fontSize: '0.75rem', fontWeight: '600', opacity: 0.5 }}>AÇÕES</th>
+            <tr style={{ textAlign: 'left', borderBottom: '2px solid hsl(var(--border))', backgroundColor: 'hsl(var(--secondary)/0.3)' }}>
+              <th style={{ padding: '1.25rem 1.5rem', fontSize: '0.75rem', fontWeight: '700', color: 'hsl(var(--muted-foreground))', textTransform: 'uppercase', letterSpacing: '0.1em' }}>PACIENTE</th>
+              <th style={{ padding: '1.25rem 1.5rem', fontSize: '0.75rem', fontWeight: '700', color: 'hsl(var(--muted-foreground))', textTransform: 'uppercase', letterSpacing: '0.1em' }}>TAREFA</th>
+              <th style={{ padding: '1.25rem 1.5rem', fontSize: '0.75rem', fontWeight: '700', color: 'hsl(var(--muted-foreground))', textTransform: 'uppercase', letterSpacing: '0.1em' }}>DATA LIMITE</th>
+              <th style={{ padding: '1.25rem 1.5rem', fontSize: '0.75rem', fontWeight: '700', color: 'hsl(var(--muted-foreground))', textTransform: 'uppercase', letterSpacing: '0.1em' }}>STATUS</th>
+              <th style={{ padding: '1.25rem 1.5rem', fontSize: '0.75rem', fontWeight: '700', color: 'hsl(var(--muted-foreground))', textTransform: 'uppercase', letterSpacing: '0.1em', textAlign: 'right' }}>AÇÕES</th>
             </tr>
           </thead>
           <tbody>
             {loading ? (
-              <tr>
-                <td colSpan={5} style={{ padding: '3rem', textAlign: 'center', opacity: 0.5 }}>Carregando tarefas...</td>
-              </tr>
+              [1, 2, 3].map(i => (
+                <tr key={i} style={{ borderBottom: '1px solid hsl(var(--border))' }}>
+                  <td colSpan={5} style={{ padding: '1.5rem' }}>
+                    <div style={{ height: '20px', background: 'hsl(var(--secondary))', borderRadius: '4px', animation: 'pulse 1.5s infinite', width: '100%' }} />
+                  </td>
+                </tr>
+              ))
             ) : tasks.length === 0 ? (
               <tr>
-                <td colSpan={5} style={{ padding: '3rem', textAlign: 'center', opacity: 0.5 }}>Nenhuma tarefa atribuída.</td>
+                <td colSpan={5} style={{ padding: '4rem', textAlign: 'center', color: 'hsl(var(--muted-foreground))' }}>
+                  <div style={{ fontSize: '2.5rem', marginBottom: '1rem' }}>📋</div>
+                  Nenhuma tarefa atribuída ainda.
+                </td>
               </tr>
             ) : (
               tasks.map((t, idx) => (
-                <tr key={t._id} style={{ borderBottom: idx === tasks.length - 1 ? 'none' : '1px solid hsl(var(--border))' }}>
-                  <td style={{ padding: '1rem 1.5rem', fontWeight: '600' }}>{t.patient}</td>
-                  <td style={{ padding: '1rem 1.5rem' }}>{t.task}</td>
-                  <td style={{ padding: '1rem 1.5rem', opacity: 0.6, fontSize: '0.875rem' }}>{t.date ? new Date(t.date + 'T12:00:00').toLocaleDateString('pt-BR') : '-'}</td>
-                  <td style={{ padding: '1rem 1.5rem' }}>
+                <tr key={t._id} className="task-row" style={{ borderBottom: idx === tasks.length - 1 ? 'none' : '1px solid hsl(var(--border))' }}>
+                  <td style={{ padding: '1.25rem 1.5rem', fontWeight: '700', color: 'hsl(var(--foreground))' }}>{t.patient}</td>
+                  <td style={{ padding: '1.25rem 1.5rem', color: 'hsl(var(--foreground))' }}>{t.task}</td>
+                  <td style={{ padding: '1.25rem 1.5rem', color: 'hsl(var(--muted-foreground))', fontSize: '0.875rem' }}>{t.date ? new Date(t.date + 'T12:00:00').toLocaleDateString('pt-BR') : '-'}</td>
+                  <td style={{ padding: '1.25rem 1.5rem' }}>
                     <button 
                       className={`badge ${t.status === 'concluído' ? 'badge-success' : 'badge-warning'}`}
-                      style={{ cursor: 'pointer', border: 'none' }}
+                      style={{ cursor: 'pointer', border: 'none', padding: '0.4rem 0.8rem', borderRadius: '99px', fontSize: '0.75rem', fontWeight: '700' }}
                       onClick={async () => {
                         const newStatus = t.status === 'pendente' ? 'concluído' : 'pendente';
                         await fetch('/api/tarefas', {
@@ -173,10 +234,10 @@ export default function TarefasPage() {
                       {t.status.charAt(0).toUpperCase() + t.status.slice(1)}
                     </button>
                   </td>
-                  <td style={{ padding: '1rem 1.5rem' }}>
-                    <div style={{ display: 'flex', gap: '0.5rem' }}>
-                      <button className="btn" style={{ padding: '0.25rem 0.5rem', fontSize: '0.75rem', border: '1px solid hsl(var(--border))' }} onClick={() => handleEditTask(t)}>✏️</button>
-                      <button className="btn" style={{ padding: '0.25rem 0.5rem', fontSize: '0.75rem', border: '1px solid hsl(var(--border))', color: 'hsl(var(--destructive))' }} onClick={() => handleDeleteTask(t._id)}>🗑️</button>
+                  <td style={{ padding: '1.25rem 1.5rem', textAlign: 'right' }}>
+                    <div style={{ display: 'flex', gap: '0.5rem', justifyContent: 'flex-end' }}>
+                      <button className="btn" style={{ padding: '0.4rem', border: '1px solid hsl(var(--border))', borderRadius: '8px', background: 'hsl(var(--card))' }} onClick={() => handleEditTask(t)}>✏️</button>
+                      <button className="btn" style={{ padding: '0.4rem', border: '1px solid hsl(var(--border))', borderRadius: '8px', background: 'hsl(var(--card))', color: 'hsl(var(--destructive))' }} onClick={() => handleDeleteTask(t._id)}>🗑️</button>
                     </div>
                   </td>
                 </tr>
@@ -186,13 +247,17 @@ export default function TarefasPage() {
         </table>
       </div>
 
-      <div style={{ marginTop: '2rem' }}>
-        <h2 style={{ fontSize: '1.25rem', fontWeight: '600', marginBottom: '1.5rem' }}>Reabilitação Neuropsicológica</h2>
-        <div className="card" style={{ padding: '2rem', textAlign: 'center' }}>
-           <div style={{ fontSize: '2.5rem', marginBottom: '1rem' }}>🧩</div>
-           <p style={{ opacity: 0.6 }}>Módulo de acompanhamento de reabilitação cognitiva em breve.</p>
+      <div className="animate-in" style={{ marginTop: '3rem', animationDelay: '0.3s' }}>
+        <h2 style={{ fontSize: '1.25rem', fontWeight: '700', marginBottom: '1.5rem', color: 'hsl(var(--foreground))' }}>Reabilitação Neuropsicológica</h2>
+        <div className="card" style={{ padding: '3rem', textAlign: 'center', border: '1px dashed hsl(var(--border))', background: 'hsl(var(--secondary)/0.2)' }}>
+           <div style={{ fontSize: '2.5rem', marginBottom: '1rem', opacity: 0.5 }}>🧩</div>
+           <p style={{ color: 'hsl(var(--muted-foreground))', fontWeight: '500' }}>Módulo de acompanhamento de reabilitação cognitiva em breve.</p>
         </div>
       </div>
+
+      <style>{`
+        @keyframes pulse { 0% { opacity: 0.6; } 50% { opacity: 0.3; } 100% { opacity: 0.6; } }
+      `}</style>
     </div>
   );
 }
