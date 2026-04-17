@@ -16,6 +16,8 @@ export async function GET() {
     const db = client.db();
     const pacientes = await db.collection('pacientes')
       .find({ tenantId: session.user.tenantId })
+      .sort({ nome: 1 })
+      .project({ anamnese: 0, observacoes: 0 }) // não carregar campos pesados na lista
       .toArray();
 
     const serializablePacientes = pacientes.map((paciente: any) => ({

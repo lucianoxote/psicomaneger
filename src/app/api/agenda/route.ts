@@ -16,6 +16,8 @@ export async function GET() {
     const db = client.db();
     const agendamentos = await db.collection('agendamentos')
       .find({ tenantId: session.user.tenantId })
+      .project({ paciente: 1, pacienteId: 1, tipo: 1, status: 1, data: 1, createdAt: 1, updatedAt: 1 })
+      .sort({ data: 1 })
       .toArray();
 
     const serializableAgendamentos = agendamentos.map((agendamento: any) => ({
