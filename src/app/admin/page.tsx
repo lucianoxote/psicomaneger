@@ -62,10 +62,12 @@ export default function AdminDashboard() {
 
   const chartColors = ['#3B82F6', '#10B981', '#F59E0B'];
   // Dynamic chart colors based on theme
-  const gridColor   = isDark ? '#334155' : '#e2e8f0';
-  const tickColor   = isDark ? '#94a3b8' : '#64748b';
-  const tooltipBg   = isDark ? '#1e293b' : '#0f172a';
-  const pieGray     = isDark ? '#334155' : '#CBD5E1';
+  const gridColor     = isDark ? '#334155' : '#e2e8f0';
+  const tickColor     = isDark ? '#94a3b8' : '#64748b';
+  const tooltipStyle  = isDark
+    ? { backgroundColor: '#1e293b', border: '1px solid #475569', borderRadius: '12px', color: '#f1f5f9', boxShadow: '0 4px 20px rgba(0,0,0,0.4)' }
+    : { backgroundColor: '#ffffff', border: '1px solid #e2e8f0', borderRadius: '12px', color: '#0f172a', boxShadow: '0 4px 20px rgba(0,0,0,0.12)' };
+  const pieGray       = isDark ? '#334155' : '#CBD5E1';
 
   return (
     <div style={{ padding: '2rem', maxWidth: '1200px', margin: '0 auto' }}>
@@ -150,9 +152,9 @@ export default function AdminDashboard() {
                 <XAxis dataKey="name" tick={{ fill: tickColor, fontSize: 12 }} axisLine={false} tickLine={false} />
                 <YAxis tick={{ fill: tickColor, fontSize: 12 }} axisLine={false} tickLine={false} />
                 <Tooltip
-                  cursor={{ fill: isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.05)' }}
-                  contentStyle={{ backgroundColor: tooltipBg, border: '1px solid #334155', borderRadius: '12px', color: '#fff' }}
-                  formatter={(v) => `${v} registros`}
+                  cursor={{ fill: isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.04)' }}
+                  contentStyle={tooltipStyle}
+                  formatter={(v) => [`${v} registros`, '']}
                 />
                 <Bar dataKey="count" radius={[8, 8, 0, 0]}>
                   {chartData.map((_, i) => <Cell key={i} fill={chartColors[i % chartColors.length]} />)}
@@ -180,7 +182,7 @@ export default function AdminDashboard() {
                 <Pie data={pieData} cx="50%" cy="50%" innerRadius={55} outerRadius={75} paddingAngle={4} dataKey="value" stroke="none">
                   {pieData.map((_, i) => <Cell key={i} fill={i === 0 ? '#10B981' : pieGray} />)}
                 </Pie>
-                <Tooltip contentStyle={{ backgroundColor: tooltipBg, border: '1px solid #334155', borderRadius: '12px', color: '#fff' }} formatter={(v) => `${v} sessões`} />
+                <Tooltip contentStyle={tooltipStyle} formatter={(v) => [`${v} sessões`, '']} />
               </PieChart>
             </ResponsiveContainer>
           )}
