@@ -19,6 +19,7 @@ export default function ConfiguracoesPage() {
   // Password Change State
   const [passwords, setPasswords] = useState({ current: '', new: '', confirm: '' });
   const [changingPass, setChangingPass] = useState(false);
+  const [showSupport, setShowSupport] = useState(false);
 
   useEffect(() => {
     setLocalSettings(settings);
@@ -245,13 +246,44 @@ export default function ConfiguracoesPage() {
           
           <div style={{ fontSize: '0.875rem' }}>
             <p style={{ marginBottom: '1rem', opacity: 0.8 }}>Deseja fazer um upgrade ou tem dúvidas sobre sua fatura?</p>
-            <button 
-              className="btn" 
-              style={{ width: '100%', background: 'hsl(var(--foreground))', color: 'hsl(var(--background))' }}
-              onClick={() => alert('Entre em contato com o suporte: lucianoxote@hotmail.com')}
-            >
-              Falar com Consultor
-            </button>
+            {!showSupport ? (
+              <button 
+                className="btn btn-primary" 
+                style={{ width: '100%', fontWeight: '600' }}
+                onClick={() => setShowSupport(true)}
+              >
+                Falar com Consultor
+              </button>
+            ) : (
+              <div className="interactive-card" style={{ 
+                padding: '1rem', 
+                background: 'hsla(var(--primary), 0.08)', 
+                border: '1px solid hsla(var(--primary), 0.2)',
+                borderRadius: '12px',
+                animation: 'fadeIn 0.3s ease'
+              }}>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', fontSize: '0.85rem' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                    <span style={{ opacity: 0.6 }}>Consultor:</span>
+                    <span style={{ fontWeight: '600' }}>Luciano Peixoto</span>
+                  </div>
+                  <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                    <span style={{ opacity: 0.6 }}>WhatsApp:</span>
+                    <a href="https://wa.me/5571988339502" target="_blank" style={{ fontWeight: '700', color: 'hsl(var(--primary))', textDecoration: 'none' }}>71 98833-9502</a>
+                  </div>
+                  <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                    <span style={{ opacity: 0.6 }}>E-mail:</span>
+                    <span style={{ fontWeight: '500' }}>lucianoxote@hotmail.com</span>
+                  </div>
+                </div>
+                <button 
+                  onClick={() => setShowSupport(false)}
+                  style={{ width: '100%', marginTop: '0.75rem', fontSize: '0.7rem', opacity: 0.5, background: 'none', border: 'none', cursor: 'pointer', textDecoration: 'underline' }}
+                >
+                  Fechar
+                </button>
+              </div>
+            )}
           </div>
         </div>
 
