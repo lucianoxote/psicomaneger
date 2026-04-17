@@ -62,21 +62,18 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
               />
             </>
           ) : settings.logoUrl ? (
-            <div style={{ marginBottom: '1rem', display: 'flex', justifyContent: 'center' }}>
-               <img 
-                 src={settings.logoUrl} 
-                 alt={settings.nomeClinica || "Logo da Clínica"} 
-                 className="custom-logo"
-                 style={{ 
-                   width: '100%', 
-                   maxWidth: '180px', 
-                   maxHeight: '85px',
-                   height: 'auto',
-                   objectFit: 'contain',
-                   transition: 'all 0.3s ease'
-                 }} 
-               />
-            </div>
+            <img 
+              src={settings.logoUrl} 
+              alt={settings.nomeClinica || "Logo da Clínica"} 
+              className="custom-logo"
+              style={{ 
+                width: '100%', 
+                maxWidth: '185px', 
+                height: 'auto',
+                marginBottom: '0.5rem',
+                transition: 'all 0.3s ease'
+              }} 
+            />
           ) : (
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: '70px', height: '70px', margin: '0 auto 0.5rem auto', backgroundColor: 'hsl(var(--primary)/0.1)', borderRadius: '50%', color: 'hsl(var(--primary))', boxShadow: '0 4px 10px rgba(0,0,0,0.05)', border: '2px solid hsl(var(--primary)/0.2)' }}>
               <span style={{ fontSize: '2rem', fontWeight: 'bold' }}>{settings.nomeClinica ? settings.nomeClinica.charAt(0).toUpperCase() : '🧠'}</span>
@@ -166,14 +163,11 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
 
       <style jsx>{`
         .custom-logo {
-          filter: drop-shadow(0 2px 4px rgba(0,0,0,0.05));
-          mix-blend-mode: multiply; /* Faz o fundo branco desaparecer no modo claro */
+          mix-blend-mode: multiply;
         }
         :global(.dark) .custom-logo {
-          filter: brightness(1.1) drop-shadow(0 0 1px rgba(255,255,255,0.8));
-          mix-blend-mode: screen; /* Faz o fundo preto desaparecer no modo escuro */
-          /* Se a logo for escura demais no modo escuro, o filtro abaixo ajuda */
-          /* filter: invert(1) hue-rotate(180deg) brightness(1.5); */
+          mix-blend-mode: screen;
+          filter: invert(1) hue-rotate(180deg) brightness(1.7) !important;
         }
         .light-logo { display: block !important; }
         .dark-logo { display: none !important; }
