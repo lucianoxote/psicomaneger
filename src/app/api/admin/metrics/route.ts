@@ -36,10 +36,14 @@ export async function GET(request: Request) {
       {
         $lookup: {
           from: "configuracoes",
-          localField: "_id",
-          foreignField: "userId",
-          as: "config",
-          pipeline: [{ $project: { nomeClinica: 1 } }]
+          // configuracoes.userId é String, mas users._id é ObjectId
+          // Precisamos converter com $toString para o join funcionar
+          let: { uid: { $toString: "$_id" } },
+          pipeline: [
+            { $match: { $expr: { $eq: ["$userId", "$$uid"] } } },
+            { $project: { nomeClinica: 1 } }
+          ],
+          as: "config"
         }
       },
       {

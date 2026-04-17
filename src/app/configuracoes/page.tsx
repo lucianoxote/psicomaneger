@@ -1,9 +1,12 @@
 'use client';
 import { useState, useEffect } from 'react';
+import { useSession } from 'next-auth/react';
 import { useSettings } from '@/components/SettingsProvider';
 
 export default function ConfiguracoesPage() {
   const { settings, setSettings, refreshSettings, t } = useSettings();
+  const { data: session } = useSession();
+  const isAdmin = session?.user?.email === 'lucianoxote@hotmail.com';
   const [localSettings, setLocalSettings] = useState(settings);
   const [saving, setSaving] = useState(false);
   
@@ -149,6 +152,8 @@ export default function ConfiguracoesPage() {
           </div>
         </div>
 
+        {/* Gestão de Acesso - SOMENTE ADMIN */}
+        {isAdmin && (
         <div className="card">
           <h3 style={{ fontSize: '1.125rem', fontWeight: '600', marginBottom: '1.5rem' }}>Gestão de Acesso</h3>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
@@ -210,6 +215,7 @@ export default function ConfiguracoesPage() {
             )}
           </div>
         </div>
+        )}
 
         <div className="card">
           <h3 style={{ fontSize: '1.125rem', fontWeight: '600', marginBottom: '1.5rem' }}>Mudar Minha Senha</h3>
