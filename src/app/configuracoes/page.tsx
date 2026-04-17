@@ -44,13 +44,16 @@ export default function ConfiguracoesPage() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(localSettings)
       });
+      const data = await res.json();
       if (res.ok) {
         await refreshSettings();
         alert(settings.idioma === 'English' ? 'Settings saved!' : 'Configurações salvas com sucesso!');
+      } else {
+        alert(data.error || 'Erro ao salvar configurações.');
       }
     } catch (e) {
       console.error(e);
-      alert('Erro ao salvar configurações.');
+      alert('Erro de rede ao tentar salvar.');
     } finally {
       setSaving(false);
     }

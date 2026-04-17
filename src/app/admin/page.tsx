@@ -16,6 +16,12 @@ export default function AdminDashboard() {
   const [loading, setLoading] = useState(true);
   // Detect dark mode for chart colors
   const [isDark, setIsDark] = useState(false);
+  
+  // Subscription management
+  const [isSubModalOpen, setIsSubModalOpen] = useState(false);
+  const [selectedUser, setSelectedUser] = useState<any>(null);
+  const [subForm, setSubForm] = useState({ plan: '', subscriptionStatus: '' });
+  const [savingSub, setSavingSub] = useState(false);
 
   useEffect(() => {
     const check = () => setIsDark(document.documentElement.classList.contains('dark'));
@@ -66,6 +72,41 @@ export default function AdminDashboard() {
       }
     } catch (e) {
       alert('Erro de rede ao tentar excluir.');
+    }
+  };
+
+  const handleEditSubscription = (user: any) => {
+    setSelectedUser(user);
+    setSubForm({
+      plan: user.plan || 'Trial',
+      subscriptionStatus: user.subscriptionStatus || 'Ativo'
+    });
+    setIsSubModalOpen(true);
+  };
+
+  const handleSaveSubscription = async () => {
+    setSavingSub(true);
+    try {
+      const res = await fetch('/api/auth/register', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          userId: selectedUser.id,
+          plan: subForm.plan,
+          subscriptionStatus: subForm.subscriptionStatus
+        })
+      });
+      if (res.ok) {
+        setIsSubModalOpen(false);
+        fetchMetrics();
+      } else {
+        const data = await res.json();
+        alert(data.error || 'Erro ao salvar');
+      }
+    } catch (e) {
+      alert('Erro de conexão');
+    } finally {
+      setSavingSub(false);
     }
   };
 
@@ -138,6 +179,17 @@ export default function AdminDashboard() {
         }
         .dark .table-row:hover {
           background: rgba(255, 255, 255, 0.03) !important;
+        }
+        .modal-overlay {
+          position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+          background: rgba(0,0,0,0.5); backdrop-filter: blur(4px);
+          display: flex; align-items: center; justify-content: center; z-index: 9999;
+          animation: fadeIn 0.2s ease;
+        }
+        .modal-card {
+           background: hsl(var(--card)); border: 1px solid hsl(var(--border));
+           border-radius: 20px; padding: 2rem; width: 100%; max-width: 400px;
+           box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
         }
       `}</style>
 
@@ -438,20 +490,34 @@ export default function AdminDashboard() {
                       }}>{t.pacientes}</span>
                     </td>
                     <td style={{ padding: '0.85rem 1rem', borderRadius: '0 12px 12px 0', border: '1px solid hsl(var(--border))', borderLeft: 'none', textAlign: 'center' }}>
-                      <button
-                        onClick={() => handleDeleteUser(t.id, t.name)}
-                        style={{
-                          background: 'none', border: 'none', cursor: 'pointer',
-                          fontSize: '1.2rem', padding: '0.4rem', borderRadius: '8px',
-                          transition: 'all 0.2s ease', color: 'hsl(var(--destructive))',
-                          opacity: t.email === 'lucianoxote@hotmail.com' ? 0.2 : 1,
-                        }}
-                        disabled={t.email === 'lucianoxote@hotmail.com'}
-                        title="Excluir Definitivamente"
-                        className="delete-btn-hover"
-                      >
-                        🗑️
-                      </button>
+                      <div style={{ display: 'flex', gap: '0.4rem', justifyContent: 'center' }}>
+                        <button
+                          onClick={() => handleEditSubscription(t)}
+                          style={{
+                            background: 'none', border: 'none', cursor: 'pointer',
+                            fontSize: '1.2rem', padding: '0.4rem', borderRadius: '8px',
+                            transition: 'all 0.2s ease', color: 'hsl(var(--primary))'
+                          }}
+                          title="Alterar Plano/Status"
+                          className="action-btn-hover"
+                        >
+                          ✏️
+                        </button>
+                        <button
+                          onClick={() => handleDeleteUser(t.id, t.name)}
+                          style={{
+                            background: 'none', border: 'none', cursor: 'pointer',
+                            fontSize: '1.2rem', padding: '0.4rem', borderRadius: '8px',
+                            transition: 'all 0.2s ease', color: 'hsl(var(--destructive))',
+                            opacity: t.email === 'lucianoxote@hotmail.com' ? 0.2 : 1,
+                          }}
+                          disabled={t.email === 'lucianoxote@hotmail.com'}
+                          title="Excluir Definitivamente"
+                          className="delete-btn-hover"
+                        >
+                          🗑️
+                        </button>
+                      </div>
                     </td>
                   </tr>
                 ))}
@@ -471,8 +537,72 @@ export default function AdminDashboard() {
           background: rgba(239, 68, 68, 0.1) !important;
           transform: scale(1.1);
         }
+        .action-btn-hover:hover {
+          background: hsla(var(--primary), 0.1) !important;
+          transform: scale(1.1);
+        }
         @keyframes spin { to { transform: rotate(360deg); } }
       `}</style>
+
+      {/* ── Modal Gestão de Assinatura ── */}
+      {isSubModalOpen && (
+        <div className="modal-overlay" onClick={() => setIsSubModalOpen(false)}>
+          <div className="modal-card" onClick={e => e.stopPropagation()}>
+            <h2 style={{ fontSize: '1.25rem', fontWeight: 800, marginBottom: '0.5rem' }}>Gestão de Assinatura</h2>
+            <p style={{ color: 'hsl(var(--muted-foreground))', fontSize: '0.85rem', marginBottom: '1.5rem' }}>
+              Alterando conta de: <b>{selectedUser?.name}</b>
+            </p>
+
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+              <div className="form-group">
+                <label className="form-label">Plano</label>
+                <select 
+                  className="form-input" 
+                  value={subForm.plan}
+                  onChange={e => setSubForm({...subForm, plan: e.target.value})}
+                >
+                  <option value="Gratuito">Gratuito</option>
+                  <option value="Trial">Trial (15 dias)</option>
+                  <option value="Plus">Plus (Intermediário)</option>
+                  <option value="Pro">Pro (Completo)</option>
+                </select>
+              </div>
+
+              <div className="form-group">
+                <label className="form-label">Status da Assinatura</label>
+                <select 
+                  className="form-input" 
+                  value={subForm.subscriptionStatus}
+                  onChange={e => setSubForm({...subForm, subscriptionStatus: e.target.value})}
+                >
+                  <option value="Ativo">Ativo</option>
+                  <option value="Pendente">Pendente</option>
+                  <option value="Vencido">Vencido</option>
+                  <option value="Cancelado">Cancelado</option>
+                </select>
+              </div>
+
+              <div style={{ display: 'flex', gap: '0.75rem', marginTop: '1rem' }}>
+                <button 
+                  className="btn" 
+                  style={{ flex: 1, border: '1px solid hsl(var(--border))' }}
+                  onClick={() => setIsSubModalOpen(false)}
+                >
+                  Cancelar
+                </button>
+                <button 
+                  className="btn btn-primary" 
+                  style={{ flex: 1 }}
+                  onClick={handleSaveSubscription}
+                  disabled={savingSub}
+                >
+                  {savingSub ? 'Salvando...' : 'Salvar'}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

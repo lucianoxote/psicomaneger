@@ -7,7 +7,9 @@ export const dynamic = 'force-dynamic';
 export async function GET() {
   try {
     const session = await auth();
-    if (!session?.user?.tenantId) {
+    const tenantId = (session?.user as any)?.tenantId || (session?.user as any)?.id;
+
+    if (!tenantId) {
       return NextResponse.json({ error: 'Não autorizado' }, { status: 401 });
     }
 
@@ -15,7 +17,9 @@ export async function GET() {
     const db = client.db();
     
     // Fetch per-tenant clinic settings and preferences
-    const settings = await db.collection("configuracoes").findOne({ tenantId: session.user.tenantId });
+    const settings = await db.collection("configuracoes").findOne({ 
+      $or: [ { tenantId: tenantId }, { userId: tenantId } ]
+    });
 
     // Merged response: database values or defaults
     const response = {
@@ -33,9 +37,10 @@ export async function GET() {
 }
 
 export async function POST(request: Request) {
-  try {
     const session = await auth();
-    if (!session?.user?.tenantId) {
+    const tenantId = (session?.user as any)?.tenantId || (session?.user as any)?.id;
+
+    if (!tenantId) {
       return NextResponse.json({ error: 'Não autorizado' }, { status: 401 });
     }
 
@@ -45,7 +50,7 @@ export async function POST(request: Request) {
 
     // Save settings per tenant
     await db.collection("configuracoes").updateOne(
-      { tenantId: session.user.tenantId },
+      { $or: [ { tenantId: tenantId }, { userId: tenantId } ] },
       { 
         $set: {
           nomeClinica: body.nomeClinica, 
@@ -53,7 +58,7 @@ export async function POST(request: Request) {
           tema: body.tema,
           idioma: body.idioma,
           logoUrl: body.logoUrl,
-          tenantId: session.user.tenantId, 
+          tenantId: tenantId, 
           updatedAt: new Date() 
         } 
       },

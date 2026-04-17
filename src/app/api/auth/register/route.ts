@@ -129,3 +129,40 @@ export async function DELETE(request: Request) {
     return NextResponse.json({ error: 'Erro interno na exclusão.' }, { status: 500 });
   }
 }
+
+export async function PATCH(request: Request) {
+  try {
+    const session = await auth();
+    // Apenas o Luciano (master admin) pode alterar assinaturas
+    if (!session?.user?.email || session.user.email !== 'lucianoxote@hotmail.com') {
+      return NextResponse.json({ error: 'Acesso negado.' }, { status: 401 });
+    }
+
+    const body = await request.json();
+    const { userId, plan, subscriptionStatus } = body;
+
+    if (!userId) {
+      return NextResponse.json({ error: 'ID do usuário é obrigatório.' }, { status: 400 });
+    }
+
+    const client = await clientPromise;
+    const db = client.db();
+
+    await db.collection("users").updateOne(
+      { _id: new ObjectId(userId) },
+      { 
+        $set: { 
+          plan, 
+          subscriptionStatus,
+          updatedAt: new Date() 
+        } 
+      }
+    );
+
+    return NextResponse.json({ success: true });
+
+  } catch (error) {
+    console.error("Erro na atualização de assinatura:", error);
+    return NextResponse.json({ error: 'Erro ao atualizar assinatura.' }, { status: 500 });
+  }
+}
