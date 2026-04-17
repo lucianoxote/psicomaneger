@@ -154,6 +154,8 @@ export default function AdminDashboard() {
                 <Tooltip
                   cursor={{ fill: isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.04)' }}
                   contentStyle={tooltipStyle}
+                  labelStyle={{ color: isDark ? '#94a3b8' : '#475569', fontWeight: 600, marginBottom: '4px' }}
+                  itemStyle={{ color: isDark ? '#f1f5f9' : '#0f172a' }}
                   formatter={(v) => [`${v} registros`, '']}
                 />
                 <Bar dataKey="count" radius={[8, 8, 0, 0]}>
@@ -182,20 +184,34 @@ export default function AdminDashboard() {
                 <Pie data={pieData} cx="50%" cy="50%" innerRadius={55} outerRadius={75} paddingAngle={4} dataKey="value" stroke="none">
                   {pieData.map((_, i) => <Cell key={i} fill={i === 0 ? '#10B981' : pieGray} />)}
                 </Pie>
-                <Tooltip contentStyle={tooltipStyle} formatter={(v) => [`${v} sessões`, '']} />
+                <Tooltip
+                  contentStyle={tooltipStyle}
+                  labelStyle={{ color: isDark ? '#94a3b8' : '#475569', fontWeight: 600 }}
+                  itemStyle={{ color: isDark ? '#f1f5f9' : '#0f172a' }}
+                  formatter={(v) => [`${v} sessões`, '']}
+                />
               </PieChart>
             </ResponsiveContainer>
           )}
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem', marginTop: '0.5rem' }}>
-            {[
-              { label: 'Recentes', value: val(metrics?.atendimentosMensais), bg: 'rgba(16,185,129,0.1)', color: '#10B981' },
-              { label: 'Histórico', value: val((metrics?.totalAgendamentos ?? 0) - (metrics?.atendimentosMensais ?? 0)), bg: 'hsl(var(--secondary))', color: 'hsl(var(--foreground))' },
-            ].map(card => (
-              <div key={card.label} style={{ background: card.bg, borderRadius: '10px', padding: '0.75rem', textAlign: 'center' }}>
-                <p style={{ fontSize: '0.7rem', color: 'hsl(var(--muted-foreground))' }}>{card.label}</p>
-                <p style={{ fontSize: '1.5rem', fontWeight: 800, color: card.color }}>{card.value}</p>
-              </div>
-            ))}
+            <div style={{
+              background: isDark ? 'rgba(16,185,129,0.15)' : 'rgba(16,185,129,0.1)',
+              border: '1px solid rgba(16,185,129,0.3)',
+              borderRadius: '10px', padding: '0.75rem', textAlign: 'center'
+            }}>
+              <p style={{ fontSize: '0.7rem', fontWeight: 600, color: isDark ? '#6ee7b7' : '#059669', marginBottom: '0.25rem' }}>Recentes</p>
+              <p style={{ fontSize: '1.5rem', fontWeight: 800, color: isDark ? '#6ee7b7' : '#059669' }}>{val(metrics?.atendimentosMensais)}</p>
+            </div>
+            <div style={{
+              background: isDark ? 'rgba(148,163,184,0.1)' : 'rgba(71,85,105,0.08)',
+              border: '1px solid hsl(var(--border))',
+              borderRadius: '10px', padding: '0.75rem', textAlign: 'center'
+            }}>
+              <p style={{ fontSize: '0.7rem', fontWeight: 600, color: 'hsl(var(--muted-foreground))', marginBottom: '0.25rem' }}>Histórico</p>
+              <p style={{ fontSize: '1.5rem', fontWeight: 800, color: 'hsl(var(--foreground))' }}>
+                {val((metrics?.totalAgendamentos ?? 0) - (metrics?.atendimentosMensais ?? 0))}
+              </p>
+            </div>
           </div>
         </div>
       </div>
