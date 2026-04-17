@@ -33,30 +33,25 @@ export async function POST(request: Request) {
     }
 
     const hashedPassword = await bcrypt.hash(password, 12);
-
+    const userId = new ObjectId(); // Gerar ID antecipadamente
     const now = new Date();
     const trialEndsAt = new Date();
     trialEndsAt.setDate(now.getDate() + 15);
 
-    const result = await db.collection("users").insertOne({
+    await db.collection("users").insertOne({
+      _id: userId,
       email,
       password: hashedPassword,
       name,
-      role: 'user', // Default role for new signups
-      tenantId: "", // Temporary, will update below
+      role: 'user',
+      tenantId: userId.toString(), // Definir no momento da criação
       plan: 'Trial',
       subscriptionStatus: 'Ativo',
       trialEndsAt,
       createdAt: now,
     });
 
-    // Self-reference tenantId with the new ID
-    await db.collection("users").updateOne(
-      { _id: result.insertedId },
-      { $set: { tenantId: result.insertedId.toString() } }
-    );
-
-    return NextResponse.json({ success: true, id: result.insertedId });
+    return NextResponse.json({ success: true, id: userId });
   } catch (e: any) {
     return NextResponse.json({ error: 'Erro ao registrar: ' + e.message }, { status: 500 });
   }

@@ -65,7 +65,7 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
 
   const fetchSettings = async () => {
     try {
-      const res = await fetch('/api/configuracoes');
+      const res = await fetch('/api/configuracoes', { cache: 'no-store' });
       const data = await res.json();
       if (data && !data.error) {
         setSettingsState(data);

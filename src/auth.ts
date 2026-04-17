@@ -31,7 +31,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
           email: user.email,
           name: user.name,
           role: user.role || 'user',
-          tenantId: user.tenantId || user._id.toString(),
+          tenantId: user.tenantId?.toString() || user._id.toString(),
           plan: user.plan || 'Gratuito',
           subscriptionStatus: user.subscriptionStatus || 'Ativo',
           trialEndsAt: user.trialEndsAt || null,
