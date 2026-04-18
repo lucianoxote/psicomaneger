@@ -14,6 +14,7 @@ export default function AdminDashboard() {
   const [metrics, setMetrics] = useState<any>(null);
   const [tenants, setTenants] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [searchTerm, setSearchTerm] = useState('');
   // Detect dark mode for chart colors
   const [isDark, setIsDark] = useState(false);
   
@@ -116,6 +117,19 @@ export default function AdminDashboard() {
 
   const val = (v?: number) => loading ? '--' : (v ?? 0);
   const isLoading = loading || status === 'loading';
+
+  const calculateRevenue = () => {
+    if (!metrics?.plans) return 0;
+    const plusCount = metrics.plans.find((p: any) => p.name === 'Plus')?.value || 0;
+    const proCount = metrics.plans.find((p: any) => p.name === 'Pro')?.value || 0;
+    return (plusCount * 50) + (proCount * 100);
+  };
+
+  const filteredTenants = tenants.filter(t => 
+    t.name.toLowerCase().includes(searchTerm.toLowerCase()) || 
+    t.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    (t.clinica || "").toLowerCase().includes(searchTerm.toLowerCase())
+  );
 
   const chartData = [
     { name: 'Clínicas', count: metrics?.totalUsers ?? 0 },
@@ -259,6 +273,30 @@ export default function AdminDashboard() {
             </div>
           </div>
         ))}
+        
+        {/* Card de Faturamento Especial */}
+        <div className="interactive-card" style={{
+          background: 'linear-gradient(135deg, hsl(var(--primary)) 0%, #3B82F6 100%)',
+          borderRadius: '18px',
+          padding: '1.5rem',
+          boxShadow: '0 8px 16px -4px hsla(var(--primary), 0.3)',
+          color: 'white'
+        }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+            <div>
+              <p style={{ fontSize: '0.72rem', fontWeight: 700, letterSpacing: '0.08em', opacity: 0.9, textTransform: 'uppercase', marginBottom: '0.5rem' }}>
+                Faturamento Est.
+              </p>
+              <p style={{ fontSize: '2.4rem', fontWeight: 800, lineHeight: 1, letterSpacing: '-0.03em' }}>
+                R$ {calculateRevenue()}
+              </p>
+            </div>
+            <div style={{ fontSize: '1.75rem', background: 'rgba(255,255,255,0.2)', padding: '0.5rem', borderRadius: '12px' }}>💹</div>
+          </div>
+          <p style={{ marginTop: '1rem', fontSize: '0.75rem', fontWeight: 600, opacity: 0.9 }}>Receita mensal projetada (Plus/Pro)</p>
+          <div style={{ marginTop: '1rem', background: 'rgba(255,255,255,0.2)', height: '1px' }} />
+          <p style={{ marginTop: '0.5rem', fontSize: '0.65rem', opacity: 0.8 }}>Base: Plus R$50 | Pro R$100</p>
+        </div>
       </div>
 
       {/* ── Charts ── */}
@@ -357,7 +395,9 @@ export default function AdminDashboard() {
           </div>
         </div>
 
-        {/* Plan Distribution Chart */}
+        </div>
+
+        {/* Recent Activity Log */}
         <div className="interactive-card" style={{
           background: 'hsl(var(--card))',
           border: '1px solid hsl(var(--border))',
@@ -365,41 +405,33 @@ export default function AdminDashboard() {
           padding: '1.75rem',
           display: 'flex', flexDirection: 'column',
         }}>
-          <h3 style={{ fontSize: '1.1rem', fontWeight: 700, color: 'hsl(var(--foreground))' }}>Distribuição de Planos</h3>
-          <p style={{ fontSize: '0.85rem', color: 'hsl(var(--muted-foreground))', marginBottom: '1.25rem' }}>Perfil comercial</p>
-          {isLoading ? (
-            <div style={{ flex: 1, background: 'hsl(var(--secondary))', borderRadius: '12px', animation: 'pulse 1.5s infinite' }} />
-          ) : (
-            <div style={{ flex: 1, position: 'relative', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-               <ResponsiveContainer width="100%" height={200}>
-                <PieChart>
-                  <Pie data={planData} cx="50%" cy="50%" innerRadius={60} outerRadius={85} paddingAngle={6} dataKey="value" stroke="none">
-                    {planData.map((p: any, i: number) => {
-                      const colors: any = { 'Trial': '#8B5CF6', 'Plus': '#3B82F6', 'Pro': '#F59E0B', 'Gratuito': '#64748b' };
-                      return <Cell key={i} fill={colors[p.name] || '#64748b'} />;
-                    })}
-                  </Pie>
-                  <Tooltip
-                    contentStyle={tooltipStyle}
-                    labelStyle={{ color: isDark ? '#94a3b8' : '#475569', fontWeight: 600 }}
-                    itemStyle={{ color: isDark ? '#f1f5f9' : '#0f172a' }}
-                    formatter={(v) => [`${v} usuários`, '']}
-                  />
-                </PieChart>
-              </ResponsiveContainer>
-              <div style={{ position: 'absolute', textAlign: 'center', pointerEvents: 'none' }}>
-                <p style={{ fontSize: '1.5rem', fontWeight: 800, color: 'hsl(var(--foreground))' }}>{planData.length}</p>
-                <p style={{ fontSize: '0.75rem', color: 'hsl(var(--muted-foreground))', textTransform: 'uppercase', fontWeight: 700 }}>Tiers</p>
+          <h3 style={{ fontSize: '1.1rem', fontWeight: 700, color: 'hsl(var(--foreground))', marginBottom: '1.25rem' }}>Atividades Recentes</h3>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+            {metrics?.activities?.map((act: any, idx: number) => (
+              <div key={idx} style={{ 
+                display: 'flex', 
+                gap: '0.85rem', 
+                paddingBottom: '1rem', 
+                borderBottom: idx === metrics.activities.length - 1 ? 'none' : '1px solid hsl(var(--border)/0.5)',
+                animation: `fadeIn 0.5s ease forwards ${idx * 0.1}s`,
+                opacity: 0
+              }}>
+                <div style={{ 
+                  width: '32px', height: '32px', borderRadius: '8px', 
+                  backgroundColor: act.type === 'signup' ? 'hsla(var(--primary), 0.1)' : 'rgba(16,185,129,0.1)',
+                  display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1rem'
+                }}>
+                  {act.type === 'signup' ? '👤' : '👥'}
+                </div>
+                <div style={{ flex: 1 }}>
+                  <p style={{ fontSize: '0.75rem', fontWeight: 700, color: 'hsl(var(--foreground))' }}>{act.label}</p>
+                  <p style={{ fontSize: '0.85rem', color: 'hsl(var(--muted-foreground))', fontWeight: 500 }}>{act.details}</p>
+                </div>
+                <div style={{ fontSize: '0.65rem', color: 'hsl(var(--muted-foreground))', whiteSpace: 'nowrap' }}>
+                  {new Date(act.time).toLocaleDateString()}
+                </div>
               </div>
-            </div>
-          )}
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '0.5rem', marginTop: '1rem' }}>
-            {planData.map((p: any) => (
-              <div key={p.name} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.75rem' }}>
-                <div style={{ width: '8px', height: '8px', borderRadius: '50%', background: p.name === 'Trial' ? '#8B5CF6' : p.name === 'Plus' ? '#3B82F6' : p.name === 'Pro' ? '#F59E0B' : '#64748b' }} />
-                <span style={{ color: 'hsl(var(--muted-foreground))' }}>{p.name}: <b>{p.value}</b></span>
-              </div>
-            ))}
+            )) || <p style={{ textAlign: 'center', opacity: 0.5, fontSize: '0.85rem' }}>Nenhuma atividade recente.</p>}
           </div>
         </div>
       </div>
@@ -417,15 +449,34 @@ export default function AdminDashboard() {
             <h3 style={{ fontSize: '1.1rem', fontWeight: 700, color: 'hsl(var(--foreground))' }}>Clientes Ativos</h3>
             <p style={{ fontSize: '0.85rem', color: 'hsl(var(--muted-foreground))' }}>Profissionais e Clínicas na plataforma</p>
           </div>
-          <span style={{
-            background: 'hsl(var(--primary)/0.1)',
-            color: 'hsl(var(--primary))',
-            fontSize: '0.8rem', fontWeight: 700,
-            padding: '0.4rem 0.9rem', borderRadius: '99px',
-            border: '1px solid hsl(var(--primary)/0.2)'
-          }}>
-            {isLoading ? 'Carregando...' : `${tenants.length} registros ativos`}
-          </span>
+          <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
+            <div style={{ position: 'relative' }}>
+              <span style={{ position: 'absolute', left: '0.75rem', top: '50%', transform: 'translateY(-50%)', opacity: 0.4 }}>🔍</span>
+              <input 
+                type="text" 
+                placeholder="Buscar cliente ou clínica..." 
+                className="form-input"
+                style={{ 
+                  paddingLeft: '2.2rem', 
+                  fontSize: '0.85rem', 
+                  width: '260px',
+                  height: '38px',
+                  background: 'hsl(var(--secondary)/0.5)'
+                }}
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+              />
+            </div>
+            <span style={{
+              background: 'hsl(var(--primary)/0.1)',
+              color: 'hsl(var(--primary))',
+              fontSize: '0.8rem', fontWeight: 700,
+              padding: '0.4rem 0.9rem', borderRadius: '99px',
+              border: '1px solid hsl(var(--primary)/0.2)'
+            }}>
+              {isLoading ? 'Carregando...' : `${tenants.length} registros totais`}
+            </span>
+          </div>
         </div>
 
         {isLoading ? (
@@ -438,13 +489,13 @@ export default function AdminDashboard() {
             <table style={{ width: '100%', borderCollapse: 'separate', borderSpacing: '0 0.5rem' }}>
               <thead>
                 <tr>
-                  {['CLÍNICA', 'RESPONSÁVEL', 'PLANO / STATUS', 'PACIENTES', 'AÇÕES'].map(h => (
-                    <th key={h} style={{ padding: h === 'AÇÕES' ? '0 1rem 0.75rem' : '0 1rem 0.75rem', textAlign: (h === 'PLANO / STATUS' || h === 'AÇÕES') ? 'center' : 'left', fontSize: '0.75rem', fontWeight: 700, letterSpacing: '0.1em', color: 'hsl(var(--muted-foreground))', textTransform: 'uppercase' }}>{h}</th>
+                  {['CLÍNICA', 'RESPONSÁVEL', 'PLANO / STATUS', 'PACIENTES', 'CONTATO', 'AÇÕES'].map(h => (
+                    <th key={h} style={{ padding: '0 1rem 0.75rem', textAlign: (h === 'PLANO / STATUS' || h === 'AÇÕES' || h === 'CONTATO') ? 'center' : 'left', fontSize: '0.75rem', fontWeight: 700, letterSpacing: '0.1em', color: 'hsl(var(--muted-foreground))', textTransform: 'uppercase' }}>{h}</th>
                   ))}
                 </tr>
               </thead>
               <tbody>
-                {tenants.map((t) => (
+                {filteredTenants.map((t) => (
                   <tr key={t.id} className="table-row">
                     <td style={{ padding: '0.85rem 1rem', borderRadius: '12px 0 0 12px', border: '1px solid hsl(var(--border))', borderRight: 'none' }}>
                       <div style={{ display: 'flex', alignItems: 'center', gap: '0.85rem' }}>
@@ -467,12 +518,19 @@ export default function AdminDashboard() {
                     </td>
                     <td style={{ padding: '0.85rem 1rem', border: '1px solid hsl(var(--border))', borderLeft: 'none', borderRight: 'none', textAlign: 'center' }}>
                       <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.25rem' }}>
-                        <span style={{ 
-                          fontSize: '0.75rem', fontWeight: 700, px: '0.5rem', borderRadius: '4px',
-                          color: t.plan === 'Pro' ? '#F59E0B' : t.plan === 'Plus' ? '#3B82F6' : t.plan === 'Trial' ? '#8B5CF6' : 'inherit'
-                        }}>
-                          {t.plan.toUpperCase()}
-                        </span>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                          <span style={{ 
+                            fontSize: '0.75rem', fontWeight: 700,
+                            color: t.plan === 'Pro' ? '#F59E0B' : t.plan === 'Plus' ? '#3B82F6' : t.plan === 'Trial' ? '#8B5CF6' : 'inherit'
+                          }}>
+                            {t.plan.toUpperCase()}
+                          </span>
+                          {t.plan === 'Trial' && t.trialEndsAt && (
+                            <span style={{ fontSize: '0.6rem', opacity: 0.6, fontWeight: 700 }}>
+                              ({Math.ceil((new Date(t.trialEndsAt).getTime() - new Date().getTime()) / (1000 * 3600 * 24))}d)
+                            </span>
+                          )}
+                        </div>
                         <span style={{ 
                           fontSize: '0.65rem', padding: '0.1rem 0.4rem', borderRadius: '99px',
                           background: t.status === 'Ativo' ? 'rgba(16,185,129,0.1)' : 'rgba(239,68,68,0.1)',
@@ -493,14 +551,36 @@ export default function AdminDashboard() {
                         border: '1px solid hsl(var(--primary)/0.15)'
                       }}>{t.pacientes}</span>
                     </td>
+                    <td style={{ padding: '0.85rem 1rem', border: '1px solid hsl(var(--border))', borderLeft: 'none', borderRight: 'none', textAlign: 'center' }}>
+                      {t.telefone ? (
+                        <a 
+                          href={`https://wa.me/55${t.telefone.replace(/\D/g, '')}`} 
+                          target="_blank"
+                          style={{
+                            display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
+                            width: '32px', height: '32px', borderRadius: '8px',
+                            background: '#25D366', color: 'white', textDecoration: 'none',
+                            fontSize: '1.1rem', boxShadow: '0 2px 4px rgba(37, 211, 102, 0.3)',
+                            transition: 'all 0.2s ease'
+                          }}
+                          className="action-btn-hover"
+                        >
+                          <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946.003-6.556 5.338-11.891 11.893-11.891 3.181.001 6.167 1.24 8.413 3.488 2.245 2.248 3.481 5.236 3.48 8.414-.003 6.557-5.338 11.892-11.893 11.892-1.99-.001-3.951-.5-5.688-1.448l-6.305 1.654zm6.597-3.807c1.676.995 3.276 1.591 5.392 1.592 5.448 0 9.886-4.438 9.889-9.886.002-5.462-4.415-9.89-9.881-9.892-5.452 0-9.89 4.44-9.892 9.886-.001 2.125.593 3.456 1.574 5.111l-.973 3.548 3.693-.969zm11.366-7.401c-.157-.263-.58-.419-1.229-.744-.648-.324-3.822-1.887-4.413-2.103-.592-.215-1.023-.324-1.45.324-.426.649-1.646 2.054-2.02 2.486-.372.433-.744.487-1.393.162-.648-.324-2.738-1.008-5.213-3.213-1.926-1.716-3.225-3.839-3.601-4.488-.377-.649-.039-.999.285-1.323.291-.291.648-.756.973-1.134.324-.378.432-.648.648-1.08.216-.432.108-.81-.054-1.135-.162-.324-1.45-3.513-1.986-4.811-.531-1.269-.991-1.095-1.359-1.114-.351-.017-.756-.021-1.161-.021-.406 0-1.067.152-1.621.756-.554.604-2.108 2.054-2.108 5.001 0 2.946 2.108 5.784 2.405 6.189.297.405 4.149 6.336 10.05 8.887 1.403.607 2.498.969 3.35 1.24.408.13.778.112 1.071.068.328-.049 1.01-.413 1.153-.811.144-.399.144-.741.101-.811-.043-.07-.157-.113-.314-.263z"/>
+                          </svg>
+                        </a>
+                      ) : (
+                        <span style={{ fontSize: '0.75rem', opacity: 0.3 }}>N/A</span>
+                      )}
+                    </td>
                     <td style={{ padding: '0.85rem 1rem', borderRadius: '0 12px 12px 0', border: '1px solid hsl(var(--border))', borderLeft: 'none', textAlign: 'center' }}>
                       <div style={{ display: 'flex', gap: '0.4rem', justifyContent: 'center' }}>
                         <button
                           onClick={() => handleEditSubscription(t)}
                           style={{
-                            background: 'none', border: 'none', cursor: 'pointer',
-                            fontSize: '1.2rem', padding: '0.4rem', borderRadius: '8px',
-                            transition: 'all 0.2s ease', color: 'hsl(var(--primary))'
+                             background: 'none', border: 'none', cursor: 'pointer',
+                             fontSize: '1.2rem', padding: '0.4rem', borderRadius: '8px',
+                             transition: 'all 0.2s ease', color: 'hsl(var(--primary))'
                           }}
                           title="Alterar Plano/Status"
                           className="action-btn-hover"
@@ -510,12 +590,12 @@ export default function AdminDashboard() {
                         <button
                           onClick={() => handleDeleteUser(t.id, t.name)}
                           style={{
-                            background: 'none', border: 'none', cursor: 'pointer',
-                            fontSize: '1.2rem', padding: '0.4rem', borderRadius: '8px',
-                            transition: 'all 0.2s ease', color: 'hsl(var(--destructive))',
-                            opacity: t.email === 'lucianoxote@hotmail.com' ? 0.2 : 1,
+                             background: 'none', border: 'none', cursor: 'pointer',
+                             fontSize: '1.2rem', padding: '0.4rem', borderRadius: '8px',
+                             transition: 'all 0.2s ease', color: 'hsl(var(--destructive))',
+                             opacity: (t.email === 'lucianoxote@hotmail.com' || t.email === 'psi.liviabrito@gmail.com') ? 0.2 : 1,
                           }}
-                          disabled={t.email === 'lucianoxote@hotmail.com'}
+                          disabled={t.email === 'lucianoxote@hotmail.com' || t.email === 'psi.liviabrito@gmail.com'}
                           title="Excluir Definitivamente"
                           className="delete-btn-hover"
                         >
