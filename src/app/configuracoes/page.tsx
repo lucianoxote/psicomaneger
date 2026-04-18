@@ -264,6 +264,7 @@ export default function ConfiguracoesPage() {
           </div>
         </div>
 
+
         {/* Gestão de Acesso - SOMENTE ADMIN */}
         {isAdmin && (
         <div className="card">
@@ -476,6 +477,7 @@ export default function ConfiguracoesPage() {
             </button>
           </form>
         </div>
+
         <div className="card">
           <h3 style={{ fontSize: '1.125rem', fontWeight: '600', marginBottom: '1.5rem' }}>Configurações Tributárias</h3>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
