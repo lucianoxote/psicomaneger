@@ -288,26 +288,58 @@ export default function FinanceiroPage() {
 
         <section>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.25rem' }}>
-            <h2 style={{ fontSize: '1.25rem', fontWeight: '700' }}>Dados NF-e</h2>
+            <h2 style={{ fontSize: '1.25rem', fontWeight: '700' }}>Dados Tributários (Est.)</h2>
             <button className="btn" style={{ border: '1px solid hsl(var(--border))', fontSize: '0.75rem' }} onClick={() => setIsNFModalOpen(true)}>Ver Mais</button>
           </div>
           <div className="card">
-            <p style={{ fontSize: '0.875rem', opacity: 0.6, marginBottom: '1.5rem' }}>Consolidado para faturamento em <b>Lauro de Freitas-BA</b>.</p>
+            <p style={{ fontSize: '0.875rem', opacity: 0.6, marginBottom: '1.5rem' }}>
+              Baseado no perfil <strong>{settings.tipoAtividade === 'CNPJ' ? 'Pessoa Jurídica' : 'Pessoa Física/Autônomo'}</strong> em <strong>{settings.cidadeAtuacao || 'Lauro de Freitas-BA'}</strong>.
+            </p>
+            
             <div style={{ display: 'grid', gap: '1rem' }}>
-              <div style={{ padding: '1rem', background: 'hsl(var(--secondary)/0.5)', borderRadius: 'var(--radius)' }}>
+              <div style={{ padding: '1rem', background: 'hsla(var(--primary), 0.05)', borderRadius: 'var(--radius)', border: '1px solid hsla(var(--primary), 0.1)' }}>
                 <span style={{ fontSize: '0.7rem', fontWeight: '700', opacity: 0.5, textTransform: 'uppercase' }}>Faturamento {FULL_MONTHS[selectedMonth]}</span>
                 <div style={{ fontSize: '1.5rem', fontWeight: '700', marginTop: '0.25rem' }}>R$ {totals.entradas.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</div>
               </div>
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem' }}>
-                <div style={{ padding: '0.75rem', border: '1px solid hsl(var(--border))', borderRadius: '8px' }}>
-                  <span style={{ fontSize: '0.65rem', opacity: 0.6 }}>ISS (Estimado)</span>
-                  <div style={{ fontWeight: '700' }}>R$ {(totals.entradas * 0.05).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</div>
+
+              {settings.tipoAtividade === 'CNPJ' ? (
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem' }}>
+                  <div style={{ padding: '0.75rem', border: '1px solid hsl(var(--border))', borderRadius: '8px' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                      <span style={{ fontSize: '0.65rem', opacity: 0.6 }}>ISS ({settings.issRate || 5}%)</span>
+                      <span title="Imposto municipal sobre serviços" style={{ cursor: 'help', fontSize: '10px' }}>ⓘ</span>
+                    </div>
+                    <div style={{ fontWeight: '700' }}>R$ {(totals.entradas * ((settings.issRate || 5)/100)).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</div>
+                  </div>
+                  <div style={{ padding: '0.75rem', border: '1px solid hsl(var(--border))', borderRadius: '8px', background: 'hls(var(--secondary)/0.3)' }}>
+                    <span style={{ fontSize: '0.65rem', opacity: 0.6 }}>{settings.regimeTributario === 'Anexo V' ? 'Simples (15.5%)' : 'Simples (6%)'}</span>
+                    <div style={{ fontWeight: '700' }}>R$ {(totals.entradas * (settings.regimeTributario === 'Anexo V' ? 0.155 : 0.06)).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</div>
+                  </div>
                 </div>
-                <div style={{ padding: '0.75rem', border: '1px solid hsl(var(--border))', borderRadius: '8px' }}>
-                  <span style={{ fontSize: '0.65rem', opacity: 0.6 }}>Atendimentos</span>
-                  <div style={{ fontWeight: '700' }}>{periodTransacoes.filter(t => t.tipo === 'receita').length}</div>
+              ) : (
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem' }}>
+                  <div style={{ padding: '0.75rem', border: '1px solid hsl(var(--border))', borderRadius: '8px' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                      <span style={{ fontSize: '0.65rem', opacity: 0.6 }}>IR (Carnê-Leão)</span>
+                      <span title="Estimativa de Imposto de Renda Pessoa Física (Tabela Progressiva 2024)" style={{ cursor: 'help', fontSize: '10px' }}>ⓘ</span>
+                    </div>
+                    <div style={{ fontWeight: '700', color: totals.entradas > 2259 ? 'hsl(var(--destructive))' : 'inherit' }}>
+                      R$ {(() => {
+                        const val = totals.entradas;
+                        if (val <= 2259.20) return '0,00';
+                        if (val <= 2826.65) return (val * 0.075 - 169.44).toLocaleString('pt-BR', { minimumFractionDigits: 2 });
+                        if (val <= 3751.05) return (val * 0.15 - 381.44).toLocaleString('pt-BR', { minimumFractionDigits: 2 });
+                        if (val <= 4664.68) return (val * 0.225 - 662.77).toLocaleString('pt-BR', { minimumFractionDigits: 2 });
+                        return (val * 0.275 - 896.00).toLocaleString('pt-BR', { minimumFractionDigits: 2 });
+                      })()}
+                    </div>
+                  </div>
+                  <div style={{ padding: '0.75rem', border: '1px solid hsl(var(--border))', borderRadius: '8px' }}>
+                    <span style={{ fontSize: '0.65rem', opacity: 0.6 }}>ISS (Fixo Anual)</span>
+                    <div style={{ fontWeight: '700', fontSize: '0.8rem' }}>Conforme Município</div>
+                  </div>
                 </div>
-              </div>
+              )}
             </div>
           </div>
         </section>
@@ -389,23 +421,31 @@ export default function FinanceiroPage() {
       {isNFModalOpen && (
         <div className="modal-overlay" onClick={() => setIsNFModalOpen(false)}>
           <div className="modal-content" onClick={e => e.stopPropagation()} style={{ maxWidth: '500px', padding: '2rem' }}>
-            <h2 style={{ fontSize: '1.25rem', fontWeight: '700', marginBottom: '1.5rem' }}>Resumo para Emissão de NF-e</h2>
+            <h2 style={{ fontSize: '1.25rem', fontWeight: '700', marginBottom: '1.5rem' }}>Resumo para Orientação Fiscal</h2>
             <div style={{ display: 'grid', gap: '0.75rem' }}>
               <div className="card" style={{ background: 'hsl(var(--secondary)/0.5)', border: 'none' }}>
-                <span style={{ fontSize: '0.7rem', opacity: 0.6 }}>PROFISSIONAL</span>
-                <div style={{ fontWeight: '600' }}>{settings.nomeClinica || 'Lívia Brito'}</div>
+                <span style={{ fontSize: '0.7rem', opacity: 0.6 }}>PROFISSIONAL / PERFIL</span>
+                <div style={{ fontWeight: '600' }}>{settings.nomeClinica || 'Lívia Brito'} ({settings.tipoAtividade || 'CPF'})</div>
               </div>
               <div className="card" style={{ background: 'hsl(var(--secondary)/0.5)', border: 'none' }}>
                 <span style={{ fontSize: '0.7rem', opacity: 0.6 }}>LOCAL DE PRESTAÇÃO</span>
-                <div style={{ fontWeight: '600' }}>Lauro de Freitas-BA</div>
+                <div style={{ fontWeight: '600' }}>{settings.cidadeAtuacao || 'Lauro de Freitas-BA'}</div>
               </div>
               <div className="card" style={{ background: 'hsl(var(--secondary)/0.5)', border: 'none' }}>
                 <span style={{ fontSize: '0.7rem', opacity: 0.6 }}>PERÍODO</span>
                 <div style={{ fontWeight: '600' }}>{FULL_MONTHS[selectedMonth]} / {selectedYear}</div>
               </div>
-              <div className="card" style={{ background: 'hsl(var(--primary)/0.1)', border: '1px solid hsl(var(--primary)/0.2)' }}>
-                <span style={{ fontSize: '0.7rem', fontWeight: '700', color: 'hsl(var(--primary))' }}>BASE DE CÁLCULO ISS</span>
+              
+              <div className="card" style={{ background: 'hsla(var(--primary), 0.1)', border: '1px solid hsla(var(--primary), 0.2)' }}>
+                <span style={{ fontSize: '0.7rem', fontWeight: '700', color: 'hsl(var(--primary))' }}>
+                  {settings.tipoAtividade === 'CNPJ' ? 'BASE DE CÁLCULO ISS' : 'BASE PARA CARNÊ-LEÃO'}
+                </span>
                 <div style={{ fontSize: '1.5rem', fontWeight: '800', color: 'hsl(var(--primary))' }}>R$ {totals.entradas.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</div>
+                <p style={{ fontSize: '0.75rem', opacity: 0.6, marginTop: '0.5rem' }}>
+                  {settings.tipoAtividade === 'CNPJ' 
+                    ? `Alíquota aplicada de ${settings.issRate || 5}% conforme configuração do município.` 
+                    : `Para controle de Imposto de Renda no CPF. Lembre-se de escriturar as despesas dedutíveis.`}
+                </p>
               </div>
             </div>
             <button className="btn btn-primary" style={{ width: '100%', marginTop: '2rem' }} onClick={() => setIsNFModalOpen(false)}>Fechar</button>

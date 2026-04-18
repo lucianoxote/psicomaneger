@@ -26,6 +26,10 @@ export async function GET() {
       tema: settings?.tema || 'Tema Claro (Premium)',
       idioma: settings?.idioma || 'Português (Brasil)',
       logoUrl: settings?.logoUrl || '',
+      tipoAtividade: settings?.tipoAtividade || 'CPF',
+      issRate: settings?.issRate ?? 5,
+      cidadeAtuacao: settings?.cidadeAtuacao || 'Lauro de Freitas-BA',
+      regimeTributario: settings?.regimeTributario || 'Anexo III'
     };
 
     return NextResponse.json(response);
@@ -58,6 +62,10 @@ export async function POST(request: Request) {
           tema: body.tema,
           idioma: body.idioma,
           logoUrl: body.logoUrl,
+          tipoAtividade: body.tipoAtividade,
+          issRate: body.issRate,
+          cidadeAtuacao: body.cidadeAtuacao,
+          regimeTributario: body.regimeTributario,
           tenantId: tenantId, 
           userId: tenantId, // Adicionado para satisfazer o índice único no banco de dados
           updatedAt: new Date() 

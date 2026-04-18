@@ -476,6 +476,62 @@ export default function ConfiguracoesPage() {
             </button>
           </form>
         </div>
+        <div className="card">
+          <h3 style={{ fontSize: '1.125rem', fontWeight: '600', marginBottom: '1.5rem' }}>Configurações Tributárias</h3>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
+            <div className="form-group">
+              <label className="form-label">Tipo de Atividade</label>
+              <select 
+                className="form-input" 
+                value={localSettings.tipoAtividade || 'CPF'} 
+                onChange={e => setLocalSettings({...localSettings, tipoAtividade: e.target.value})}
+              >
+                <option value="CPF">Pessoa Física / Autônomo (CPF)</option>
+                <option value="CNPJ">Pessoa Jurídica (CNPJ)</option>
+              </select>
+              <p style={{ fontSize: '0.75rem', opacity: 0.6, marginTop: '0.4rem' }}>
+                💡 Psicólogos não podem ser MEI. Escolha CPF se for autônomo ou CNPJ se tiver empresa (ME).
+              </p>
+            </div>
+
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+              <div className="form-group">
+                <label className="form-label">Alíquota ISS (%)</label>
+                <input 
+                  type="number" 
+                  step="0.1"
+                  className="form-input" 
+                  value={localSettings.issRate || 5} 
+                  onChange={e => setLocalSettings({...localSettings, issRate: parseFloat(e.target.value)})} 
+                />
+              </div>
+              <div className="form-group">
+                <label className="form-label">Cidade / Estado</label>
+                <input 
+                  type="text" 
+                  className="form-input" 
+                  value={localSettings.cidadeAtuacao || 'Lauro de Freitas-BA'} 
+                  onChange={e => setLocalSettings({...localSettings, cidadeAtuacao: e.target.value})} 
+                />
+              </div>
+            </div>
+
+            {localSettings.tipoAtividade === 'CNPJ' && (
+              <div className="form-group" style={{ padding: '1rem', background: 'hsla(var(--primary), 0.05)', borderRadius: '8px', border: '1px solid hsla(var(--primary), 0.1)' }}>
+                <label className="form-label">Regime Tributário (Simples Nacional)</label>
+                <select 
+                  className="form-input" 
+                  value={localSettings.regimeTributario || 'Anexo III'} 
+                  onChange={e => setLocalSettings({...localSettings, regimeTributario: e.target.value})}
+                >
+                  <option value="Anexo III">Anexo III (6% - c/ Fator R)</option>
+                  <option value="Anexo V">Anexo V (15,5%)</option>
+                </select>
+              </div>
+            )}
+          </div>
+        </div>
+
 
         <div className="card">
           <h3 style={{ fontSize: '1.125rem', fontWeight: '600', marginBottom: '1.5rem' }}>{t('Preferências do Sistema')}</h3>

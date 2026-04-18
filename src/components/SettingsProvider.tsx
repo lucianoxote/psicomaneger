@@ -8,6 +8,10 @@ type Settings = {
   tema: string;
   idioma: string;
   logoUrl?: string;
+  tipoAtividade?: string;
+  issRate?: number;
+  cidadeAtuacao?: string;
+  regimeTributario?: string;
 };
 
 type SettingsContextType = {
@@ -60,7 +64,11 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
     nomeClinica: 'SynaPSIS',
     crp: '',
     tema: 'Tema Claro (Premium)',
-    idioma: 'Português (Brasil)'
+    idioma: 'Português (Brasil)',
+    tipoAtividade: 'CPF',
+    issRate: 5,
+    cidadeAtuacao: 'Lauro de Freitas-BA',
+    regimeTributario: 'Anexo III'
   });
 
   const fetchSettings = async () => {
