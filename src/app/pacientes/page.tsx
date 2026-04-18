@@ -2,13 +2,28 @@
 import { useState, useEffect } from 'react';
 import PatientModal from '@/components/PatientModal';
 import Link from 'next/link';
+import { useSession } from 'next-auth/react';
 
 export default function PacientesPage() {
   const [pacientes, setPacientes] = useState([]);
   const [loading, setLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
-
   const [targetSearch, setTargetSearch] = useState('');
+  const { data: session } = useSession();
+
+  const PLAN_LIMITS: Record<string, number> = {
+    'Gratuito': Infinity,
+    'Trial': 15,
+    'Plus': 30,
+    'Pro': Infinity
+  };
+
+  const userPlan = (session?.user as any)?.plan || 'Trial';
+  const limit = PLAN_LIMITS[userPlan] || 15;
+  const isLimitReached = session?.user?.email !== 'lucianoxote@hotmail.com' && 
+                        userPlan !== 'Gratuito' && 
+                        userPlan !== 'Pro' && 
+                        (pacientes?.length || 0) >= limit;
 
   useEffect(() => {
     fetchPacientes();
@@ -41,7 +56,11 @@ export default function PacientesPage() {
         body: JSON.stringify(patientData)
       });
       if (res.ok) {
+        setIsModalOpen(false);
         fetchPacientes();
+      } else {
+        const data = await res.json();
+        alert(data.error || 'Erro ao salvar paciente');
       }
     } catch (error) {
       console.error('Erro ao salvar:', error);
@@ -55,13 +74,36 @@ export default function PacientesPage() {
           <h1 style={{ fontSize: '2rem', fontWeight: '700', letterSpacing: '-0.02em' }}>Gestão de Pacientes</h1>
           <p style={{ opacity: 0.6, fontSize: '1rem' }}>Sua base de pacientes com prontuários e documentos integrados.</p>
         </div>
-        <button 
-          className="btn btn-primary" 
-          style={{ padding: '0.75rem 1.5rem', boxShadow: '0 4px 14px 0 hsla(var(--primary), 0.39)' }}
-          onClick={() => setIsModalOpen(true)}
-        >
-          + Novo Paciente
-        </button>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+          <div style={{ 
+            fontSize: '0.85rem', 
+            fontWeight: '600', 
+            padding: '0.4rem 0.8rem', 
+            borderRadius: '8px', 
+            backgroundColor: isLimitReached ? 'hsla(var(--destructive), 0.1)' : 'hsl(var(--secondary))',
+            color: isLimitReached ? 'hsl(var(--destructive))' : 'inherit',
+            border: `1px solid ${isLimitReached ? 'hsla(var(--destructive), 0.2)' : 'hsl(var(--border))'}`,
+            display: 'flex',
+            alignItems: 'center',
+            gap: '0.5rem'
+          }}>
+            <span style={{ opacity: 0.6 }}>{isLimitReached ? '⚠️ Limite:' : '📊 Pacientes:'}</span>
+            <span>{(pacientes || []).length} / {limit === Infinity ? '∞' : limit}</span>
+          </div>
+          <button 
+            className={`btn ${isLimitReached ? 'btn-ghost' : 'btn-primary'}`} 
+            style={{ 
+              padding: '0.75rem 1.5rem', 
+              boxShadow: isLimitReached ? 'none' : '0 4px 14px 0 hsla(var(--primary), 0.39)',
+              opacity: isLimitReached ? 0.5 : 1,
+              cursor: isLimitReached ? 'not-allowed' : 'pointer'
+            }}
+            onClick={() => !isLimitReached && setIsModalOpen(true)}
+            title={isLimitReached ? "Limite do plano atingido" : "Adicionar novo paciente"}
+          >
+            {isLimitReached ? 'Limite Atingido' : '+ Novo Paciente'}
+          </button>
+        </div>
       </header>
 
       <div className="card" style={{ padding: '0', overflow: 'hidden', border: '1px solid hsl(var(--border))' }}>

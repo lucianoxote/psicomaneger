@@ -45,6 +45,27 @@ export async function POST(request: Request) {
     const body = await request.json();
     const client = await clientPromise;
     const db = client.db();
+
+    // Verificação de Limites do Plano
+    const PLAN_LIMITS: Record<string, number> = {
+      'Gratuito': Infinity,
+      'Trial': 15,
+      'Plus': 30,
+      'Pro': Infinity
+    };
+
+    const userPlan = session.user.plan || 'Trial';
+    const limit = PLAN_LIMITS[userPlan] || 15;
+
+    // Admin Luciano sempre tem bypass
+    if (session.user.email !== 'lucianoxote@hotmail.com' && userPlan !== 'Gratuito' && userPlan !== 'Pro') {
+      const currentCount = await db.collection('pacientes').countDocuments({ tenantId: session.user.tenantId });
+      if (currentCount >= limit) {
+        return NextResponse.json({ 
+          error: `Limite de pacientes atingido para o plano ${userPlan}. (Limite: ${limit})` 
+        }, { status: 403 });
+      }
+    }
     
     const result = await db.collection('pacientes').insertOne({
       ...body,
