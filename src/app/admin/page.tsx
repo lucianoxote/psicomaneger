@@ -416,8 +416,10 @@ export default function AdminDashboard() {
               }}>
                 <div style={{ 
                   width: '32px', height: '32px', borderRadius: '8px', 
-                  backgroundColor: act.type === 'signup' ? 'hsla(var(--primary), 0.1)' : 'rgba(16,185,129,0.1)',
-                  display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1rem'
+                  backgroundColor: act.type === 'signup' ? 'rgba(59, 130, 246, 0.15)' : 'rgba(139, 92, 246, 0.15)',
+                  color: act.type === 'signup' ? '#3B82F6' : '#8B5CF6',
+                  display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.1rem',
+                  border: `1px solid ${act.type === 'signup' ? 'rgba(59, 130, 246, 0.2)' : 'rgba(139, 92, 246, 0.2)'}`
                 }}>
                   {act.type === 'signup' ? '👤' : '👥'}
                 </div>
