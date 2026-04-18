@@ -394,9 +394,7 @@ export default function AdminDashboard() {
             </div>
           </div>
         </div>
-
-        </div>
-
+        
         {/* Recent Activity Log */}
         <div className="interactive-card" style={{
           background: 'hsl(var(--card))',
