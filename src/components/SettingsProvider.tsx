@@ -10,6 +10,8 @@ type Settings = {
   logoUrl?: string;
   tipoAtividade?: string;
   issRate?: number;
+  uf?: string;
+  cidade?: string;
   cidadeAtuacao?: string;
   regimeTributario?: string;
 };
@@ -67,6 +69,8 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
     idioma: 'Português (Brasil)',
     tipoAtividade: 'CPF',
     issRate: 5,
+    uf: 'BA',
+    cidade: 'Lauro de Freitas',
     cidadeAtuacao: 'Lauro de Freitas-BA',
     regimeTributario: 'Anexo III'
   });

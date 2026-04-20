@@ -1,7 +1,8 @@
-'use client';
-import { useState, useEffect } from 'react';
-import { useSession } from 'next-auth/react';
-import { useSettings } from '@/components/SettingsProvider';
+const BRAZIL_STATES = [
+  'AC', 'AL', 'AP', 'AM', 'BA', 'CE', 'DF', 'ES', 'GO', 'MA', 
+  'MT', 'MS', 'MG', 'PA', 'PB', 'PR', 'PE', 'PI', 'RJ', 'RN', 
+  'RS', 'RO', 'RR', 'SC', 'SP', 'SE', 'TO'
+];
 
 export default function ConfiguracoesPage() {
   const { settings, setSettings, refreshSettings, t } = useSettings();
@@ -496,24 +497,50 @@ export default function ConfiguracoesPage() {
               </p>
             </div>
 
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+            <div style={{ display: 'grid', gridTemplateColumns: 'minmax(120px, 1fr) 2fr 1fr', gap: '1rem' }}>
               <div className="form-group">
-                <label className="form-label">Alíquota ISS (%)</label>
+                <label className="form-label">Estado (UF)</label>
+                <select 
+                  className="form-input" 
+                  value={localSettings.uf || 'BA'} 
+                  onChange={e => {
+                    const newUf = e.target.value;
+                    setLocalSettings({
+                      ...localSettings, 
+                      uf: newUf,
+                      cidadeAtuacao: `${localSettings.cidade || 'Lauro de Freitas'}-${newUf}`
+                    });
+                  }}
+                >
+                  {BRAZIL_STATES.map(uf => (
+                    <option key={uf} value={uf}>{uf}</option>
+                  ))}
+                </select>
+              </div>
+              <div className="form-group">
+                <label className="form-label">Cidade</label>
+                <input 
+                  type="text" 
+                  className="form-input" 
+                  value={localSettings.cidade || 'Lauro de Freitas'} 
+                  onChange={e => {
+                    const newCidade = e.target.value;
+                    setLocalSettings({
+                      ...localSettings, 
+                      cidade: newCidade,
+                      cidadeAtuacao: `${newCidade}-${localSettings.uf || 'BA'}`
+                    });
+                  }} 
+                />
+              </div>
+              <div className="form-group">
+                <label className="form-label">ISS (%)</label>
                 <input 
                   type="number" 
                   step="0.1"
                   className="form-input" 
                   value={localSettings.issRate || 5} 
                   onChange={e => setLocalSettings({...localSettings, issRate: parseFloat(e.target.value)})} 
-                />
-              </div>
-              <div className="form-group">
-                <label className="form-label">Cidade / Estado</label>
-                <input 
-                  type="text" 
-                  className="form-input" 
-                  value={localSettings.cidadeAtuacao || 'Lauro de Freitas-BA'} 
-                  onChange={e => setLocalSettings({...localSettings, cidadeAtuacao: e.target.value})} 
                 />
               </div>
             </div>

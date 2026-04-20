@@ -293,7 +293,7 @@ export default function FinanceiroPage() {
           </div>
           <div className="card">
             <p style={{ fontSize: '0.875rem', opacity: 0.6, marginBottom: '1.5rem' }}>
-              Baseado no perfil <strong>{settings.tipoAtividade === 'CNPJ' ? 'Pessoa Jurídica' : 'Pessoa Física/Autônomo'}</strong> em <strong>{settings.cidadeAtuacao || 'Lauro de Freitas-BA'}</strong>.
+              Baseado no perfil <strong>{settings.tipoAtividade === 'CNPJ' ? 'Pessoa Jurídica' : 'Pessoa Física/Autônomo'}</strong> em <strong>{settings.cidade ? `${settings.cidade}-${settings.uf || 'BA'}` : (settings.cidadeAtuacao || 'Lauro de Freitas-BA')}</strong>.
             </p>
             
             <div style={{ display: 'grid', gap: '1rem' }}>
@@ -407,7 +407,7 @@ export default function FinanceiroPage() {
               <div style={{ marginTop: '5rem', borderTop: '1px solid #000', paddingTop: '1rem', display: 'inline-block', minWidth: '300px' }}>
                 <div style={{ fontWeight: '700', fontSize: '1.1rem' }}>{settings.nomeClinica || 'Lívia Brito'}</div>
                 {settings.crp && !settings.nomeClinica?.includes('CRP') && <div>CRP: {settings.crp}</div>}
-                <div style={{ opacity: 0.8 }}>Lauro de Freitas-BA</div>
+                <div style={{ opacity: 0.8 }}>{settings.cidade ? `${settings.cidade}-${settings.uf || 'BA'}` : (settings.cidadeAtuacao || 'Lauro de Freitas-BA')}</div>
               </div>
             </div>
             <button className="btn btn-primary no-print" style={{ width: '100%', marginTop: '3rem', backgroundColor: '#000', color: '#fff' }} onClick={() => window.print()}>Imprimir Recibo</button>
@@ -429,7 +429,7 @@ export default function FinanceiroPage() {
               </div>
               <div className="card" style={{ background: 'hsl(var(--secondary)/0.5)', border: 'none' }}>
                 <span style={{ fontSize: '0.7rem', opacity: 0.6 }}>LOCAL DE PRESTAÇÃO</span>
-                <div style={{ fontWeight: '600' }}>{settings.cidadeAtuacao || 'Lauro de Freitas-BA'}</div>
+                <div style={{ fontWeight: '600' }}>{settings.cidade ? `${settings.cidade}-${settings.uf || 'BA'}` : (settings.cidadeAtuacao || 'Lauro de Freitas-BA')}</div>
               </div>
               <div className="card" style={{ background: 'hsl(var(--secondary)/0.5)', border: 'none' }}>
                 <span style={{ fontSize: '0.7rem', opacity: 0.6 }}>PERÍODO</span>

@@ -28,6 +28,8 @@ export async function GET() {
       logoUrl: settings?.logoUrl || '',
       tipoAtividade: settings?.tipoAtividade || 'CPF',
       issRate: settings?.issRate ?? 5,
+      uf: settings?.uf || 'BA',
+      cidade: settings?.cidade || 'Lauro de Freitas',
       cidadeAtuacao: settings?.cidadeAtuacao || 'Lauro de Freitas-BA',
       regimeTributario: settings?.regimeTributario || 'Anexo III'
     };
@@ -64,6 +66,8 @@ export async function POST(request: Request) {
           logoUrl: body.logoUrl,
           tipoAtividade: body.tipoAtividade,
           issRate: body.issRate,
+          uf: body.uf,
+          cidade: body.cidade,
           cidadeAtuacao: body.cidadeAtuacao,
           regimeTributario: body.regimeTributario,
           tenantId: tenantId, 
