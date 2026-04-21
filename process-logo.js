@@ -33,32 +33,30 @@ async function processImage() {
     const h = bgClean.bitmap.height;
     bgClean.crop(0, 0, bgClean.bitmap.width, Math.floor(h * 0.65));
     bgClean.autocrop();
-    // Sharpen slightly for the small version
-    bgClean.convolute([[-1, -1, -1], [-1, 9, -1], [-1, -1, -1]]); 
 
     await bgClean.writeAsync('./public/images/logo-sinapsi.png');
 
-    // Create Dark Mode Version (White Text) 
+    // Create Premium Dark Mode Version (White Text + Original Brain)
+    // We use the EXACT alpha channel from the source to avoid jagged edges
     const whiteLogo = bgClean.clone();
     const midPoint = Math.floor(whiteLogo.bitmap.height * 0.45);
+    
     whiteLogo.scan(0, 0, whiteLogo.bitmap.width, whiteLogo.bitmap.height, function(x, y, idx) {
-      const r = this.bitmap.data[idx + 0];
-      const g = this.bitmap.data[idx + 1];
-      const b = this.bitmap.data[idx + 2];
       const a = this.bitmap.data[idx + 3];
       const yPos = Math.floor(idx / 4 / whiteLogo.bitmap.width);
-      if (a > 50 && yPos > midPoint) {
-        this.bitmap.data[idx + 0] = 255;
-        this.bitmap.data[idx + 1] = 255;
-        this.bitmap.data[idx + 2] = 255;
-      }
-      if (a > 50 && yPos <= midPoint && r < 130 && g < 130 && b < 130) {
-        this.bitmap.data[idx + 0] = 255;
-        this.bitmap.data[idx + 1] = 255;
-        this.bitmap.data[idx + 2] = 255;
+
+      if (a > 0) {
+        if (yPos > midPoint) {
+          // It's text: make it pure white but keep the original anti-aliased ALPHA
+          this.bitmap.data[idx + 0] = 255;
+          this.bitmap.data[idx + 1] = 255;
+          this.bitmap.data[idx + 2] = 255;
+        } else {
+          // It's the brain: keep original colors/alpha, maybe just a touch more contrast
+        }
       }
     });
-    whiteLogo.color([{ apply: 'brighten', params: [10] }]);
+
     await whiteLogo.writeAsync('./public/images/logo-sinapsi-white.png');
 
     // --- PART 3: High-Res Brain Icon (Favicon) ---
