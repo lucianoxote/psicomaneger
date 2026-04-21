@@ -48,8 +48,8 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
             <span className="mobile-header-title" style={{ fontWeight: '700' }}>
               {isLuciano ? (
                 <>
-                  <span style={{ color: '#00a2a5' }}>Luciano</span>{' '}
-                  <span style={{ color: '#8a3ab9' }}>Peixoto</span>
+                  <span style={{ color: '#8a3ab9' }}>Luciano Peixoto</span>{' '}
+                  <span style={{ color: '#10b981' }}>| ADM</span>
                 </>
               ) : (
                 settings.nomeClinica || 'Sinapsi Gestor'

@@ -103,9 +103,12 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
           <div className="clinic-name-text" style={{ fontSize: '0.85rem', opacity: 1, marginTop: '1rem', letterSpacing: '0.05em', fontWeight: '700', textAlign: 'left' }}>
             {isLuciano ? (
               <>
-                <span style={{ color: '#00a2a5' }}>Luciano</span>{' '}
-                <span style={{ color: '#8a3ab9' }}>Peixoto</span>
-                {settings.crp ? <span style={{ color: 'hsl(var(--muted-foreground))', fontWeight: '500' }}> | {settings.crp}</span> : <span style={{ color: 'hsl(var(--muted-foreground))', fontWeight: '500' }}> | ADM</span>}
+                <span style={{ color: '#8a3ab9' }}>Luciano Peixoto</span>
+                {settings.crp ? (
+                  <span style={{ color: 'hsl(var(--muted-foreground))', fontWeight: '500' }}> | {settings.crp}</span>
+                ) : (
+                  <span style={{ color: '#10b981', fontWeight: '700' }}> | ADM</span>
+                )}
               </>
             ) : (
               <>
