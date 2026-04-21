@@ -20,8 +20,8 @@ export const metadata: Metadata = {
   title: "Sinapsi Gestor - Gestão Clínica",
   description: "Sistema premium de gestão para psicólogos clínicos",
   icons: {
-    icon: '/brand_icon_sinapsi_v3.png',
-    apple: '/brand_icon_sinapsi_v3.png',
+    icon: '/synapsi_brain_v6.png',
+    apple: '/synapsi_brain_v6.png',
   },
 };
 
