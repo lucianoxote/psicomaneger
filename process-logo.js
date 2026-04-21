@@ -6,26 +6,25 @@ async function processImage() {
     const sourceFull = 'C:/Users/Luciano Peixoto/.gemini/antigravity/brain/d8b49a20-ae89-45be-a3c4-41991d9aca60/media__1776794249922.png';
     let bgFull = await Jimp.read(sourceFull);
     
-    // Smooth cleaning using Alpha Mapping (preserves anti-aliased edges)
+    // DEEP CLEAN: Aggressive background extraction + Noise filtering
     bgFull.scan(0, 0, bgFull.bitmap.width, bgFull.bitmap.height, function(x, y, idx) {
       const r = this.bitmap.data[idx + 0];
       const g = this.bitmap.data[idx + 1];
       const b = this.bitmap.data[idx + 2];
-      const brightness = (r + g + b) / 3;
+      const avg = (r + g + b) / 3;
 
-      if (brightness > 240) {
-        // Map brightness to transparency (white = 0, light grey = semi-transparent)
-        const alpha = Math.min(255, Math.floor((255 - brightness) * (255 / (255 - 240))));
-        this.bitmap.data[idx + 3] = alpha;
+      // Aggressive cut for anything near white to kill artifacts/dots
+      if (avg > 235) {
+        this.bitmap.data[idx + 3] = 0; 
       } else {
+        // Boost contrast of non-transparent areas
         this.bitmap.data[idx + 3] = 255;
       }
     });
 
     bgFull.autocrop();
-    // Use high-quality resizing for internal components (let browser handle final scale)
-    bgFull.resize(800, Jimp.AUTO); 
-    bgFull.color([{ apply: 'saturate', params: [30] }]);
+    bgFull.resize(1000, Jimp.AUTO); // Large size for browser-side high-quality downscaling
+    bgFull.color([{ apply: 'saturate', params: [35] }]);
     await bgFull.writeAsync('./public/images/logo-sinapsi-full.png');
 
     // --- PART 2: Clean Logo (For Sidebar/Watermark) ---
@@ -33,11 +32,9 @@ async function processImage() {
     const h = bgClean.bitmap.height;
     bgClean.crop(0, 0, bgClean.bitmap.width, Math.floor(h * 0.65));
     bgClean.autocrop();
-
     await bgClean.writeAsync('./public/images/logo-sinapsi.png');
 
-    // Create Premium Dark Mode Version (White Text + Original Brain)
-    // We use the EXACT alpha channel from the source to avoid jagged edges
+    // Create Premium Dark Mode Version (White Text + Clean Brain)
     const whiteLogo = bgClean.clone();
     const midPoint = Math.floor(whiteLogo.bitmap.height * 0.45);
     
@@ -47,12 +44,16 @@ async function processImage() {
 
       if (a > 0) {
         if (yPos > midPoint) {
-          // It's text: make it pure white but keep the original anti-aliased ALPHA
+          // Force pure solid white for text to stop any "fuzziness"
           this.bitmap.data[idx + 0] = 255;
           this.bitmap.data[idx + 1] = 255;
           this.bitmap.data[idx + 2] = 255;
+          this.bitmap.data[idx + 3] = 255;
         } else {
-          // It's the brain: keep original colors/alpha, maybe just a touch more contrast
+          // Brand Colors: Brighten slightly for dark theme visibility
+          this.bitmap.data[idx + 0] = Math.min(255, this.bitmap.data[idx + 0] + 10);
+          this.bitmap.data[idx + 1] = Math.min(255, this.bitmap.data[idx + 1] + 10);
+          this.bitmap.data[idx + 2] = Math.min(255, this.bitmap.data[idx + 2] + 10);
         }
       }
     });
