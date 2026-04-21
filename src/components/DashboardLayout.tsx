@@ -3,16 +3,28 @@ import { useState } from 'react';
 import Sidebar from './Sidebar';
 import { useSettings } from './SettingsProvider';
 import { usePathname } from 'next/navigation';
+import { useSession } from 'next-auth/react';
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const { settings } = useSettings();
+  const { data: session } = useSession();
   const pathname = usePathname();
 
   const isAuthPage = pathname?.startsWith('/login') || pathname === '/reset-password';
+  const isLivia = session?.user?.email === 'psi.liviabrito@gmail.com';
+  const isLuciano = session?.user?.email === 'lucianoxote@hotmail.com';
   
   if (isAuthPage) {
     return <>{children}</>;
+  }
+
+  // Determine the mobile icon
+  let mobileIcon = "/favicon-sinapsi.png"; // Default to new SinapsiGestão brain
+  if (isLivia && !settings.logoUrl) {
+    mobileIcon = "/images/livia_brain_icon.png";
+  } else if (settings.logoUrl && !isLuciano) {
+    mobileIcon = settings.logoUrl;
   }
 
   return (
@@ -29,7 +41,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
           </button>
           <div className="mobile-header-brand" style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
             <img 
-              src="/images/livia_brain_icon.png" 
+              src={mobileIcon} 
               alt="Logo" 
               style={{ width: '32px', height: '32px', objectFit: 'contain' }} 
             />
