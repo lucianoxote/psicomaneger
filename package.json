@@ -12,6 +12,7 @@
     "@auth/mongodb-adapter": "^3.11.1",
     "@vercel/blob": "^2.3.3",
     "bcryptjs": "^3.0.3",
+    "jimp": "^1.6.1",
     "mongodb": "^6.12.0",
     "next": "14.2.23",
     "next-auth": "^5.0.0-beta.30",

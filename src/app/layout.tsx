@@ -21,6 +21,7 @@ export const metadata: Metadata = {
   description: "Sistema premium de gestão para psicólogos clínicos",
   icons: {
     icon: '/favicon-sinapsi.png',
+    apple: '/favicon-sinapsi.png',
   },
 };
 
