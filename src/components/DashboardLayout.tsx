@@ -20,7 +20,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   }
 
   // Determine the mobile icon
-  let mobileIcon = "/favicon-sinapsi.png"; // Default to new SinapsiGestão brain
+  let mobileIcon = "/favicon-sinapsi.png"; // Default to new SinapsiGestor brain
   if (isLivia && !settings.logoUrl) {
     mobileIcon = "/images/livia_brain_icon.png";
   } else if (settings.logoUrl && !isLuciano) {
@@ -52,7 +52,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                   <span style={{ color: '#8a3ab9' }}>Peixoto</span>
                 </>
               ) : (
-                settings.nomeClinica || 'SinapsiGestão'
+                settings.nomeClinica || 'Sinapsi Gestor'
               )}
             </span>
           </div>

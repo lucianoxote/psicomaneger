@@ -46,7 +46,7 @@ export default function ForgotPasswordPage() {
               <span className="logo-icon">🔒</span>
             </div>
             <div className="brand-text">
-              <span className="brand-name">SinapsiGestão</span>
+              <span className="brand-name">Sinapsi Gestor</span>
             </div>
           </div>
           <h1>Recuperar Senha</h1>

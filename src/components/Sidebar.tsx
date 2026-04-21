@@ -78,7 +78,7 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
             <div style={{ padding: '0.5rem 0', display: 'flex', justifyContent: 'center' }}>
               <img 
                 src="/images/logo-sinapsi.png" 
-                alt="SinapsiGestão Logo" 
+                alt="SinapsiGestor Logo" 
                 className="sidebar-brand-logo light-logo"
                 style={{ 
                   width: '100%', 
@@ -89,7 +89,7 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
               />
               <img 
                 src="/images/logo-sinapsi-white.png" 
-                alt="SinapsiGestão Logo" 
+                alt="SinapsiGestor Logo" 
                 className="sidebar-brand-logo dark-logo"
                 style={{ 
                   width: '100%', 
@@ -163,7 +163,7 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
             <span>🚪</span> {t('Sair')}
           </button>
 
-          {/* Powered By SinapsiGestão Watermark */}
+          {/* Powered By SinapsiGestor Watermark */}
           <div style={{
             marginTop: '1rem',
             paddingTop: '0.8rem',
@@ -181,13 +181,13 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
             <div style={{ display: 'flex', justifyContent: 'center' }}>
                <img 
                  src="/images/logo-sinapsi.png" 
-                 alt="SinapsiGestão" 
+                 alt="SinapsiGestor" 
                  className="light-logo footer-brand-img"
                  style={{ width: '100%', maxWidth: '100px', height: 'auto', objectFit: 'contain' }} 
                />
                <img 
                  src="/images/logo-sinapsi-white.png" 
-                 alt="SinapsiGestão" 
+                 alt="SinapsiGestor" 
                  className="dark-logo footer-brand-img"
                  style={{ width: '100%', maxWidth: '100px', height: 'auto', objectFit: 'contain' }} 
                />

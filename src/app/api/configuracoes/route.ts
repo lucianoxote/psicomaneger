@@ -21,7 +21,7 @@ export async function GET() {
 
     // Merged response: database values or defaults
     const response = {
-      nomeClinica: settings?.nomeClinica || 'SinapsiGestão',
+      nomeClinica: settings?.nomeClinica || 'Sinapsi Gestor',
       crp: settings?.crp || '',
       tema: settings?.tema || 'Tema Claro (Premium)',
       idioma: settings?.idioma || 'Português (Brasil)',

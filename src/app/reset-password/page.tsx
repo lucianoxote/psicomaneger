@@ -77,7 +77,7 @@ function ResetPasswordForm() {
             <span className="logo-icon">✨</span>
           </div>
           <div className="brand-text">
-            <span className="brand-name">SinapsiGestão</span>
+            <span className="brand-name">Sinapsi Gestor</span>
           </div>
         </div>
         <h1>Criar Nova Senha</h1>

@@ -124,7 +124,7 @@ export default function LoginPage() {
             <div className="logo-icon-wrapper" style={{ width: '100%', maxWidth: '300px', height: 'auto', background: 'none', boxShadow: 'none', margin: '0 auto' }}>
               <img 
                 src="/images/logo-sinapsi-full.png" 
-                alt="SinapsiGestão Logo" 
+                alt="Sinapsi Gestor Logo" 
                 style={{ 
                   width: '100%', 
                   height: 'auto', 
