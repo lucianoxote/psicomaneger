@@ -6,10 +6,15 @@ async function processImage() {
     const sourceFull = 'C:/Users/Luciano Peixoto/.gemini/antigravity/brain/d8b49a20-ae89-45be-a3c4-41991d9aca60/media__1776778552639.png';
     const bgFull = await Jimp.read(sourceFull);
     bgFull.scan(0, 0, bgFull.bitmap.width, bgFull.bitmap.height, function(x, y, idx) {
-      if (this.bitmap.data[idx + 0] > 248 && this.bitmap.data[idx + 1] > 248 && this.bitmap.data[idx + 2] > 248) {
+      const r = this.bitmap.data[idx + 0];
+      const g = this.bitmap.data[idx + 1];
+      const b = this.bitmap.data[idx + 2];
+      
+      // More aggressive threshold (240 instead of 248) to kill noise/stains
+      if (r > 240 && g > 240 && b > 240) {
         this.bitmap.data[idx + 3] = 0; 
       } else {
-        this.bitmap.data[idx + 3] = 255;
+        this.bitmap.data[idx + 3] = 255; // Force solid colors
       }
     });
     bgFull.autocrop().color([{ apply: 'saturate', params: [40] }, { apply: 'brighten', params: [5] }]);
@@ -19,7 +24,11 @@ async function processImage() {
     const sourceClean = 'C:/Users/Luciano Peixoto/.gemini/antigravity/brain/d8b49a20-ae89-45be-a3c4-41991d9aca60/media__1776779368168.png';
     const bgClean = await Jimp.read(sourceClean);
     bgClean.scan(0, 0, bgClean.bitmap.width, bgClean.bitmap.height, function(x, y, idx) {
-      if (this.bitmap.data[idx + 0] > 248 && this.bitmap.data[idx + 1] > 248 && this.bitmap.data[idx + 2] > 248) {
+      const r = this.bitmap.data[idx + 0];
+      const g = this.bitmap.data[idx + 1];
+      const b = this.bitmap.data[idx + 2];
+
+      if (r > 242 && g > 242 && b > 242) {
         this.bitmap.data[idx + 3] = 0; 
       } else {
         this.bitmap.data[idx + 3] = 255;
