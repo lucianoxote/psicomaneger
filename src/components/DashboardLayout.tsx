@@ -27,7 +27,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   }
 
   // Determine the mobile icon
-  let mobileIcon = "/favicon-sinapsi.png"; // Default to new SinapsiGestor brain
+  let mobileIcon = "/synapsi_brain_v6.png"; // Default to new SinapsiGestor brain
   if (isLivia && !settings.logoUrl) {
     mobileIcon = "/images/livia_brain_icon.png";
   } else if (settings.logoUrl && !isLuciano) {
@@ -46,13 +46,13 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
           >
             ☰
           </button>
-          <div className="mobile-header-brand" style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+          <div className="mobile-header-brand" style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', flex: 1, minWidth: 0 }}>
             <img 
               src={mobileIcon} 
               alt="Logo" 
-              style={{ width: '32px', height: '32px', objectFit: 'contain' }} 
+              style={{ width: '32px', height: '32px', objectFit: 'contain', flexShrink: 0 }} 
             />
-            <span className="mobile-header-title" style={{ fontWeight: '700' }}>
+            <span className="mobile-header-title" style={{ fontWeight: '700', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
               {isLuciano ? (
                 <>
                   <span style={{ color: '#8a3ab9' }}>Luciano Peixoto</span>{' '}
