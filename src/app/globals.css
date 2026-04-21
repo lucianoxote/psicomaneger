@@ -138,6 +138,19 @@ h3 {
   letter-spacing: -0.02em;
 }
 
+/* Logo Theme Management */
+.dark-logo {
+  display: none !important;
+}
+
+.dark .dark-logo {
+  display: block !important;
+}
+
+.dark .light-logo {
+  display: none !important;
+}
+
 .card {
   background-color: hsl(var(--card));
   border: 1px solid hsl(var(--border));

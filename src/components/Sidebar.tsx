@@ -61,7 +61,7 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
                 }} 
               />
             </>
-          ) : settings.logoUrl ? (
+          ) : settings.logoUrl && !settings.logoUrl.toLowerCase().includes('synapsis') && !isLuciano ? (
             <img 
               src={settings.logoUrl} 
               alt={settings.nomeClinica || "Logo da Clínica"} 
@@ -75,11 +75,32 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
               }} 
             />
           ) : (
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: '70px', height: '70px', margin: '0 auto 0.5rem auto', backgroundColor: 'hsl(var(--primary)/0.1)', borderRadius: '50%', color: 'hsl(var(--primary))', boxShadow: '0 4px 10px rgba(0,0,0,0.05)', border: '2px solid hsl(var(--primary)/0.2)' }}>
-              <span style={{ fontSize: '2rem', fontWeight: 'bold' }}>{settings.nomeClinica ? settings.nomeClinica.charAt(0).toUpperCase() : '🧠'}</span>
+            <div style={{ padding: '0.5rem 0', display: 'flex', justifyContent: 'center' }}>
+              <img 
+                src="/images/logo-sinapsi.png" 
+                alt="SinapsiGestão Logo" 
+                className="sidebar-brand-logo light-logo"
+                style={{ 
+                  width: '100%', 
+                  maxWidth: '185px', 
+                  height: 'auto',
+                  transition: 'all 0.3s ease'
+                }} 
+              />
+              <img 
+                src="/images/logo-sinapsi-white.png" 
+                alt="SinapsiGestão Logo" 
+                className="sidebar-brand-logo dark-logo"
+                style={{ 
+                  width: '100%', 
+                  maxWidth: '185px', 
+                  height: 'auto',
+                  transition: 'all 0.3s ease'
+                }} 
+              />
             </div>
           )}
-          <div className="clinic-name-text" style={{ fontSize: '0.7rem', opacity: 1, marginTop: '0.15rem', letterSpacing: '0.05em', fontWeight: '600', textAlign: 'left' }}>
+          <div className="clinic-name-text" style={{ fontSize: '0.75rem', opacity: 1, marginTop: '1rem', letterSpacing: '0.05em', fontWeight: '600', textAlign: 'left', color: 'hsl(var(--muted-foreground))' }}>
             {settings.nomeClinica || session?.user?.name || 'Profissional'} {settings.crp ? `| ${settings.crp}` : ''}
           </div>
         </div>
@@ -134,28 +155,32 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
 
           {/* Powered By SinapsiGestão Watermark */}
           <div style={{
-            marginTop: '1rem',
+            marginTop: '1.5rem',
             paddingTop: '1rem',
             borderTop: '1px solid hsla(var(--border), 0.3)',
             textAlign: 'center',
-            opacity: 0.5,
-            fontSize: '0.65rem',
-            letterSpacing: '0.02em',
+            opacity: 0.6,
             transition: 'opacity 0.3s ease',
             cursor: 'default',
-            paddingBottom: '0.5rem' // Ensure it doesn't touch the absolute bottom of viewport
+            paddingBottom: '0.8rem'
           }}
           onMouseEnter={(e) => e.currentTarget.style.opacity = '1'}
-          onMouseLeave={(e) => e.currentTarget.style.opacity = '0.5'}
+          onMouseLeave={(e) => e.currentTarget.style.opacity = '0.6'}
           >
-            <span style={{ display: 'block', marginBottom: '0.2rem' }}>Powered by</span>
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.4rem', fontWeight: '700', fontSize: '0.85rem', color: 'hsl(var(--primary))' }}>
+            <span style={{ display: 'block', marginBottom: '0.4rem', fontSize: '0.65rem', letterSpacing: '0.05em', color: 'hsl(var(--muted-foreground))' }}>Powered by</span>
+            <div style={{ display: 'flex', justifyContent: 'center' }}>
                <img 
-                 src="/logo-sinapsi.png" 
-                 alt="Ícone SinapsiGestão" 
-                 style={{ width: '20px', height: 'auto', objectFit: 'contain' }} 
+                 src="/images/logo-sinapsi.png" 
+                 alt="SinapsiGestão" 
+                 className="light-logo"
+                 style={{ width: '100%', maxWidth: '110px', height: 'auto', objectFit: 'contain' }} 
                />
-               SinapsiGestão
+               <img 
+                 src="/images/logo-sinapsi-white.png" 
+                 alt="SinapsiGestão" 
+                 className="dark-logo"
+                 style={{ width: '100%', maxWidth: '110px', height: 'auto', objectFit: 'contain' }} 
+               />
             </div>
           </div>
         </div>

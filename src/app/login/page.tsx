@@ -121,21 +121,19 @@ export default function LoginPage() {
       <div className="login-card glass">
         <div className="login-header">
           <div className="logo-section" style={{ marginBottom: '0.5rem' }}>
-            <div className="logo-icon-wrapper" style={{ width: '300px', height: 'auto', background: 'none', boxShadow: 'none' }}>
+            <div className="logo-icon-wrapper" style={{ width: '100%', maxWidth: '300px', height: 'auto', background: 'none', boxShadow: 'none', margin: '0 auto' }}>
               <img 
-                src="/logo-sinapsi.png" 
+                src="/images/logo-sinapsi-full.png" 
                 alt="SinapsiGestão Logo" 
                 style={{ 
                   width: '100%', 
                   height: 'auto', 
-                  display: 'block'
+                  display: 'block',
+                  filter: 'brightness(1.05)'
                 }} 
               />
             </div>
           </div>
-          <p className="welcome-text" style={{ marginTop: '0.5rem', fontWeight: '500' }}>
-            {isRegistering ? 'Configuração de Primeiro Acesso' : 'Sistema de Gestão para Psicólogos'}
-          </p>
         </div>
 
         <form onSubmit={isRegistering ? handleRegister : handleLogin} className="login-form">
