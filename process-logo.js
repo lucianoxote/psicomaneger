@@ -3,20 +3,19 @@ const Jimp = require('jimp');
 async function processImage() {
   try {
     // --- PART 1: Full Logo with Slogans (For Login Page) ---
-    const sourceFull = 'C:/Users/Luciano Peixoto/.gemini/antigravity/brain/d8b49a20-ae89-45be-a3c4-41991d9aca60/media__1776792887743.png';
+    const sourceFull = 'C:/Users/Luciano Peixoto/.gemini/antigravity/brain/d8b49a20-ae89-45be-a3c4-41991d9aca60/media__1776794258957.png';
     let bgFull = await Jimp.read(sourceFull);
     
-    // REMASTERING: Upscale then smooth then threshold for crisp edges
-    bgFull.resize(bgFull.bitmap.width * 2, Jimp.AUTO); 
+    // Smooth cleaning for High-Quality original (no upscaling needed, just pure preservation)
     bgFull.scan(0, 0, bgFull.bitmap.width, bgFull.bitmap.height, function(x, y, idx) {
       const r = this.bitmap.data[idx + 0];
       const g = this.bitmap.data[idx + 1];
       const b = this.bitmap.data[idx + 2];
-      // Clean background artifacts (JPEG/Screenshot noise)
-      if (r > 230 && g > 230 && b > 230) {
+      // Superior removal for pure white background
+      if (r > 248 && g > 248 && b > 248) {
         this.bitmap.data[idx + 3] = 0; 
       } else {
-        this.bitmap.data[idx + 3] = 255; // Force opacity
+        this.bitmap.data[idx + 3] = 255; 
       }
     });
     
