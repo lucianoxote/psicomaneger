@@ -1,5 +1,5 @@
 'use client';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Sidebar from './Sidebar';
 import { useSettings } from './SettingsProvider';
 import { usePathname } from 'next/navigation';
@@ -9,11 +9,16 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const { settings } = useSettings();
   const { data: session } = useSession();
-  const pathname = usePathname();
+  const [latchedIsLuciano, setLatchedIsLuciano] = useState(false);
+  
+  useEffect(() => {
+    if (session?.user?.email?.toLowerCase() === 'lucianoxote@hotmail.com') {
+      setLatchedIsLuciano(true);
+    }
+  }, [session]);
 
-  const isAuthPage = pathname?.startsWith('/login') || pathname === '/reset-password';
   const isLivia = session?.user?.email?.toLowerCase() === 'psi.liviabrito@gmail.com';
-  const isLuciano = session?.user?.email?.toLowerCase() === 'lucianoxote@hotmail.com';
+  const isLuciano = session?.user?.email?.toLowerCase() === 'lucianoxote@hotmail.com' || latchedIsLuciano;
   
   if (isAuthPage) {
     return <>{children}</>;

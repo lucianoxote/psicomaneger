@@ -1,4 +1,5 @@
 'use client';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useSettings } from './SettingsProvider';
@@ -13,9 +14,16 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
   const pathname = usePathname();
   const { t, settings } = useSettings();
   const { data: session } = useSession();
+  const [latchedIsLuciano, setLatchedIsLuciano] = useState(false);
+
+  useEffect(() => {
+    if (session?.user?.email?.toLowerCase() === 'lucianoxote@hotmail.com') {
+      setLatchedIsLuciano(true);
+    }
+  }, [session]);
   
-  const isLivia = session?.user?.email === 'psi.liviabrito@gmail.com';
-  const isLuciano = session?.user?.email?.toLowerCase() === 'lucianoxote@hotmail.com';
+  const isLivia = session?.user?.email?.toLowerCase() === 'psi.liviabrito@gmail.com';
+  const isLuciano = session?.user?.email?.toLowerCase() === 'lucianoxote@hotmail.com' || latchedIsLuciano;
 
   const handleSignOut = () => {
     signOut({ callbackUrl: '/login' });
@@ -143,7 +151,7 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
             <span>⚙️</span> {t('Configurações')}
           </Link>
 
-          {session?.user?.email === 'lucianoxote@hotmail.com' && (
+          {session?.user?.email?.toLowerCase() === 'lucianoxote@hotmail.com' && (
             <Link
               href="/admin"
               className={`nav-link ${pathname === '/admin' ? 'active' : ''}`}
