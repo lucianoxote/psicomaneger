@@ -47,20 +47,20 @@ export async function POST(request: Request) {
     }
 
     await mailClient.emails.send({
-      from: 'SynaPSIS <onboarding@resend.dev>',
+      from: 'SinapsiGestão <onboarding@resend.dev>',
       to: email,
-      subject: 'Recuperação de Senha - SynaPSIS',
+      subject: 'Recuperação de Senha - SinapsiGestão',
       html: `
         <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #e2e8f0; border-radius: 12px;">
           <h2 style="color: #2563eb; margin-bottom: 24px;">Recuperação de Senha</h2>
-          <p>Você solicitou a redefinição de sua senha no <strong>SynaPSIS</strong>.</p>
+          <p>Você solicitou a redefinição de sua senha no <strong>SinapsiGestão</strong>.</p>
           <p>Clique no botão abaixo para criar uma nova senha. Este link expira em 1 hora.</p>
           <div style="margin: 32px 0;">
             <a href="${resetUrl}" style="background-color: #2563eb; color: white; padding: 12px 24px; border-radius: 8px; text-decoration: none; font-weight: 600;">Redefinir Minha Senha</a>
           </div>
           <p style="color: #64748b; font-size: 14px;">Se você não solicitou isso, ignore este e-mail.</p>
           <hr style="margin: 32px 0; border: 0; border-top: 1px solid #e2e8f0;" />
-          <p style="color: #94a3b8; font-size: 12px; text-align: center;">SynaPSIS - Gestão Clínica de Excelência</p>
+          <p style="color: #94a3b8; font-size: 12px; text-align: center;">SinapsiGestão - Gestão Clínica de Excelência</p>
         </div>
       `,
     });

@@ -17,7 +17,7 @@ const geistMono = localFont({
 });
 
 export const metadata: Metadata = {
-  title: "SynaPSIS - Gestão Clínica",
+  title: "SinapsiGestão - Gestão Clínica",
   description: "Sistema premium de gestão para psicólogos clínicos",
   icons: {
     icon: '/favicon.ico',

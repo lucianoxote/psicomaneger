@@ -132,7 +132,7 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
             <span>🚪</span> {t('Sair')}
           </button>
 
-          {/* Powered By SynaPSIS Watermark */}
+          {/* Powered By SinapsiGestão Watermark */}
           <div style={{
             marginTop: '1rem',
             paddingTop: '1rem',
@@ -149,13 +149,13 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
           onMouseLeave={(e) => e.currentTarget.style.opacity = '0.5'}
           >
             <span style={{ display: 'block', marginBottom: '0.2rem' }}>Powered by</span>
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.4rem', fontWeight: '700', fontSize: '0.9rem', color: 'hsl(var(--primary))' }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.4rem', fontWeight: '700', fontSize: '0.85rem', color: 'hsl(var(--primary))' }}>
                <img 
-                 src="/images/synapsis-icone.png" 
-                 alt="Ícone SynaPSIS" 
-                 style={{ width: '16px', height: '16px', objectFit: 'contain' }} 
+                 src="/logo-sinapsi.png" 
+                 alt="Ícone SinapsiGestão" 
+                 style={{ width: '20px', height: 'auto', objectFit: 'contain' }} 
                />
-               SynaPSIS
+               SinapsiGestão
             </div>
           </div>
         </div>

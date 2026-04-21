@@ -120,32 +120,22 @@ export default function LoginPage() {
     <div className="login-container" style={{ backgroundColor: 'hsl(28, 30%, 93%)' }}>
       <div className="login-card glass">
         <div className="login-header">
-          <div className="logo-section" style={{ marginBottom: '1.5rem' }}>
-            <div className="logo-icon-wrapper" style={{ width: '280px', height: 'auto', background: 'none', boxShadow: 'none' }}>
+          <div className="logo-section" style={{ marginBottom: '0.5rem' }}>
+            <div className="logo-icon-wrapper" style={{ width: '300px', height: 'auto', background: 'none', boxShadow: 'none' }}>
               <img 
-                src="/images/logo_livia_transparent.png" 
-                alt="Lívia Brito Psicóloga" 
-                className="light-logo"
+                src="/logo-sinapsi.png" 
+                alt="SinapsiGestão Logo" 
                 style={{ 
                   width: '100%', 
                   height: 'auto', 
                   display: 'block'
                 }} 
               />
-              <img 
-                src="/images/logo_livia_white_text.png" 
-                alt="Lívia Brito Psicóloga" 
-                className="dark-logo"
-                style={{ 
-                  width: '100%', 
-                  height: 'auto',
-                  mixBlendMode: 'screen',
-                  clipPath: 'inset(2px)'
-                }} 
-              />
             </div>
           </div>
-          <p className="welcome-text" style={{ marginTop: '1rem' }}>{isRegistering ? 'Configuração de Primeiro Acesso' : 'Gestão Clínica de Excelência'}</p>
+          <p className="welcome-text" style={{ marginTop: '0.5rem', fontWeight: '500' }}>
+            {isRegistering ? 'Configuração de Primeiro Acesso' : 'Sistema de Gestão para Psicólogos'}
+          </p>
         </div>
 
         <form onSubmit={isRegistering ? handleRegister : handleLogin} className="login-form">

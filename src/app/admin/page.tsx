@@ -218,7 +218,7 @@ export default function AdminDashboard() {
             Painel de Comando SaaS
           </h1>
           <p style={{ color: 'hsl(var(--muted-foreground))', marginTop: '0.25rem' }}>
-            Visão global em tempo real da plataforma SynaPSIS
+            Visão global em tempo real da plataforma SinapsiGestão
           </p>
         </div>
         <button
