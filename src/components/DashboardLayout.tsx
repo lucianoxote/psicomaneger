@@ -45,7 +45,16 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
               alt="Logo" 
               style={{ width: '32px', height: '32px', objectFit: 'contain' }} 
             />
-            <span className="mobile-header-title">{settings.nomeClinica || 'SinapsiGestão'}</span>
+            <span className="mobile-header-title" style={{ fontWeight: '700' }}>
+              {isLuciano ? (
+                <>
+                  <span style={{ color: '#00a2a5' }}>Luciano</span>{' '}
+                  <span style={{ color: '#8a3ab9' }}>Peixoto</span>
+                </>
+              ) : (
+                settings.nomeClinica || 'SinapsiGestão'
+              )}
+            </span>
           </div>
         </div>
       </div>
