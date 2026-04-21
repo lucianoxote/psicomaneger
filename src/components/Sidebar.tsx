@@ -15,7 +15,7 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
   const { data: session } = useSession();
   
   const isLivia = session?.user?.email === 'psi.liviabrito@gmail.com';
-  const isLuciano = session?.user?.email === 'lucianoxote@hotmail.com';
+  const isLuciano = session?.user?.email?.toLowerCase() === 'lucianoxote@hotmail.com';
 
   const handleSignOut = () => {
     signOut({ callbackUrl: '/login' });

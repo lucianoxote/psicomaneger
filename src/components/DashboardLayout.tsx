@@ -12,8 +12,8 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   const pathname = usePathname();
 
   const isAuthPage = pathname?.startsWith('/login') || pathname === '/reset-password';
-  const isLivia = session?.user?.email === 'psi.liviabrito@gmail.com';
-  const isLuciano = session?.user?.email === 'lucianoxote@hotmail.com';
+  const isLivia = session?.user?.email?.toLowerCase() === 'psi.liviabrito@gmail.com';
+  const isLuciano = session?.user?.email?.toLowerCase() === 'lucianoxote@hotmail.com';
   
   if (isAuthPage) {
     return <>{children}</>;
