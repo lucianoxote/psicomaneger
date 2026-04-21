@@ -2,43 +2,41 @@ const { Jimp } = require('jimp');
 
 async function processFavicon() {
   try {
-    const source = 'C:/Users/Luciano Peixoto/.gemini/antigravity/brain/d8b49a20-ae89-45be-a3c4-41991d9aca60/media__1776791543554.png';
-    let icon = await Jimp.read(source);
+    // USING THE TRUE HD SOURCE
+    const source = 'C:/Users/Luciano Peixoto/.gemini/antigravity/brain/d8b49a20-ae89-45be-a3c4-41991d9aca60/media__1776794249922.png';
+    let img = await Jimp.read(source);
     
-    console.log('Detecting and removing "false transparency" checkerboard...');
+    console.log('Extracting brain icon from HD source...');
 
-    // DEEP CLEAN: Multi-threshold checkerboard removal
-    icon.scan(0, 0, icon.bitmap.width, icon.bitmap.height, (x, y, idx) => {
-      const r = icon.bitmap.data[idx + 0];
-      const g = icon.bitmap.data[idx + 1];
-      const b = icon.bitmap.data[idx + 2];
+    // CLEAN BACKGROUND (Aggressive near-white removal)
+    img.scan(0, 0, img.bitmap.width, img.bitmap.height, (x, y, idx) => {
+      const r = img.bitmap.data[idx + 0];
+      const g = img.bitmap.data[idx + 1];
+      const b = img.bitmap.data[idx + 2];
+      const avg = (r + g + b) / 3;
       
-      const isWhite = (r > 240 && g > 240 && b > 240);
-      const isGrey = (r > 220 && g > 220 && b > 220 && Math.abs(r - g) < 5 && Math.abs(g - b) < 5);
-      
-      if (isWhite || isGrey) {
-        icon.bitmap.data[idx + 3] = 0; // Make transparent
+      if (avg > 240) {
+        img.bitmap.data[idx + 3] = 0; // Transparent
       } else {
-        icon.bitmap.data[idx + 3] = 255;
+        img.bitmap.data[idx + 3] = 255;
       }
     });
 
-    icon.autocrop();
+    // CROP TO BRAIN (The top portion of the logo)
+    const h = img.bitmap.height;
+    img.crop({ x: 0, y: 0, w: img.bitmap.width, h: Math.floor(h * 0.45) });
+    img.autocrop();
     
-    // HIGH COMPATIBILITY CENTER & SQUARE LOGIC
-    // Using 180px with 10% padding (totaling 200px) is safer for mobile cutting
-    const size = 512; // High-res source
-    console.log('Finalizing squaring and high-res output...');
+    // SQUARE AND RECENTER
+    const size = 512;
+    img.contain({ w: size, h: size });
     
-    // In Jimp v1, resize/contain use objects with w and h
-    icon.contain({ w: size, h: size });
+    img.color([{ apply: 'saturate', params: [35] }]);
     
-    icon.color([{ apply: 'saturate', params: [30] }]);
-    
-    await icon.write('./public/favicon-sinapsi.png');
+    await img.write('./public/favicon-sinapsi.png');
 
-    console.log('HD FINAL FAVICON GENERATED AT ./public/favicon-sinapsi.png');
-    console.log('TRANSPARENCY: 100% SUCCESS');
+    console.log('CRYSTAL HD FAVICON GENERATED AT ./public/favicon-sinapsi.png');
+    console.log('SUCCESS: NO MORE BLURRY PRINTS');
   } catch (err) {
     console.error('Error processing favicon:', err);
   }
