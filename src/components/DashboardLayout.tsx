@@ -10,6 +10,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   const { settings } = useSettings();
   const { data: session } = useSession();
   const [latchedIsLuciano, setLatchedIsLuciano] = useState(false);
+  const pathname = usePathname();
   
   useEffect(() => {
     if (session?.user?.email?.toLowerCase() === 'lucianoxote@hotmail.com') {
@@ -17,6 +18,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     }
   }, [session]);
 
+  const isAuthPage = pathname?.startsWith('/login') || pathname === '/reset-password';
   const isLivia = session?.user?.email?.toLowerCase() === 'psi.liviabrito@gmail.com';
   const isLuciano = session?.user?.email?.toLowerCase() === 'lucianoxote@hotmail.com' || latchedIsLuciano;
   
