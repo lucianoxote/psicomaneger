@@ -3,7 +3,7 @@ const Jimp = require('jimp');
 async function processImage() {
   try {
     // --- PART 1: Full Logo with Slogans (For Login Page) ---
-    const sourceFull = 'C:/Users/Luciano Peixoto/.gemini/antigravity/brain/d8b49a20-ae89-45be-a3c4-41991d9aca60/media__1776794258957.png';
+    const sourceFull = 'C:/Users/Luciano Peixoto/.gemini/antigravity/brain/d8b49a20-ae89-45be-a3c4-41991d9aca60/media__1776794249922.png';
     let bgFull = await Jimp.read(sourceFull);
     
     // Smooth cleaning for High-Quality original (no upscaling needed, just pure preservation)
