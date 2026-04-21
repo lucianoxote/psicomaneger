@@ -165,31 +165,31 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
 
           {/* Powered By SinapsiGestão Watermark */}
           <div style={{
-            marginTop: '1.5rem',
-            paddingTop: '1rem',
-            borderTop: '1px solid hsla(var(--border), 0.3)',
+            marginTop: '1rem',
+            paddingTop: '0.8rem',
+            borderTop: '1px solid hsla(var(--border), 0.1)',
             textAlign: 'center',
             opacity: 0.6,
             transition: 'opacity 0.3s ease',
             cursor: 'default',
-            paddingBottom: '0.8rem'
+            paddingBottom: '2.5rem' // Increased significantly for mobile framing
           }}
           onMouseEnter={(e) => e.currentTarget.style.opacity = '1'}
           onMouseLeave={(e) => e.currentTarget.style.opacity = '0.6'}
           >
-            <span style={{ display: 'block', marginBottom: '0.4rem', fontSize: '0.65rem', letterSpacing: '0.05em', color: 'hsl(var(--muted-foreground))' }}>Powered by</span>
+            <span style={{ display: 'block', marginBottom: '0.6rem', fontSize: '0.6rem', letterSpacing: '0.05em', color: 'hsl(var(--muted-foreground))', textTransform: 'uppercase' }}>Powered by</span>
             <div style={{ display: 'flex', justifyContent: 'center' }}>
                <img 
                  src="/images/logo-sinapsi.png" 
                  alt="SinapsiGestão" 
-                 className="light-logo"
-                 style={{ width: '100%', maxWidth: '110px', height: 'auto', objectFit: 'contain' }} 
+                 className="light-logo footer-brand-img"
+                 style={{ width: '100%', maxWidth: '100px', height: 'auto', objectFit: 'contain' }} 
                />
                <img 
                  src="/images/logo-sinapsi-white.png" 
                  alt="SinapsiGestão" 
-                 className="dark-logo"
-                 style={{ width: '100%', maxWidth: '110px', height: 'auto', objectFit: 'contain' }} 
+                 className="dark-logo footer-brand-img"
+                 style={{ width: '100%', maxWidth: '100px', height: 'auto', objectFit: 'contain' }} 
                />
             </div>
           </div>
