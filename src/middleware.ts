@@ -16,8 +16,7 @@ export default async function middleware(req: any) {
   const ip = req.ip ?? "127.0.0.1";
   const { pathname } = req.nextUrl;
 
-  // Proteger apenas rotas sensíveis contra ataques de força bruta (Login e Cadastro)
-  // Aplicamos apenas em requisições POST para não travar a navegação normal
+  // 1. Proteger apenas rotas sensíveis contra ataques de força bruta (Login e Cadastro)
   if ((pathname === "/login" || pathname.startsWith("/api/auth")) && req.method === "POST") {
     try {
       const { success } = await ratelimit.limit(`ratelimit_${ip}`);
@@ -30,6 +29,11 @@ export default async function middleware(req: any) {
     } catch (e) {
       console.error("Erro no Rate Limiting:", e);
     }
+  }
+
+  // 2. Permitir que rotas de autenticação do NextAuth passem sem interferência de redirecionamento
+  if (pathname.startsWith("/api/auth")) {
+    return NextResponse.next();
   }
 
   // Segue para a lógica normal de autenticação do NextAuth
