@@ -28,6 +28,9 @@ export default function AdminDashboard() {
   const [activeTab, setActiveTab] = useState<'metrics' | 'security'>('metrics');
   const [logs, setLogs] = useState<any[]>([]);
   const [loadingLogs, setLoadingLogs] = useState(false);
+  const [backups, setBackups] = useState<any[]>([]);
+  const [loadingBackups, setLoadingBackups] = useState(false);
+  const [isRestoring, setIsRestoring] = useState(false);
 
   useEffect(() => {
     const check = () => setIsDark(document.documentElement.classList.contains('dark'));
@@ -43,8 +46,53 @@ export default function AdminDashboard() {
     if (status === 'authenticated') {
       fetchMetrics();
       fetchLogs();
+      fetchBackups();
     }
   }, [status, session, router]);
+
+  const fetchBackups = async () => {
+    setLoadingBackups(true);
+    try {
+      const response = await fetch('/api/admin/backups', { cache: 'no-store' });
+      if (response.ok) {
+        const data = await response.json();
+        setBackups(data);
+      }
+    } catch (e) {
+      console.error(e);
+    } finally {
+      setLoadingBackups(false);
+    }
+  };
+
+  const handleRestore = async (url: string, date: string) => {
+    const confirm1 = confirm(`🚨 ATENÇÃO: Você está prestes a restaurar o banco de dados para o estado de ${date}. ISSO APAGARÁ TODOS OS DADOS ATUAIS. Deseja continuar?`);
+    if (!confirm1) return;
+
+    const confirm2 = confirm(`⚠️ CONFIRMAÇÃO FINAL: Tem certeza absoluta? Esta ação não pode ser desfeita.`);
+    if (!confirm2) return;
+
+    setIsRestoring(true);
+    try {
+      const res = await fetch('/api/admin/restore', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ backupUrl: url })
+      });
+
+      if (res.ok) {
+        alert('✅ Restauração concluída com sucesso! O sistema foi atualizado.');
+        window.location.reload();
+      } else {
+        const data = await res.json();
+        alert(`❌ Erro na restauração: ${data.error}`);
+      }
+    } catch (e) {
+      alert('❌ Erro de conexão ao tentar restaurar.');
+    } finally {
+      setIsRestoring(false);
+    }
+  };
 
   const fetchLogs = async () => {
     setLoadingLogs(true);
@@ -271,7 +319,10 @@ export default function AdminDashboard() {
           </button>
         </div>
         <button
-          onClick={() => activeTab === 'metrics' ? fetchMetrics() : fetchLogs()}
+          onClick={() => {
+            if (activeTab === 'metrics') fetchMetrics();
+            else { fetchLogs(); fetchBackups(); }
+          }}
           disabled={isLoading}
           className="refresh-btn"
           style={{
@@ -729,6 +780,90 @@ export default function AdminDashboard() {
                <p>Nenhum registro de segurança encontrado ainda.</p>
              </div>
           )}
+        </div>
+
+        {/* ── Backups Vault Section ── */}
+        <div className="admin-page-init" style={{
+          background: 'hsl(var(--card))',
+          border: '1px solid hsl(var(--border))',
+          borderRadius: '20px',
+          padding: '1.75rem',
+          marginTop: '1.5rem',
+          borderTop: '4px solid #EF4444'
+        }}>
+          <div style={{ marginBottom: '1.5rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <div>
+              <h3 style={{ fontSize: '1.25rem', fontWeight: 800, color: 'hsl(var(--foreground))' }}>Cofre de Backups (Máquina do Tempo)</h3>
+              <p style={{ color: 'hsl(var(--muted-foreground))', fontSize: '0.9rem' }}>Pontos de restauração semanais salvos no Vercel Blob</p>
+            </div>
+            <div style={{ fontSize: '2rem' }}>⏳</div>
+          </div>
+
+          {loadingBackups ? (
+            <div style={{ textAlign: 'center', padding: '2rem' }}>
+               <div className="admin-spinner" style={{ width: '30px', height: '30px', border: '3px solid hsl(var(--primary)/0.2)', borderTopColor: 'hsl(var(--primary))', borderRadius: '50%', animation: 'spin 1s linear infinite', margin: '0 auto 1rem' }} />
+            </div>
+          ) : backups.length > 0 ? (
+            <div style={{ overflowX: 'auto' }}>
+              <table style={{ width: '100%', borderCollapse: 'separate', borderSpacing: '0 0.5rem' }}>
+                <thead>
+                  <tr>
+                    {['DATA DO BACKUP', 'TAMANHO', 'AÇÃO DE EMERGÊNCIA'].map(h => (
+                      <th key={h} style={{ padding: '0 1rem 0.75rem', textAlign: h === 'AÇÃO DE EMERGÊNCIA' ? 'center' : 'left', fontSize: '0.75rem', fontWeight: 700, letterSpacing: '0.1em', color: 'hsl(var(--muted-foreground))', textTransform: 'uppercase' }}>{h}</th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody>
+                  {backups.map((b) => {
+                    const dateStr = new Date(b.uploadedAt).toLocaleString('pt-BR');
+                    return (
+                      <tr key={b.url} className="table-row">
+                        <td style={{ padding: '1rem', border: '1px solid hsl(var(--border))', borderRight: 'none', borderRadius: '12px 0 0 12px', fontSize: '0.9rem', color: 'hsl(var(--foreground))', fontWeight: 600 }}>
+                          📅 {dateStr}
+                        </td>
+                        <td style={{ padding: '1rem', border: '1px solid hsl(var(--border))', borderLeft: 'none', borderRight: 'none', fontSize: '0.85rem', color: 'hsl(var(--muted-foreground))' }}>
+                          {(b.size / 1024).toFixed(1)} KB
+                        </td>
+                        <td style={{ padding: '1rem', border: '1px solid hsl(var(--border))', borderLeft: 'none', borderRadius: '0 12px 12px 0', textAlign: 'center' }}>
+                          <button
+                            onClick={() => handleRestore(b.url, dateStr)}
+                            disabled={isRestoring}
+                            style={{
+                              background: '#EF4444',
+                              color: 'white',
+                              border: 'none',
+                              padding: '0.5rem 1rem',
+                              borderRadius: '8px',
+                              fontSize: '0.75rem',
+                              fontWeight: 800,
+                              cursor: isRestoring ? 'not-allowed' : 'pointer',
+                              boxShadow: '0 4px 12px rgba(239, 68, 68, 0.25)',
+                              opacity: isRestoring ? 0.5 : 1,
+                              transition: 'all 0.2s ease'
+                            }}
+                            onMouseEnter={(e) => !isRestoring && (e.currentTarget.style.transform = 'scale(1.05)')}
+                            onMouseLeave={(e) => !isRestoring && (e.currentTarget.style.transform = 'scale(1)')}
+                          >
+                            {isRestoring ? 'RESTAURANDO...' : '🚨 RESTAURAR ESTE PONTO'}
+                          </button>
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+          ) : (
+            <div style={{ textAlign: 'center', padding: '2rem', opacity: 0.5 }}>
+              <p>Nenhum ponto de restauração encontrado no cofre.</p>
+            </div>
+          )}
+          
+          <div style={{ marginTop: '1.5rem', padding: '1rem', borderRadius: '12px', background: 'rgba(239, 68, 68, 0.05)', border: '1px solid rgba(239, 68, 68, 0.1)' }}>
+            <p style={{ fontSize: '0.75rem', color: '#EF4444', fontWeight: 600 }}>
+              ⚠️ AVISO: A restauração é um processo irreversível que substitui todos os dados atuais pelos dados do backup selecionado. Use com extrema cautela.
+            </p>
+          </div>
         </div>
       )}
 
