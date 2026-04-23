@@ -7,7 +7,7 @@ import { NextResponse } from "next/server";
 // Configuração do Limitador de Acesso (10 tentativas por minuto por IP)
 const ratelimit = new Ratelimit({
   redis: Redis.fromEnv(),
-  limiter: Ratelimit.slidingWindow(10, "60 s"),
+  limiter: Ratelimit.slidingWindow(60, "60 s"),
 });
 
 const nextAuth = NextAuth(authConfig);
@@ -16,18 +16,18 @@ export default async function middleware(req: any) {
   const ip = req.ip ?? "127.0.0.1";
   const { pathname } = req.nextUrl;
 
-  // Proteger apenas rotas sensíveis contra ataques de força bruta
-  if (pathname === "/login" || pathname.startsWith("/api/auth")) {
+  // Proteger apenas rotas sensíveis contra ataques de força bruta (Login e Cadastro)
+  // Aplicamos apenas em requisições POST para não travar a navegação normal
+  if ((pathname === "/login" || pathname.startsWith("/api/auth")) && req.method === "POST") {
     try {
       const { success } = await ratelimit.limit(`ratelimit_${ip}`);
       if (!success) {
         return new NextResponse(
-          "Muitas tentativas de acesso. Por segurança, sua conexão foi pausada por 1 minuto.", 
+          "Muitas tentativas de acesso. Por segurança, aguarde um minuto.", 
           { status: 429, headers: { 'Content-Type': 'text/plain; charset=utf-8' } }
         );
       }
     } catch (e) {
-      // Se o Redis falhar, deixamos passar para não travar o sistema
       console.error("Erro no Rate Limiting:", e);
     }
   }
