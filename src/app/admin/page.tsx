@@ -24,6 +24,11 @@ export default function AdminDashboard() {
   const [subForm, setSubForm] = useState({ plan: '', subscriptionStatus: '' });
   const [savingSub, setSavingSub] = useState(false);
 
+  // Security Logs
+  const [activeTab, setActiveTab] = useState<'metrics' | 'security'>('metrics');
+  const [logs, setLogs] = useState<any[]>([]);
+  const [loadingLogs, setLoadingLogs] = useState(false);
+
   useEffect(() => {
     const check = () => setIsDark(document.documentElement.classList.contains('dark'));
     check();
@@ -35,8 +40,26 @@ export default function AdminDashboard() {
   useEffect(() => {
     if (status === 'unauthenticated') { router.push('/login'); return; }
     if (status === 'authenticated' && session?.user?.email !== 'lucianoxote@hotmail.com') { router.push('/'); return; }
-    if (status === 'authenticated') fetchMetrics();
+    if (status === 'authenticated') {
+      fetchMetrics();
+      fetchLogs();
+    }
   }, [status, session, router]);
+
+  const fetchLogs = async () => {
+    setLoadingLogs(true);
+    try {
+      const response = await fetch('/api/admin/audit-logs', { cache: 'no-store' });
+      if (response.ok) {
+        const data = await response.json();
+        setLogs(data);
+      }
+    } catch (e) {
+      console.error(e);
+    } finally {
+      setLoadingLogs(false);
+    }
+  };
 
   const fetchMetrics = async () => {
     setLoading(true);
@@ -221,8 +244,34 @@ export default function AdminDashboard() {
             Visão global em tempo real da plataforma Sinapsi Gestor
           </p>
         </div>
+        <div style={{ display: 'flex', gap: '0.5rem', background: 'hsl(var(--secondary)/0.5)', padding: '0.4rem', borderRadius: '12px' }}>
+          <button 
+            onClick={() => setActiveTab('metrics')}
+            style={{ 
+              padding: '0.5rem 1rem', borderRadius: '8px', border: 'none', cursor: 'pointer',
+              background: activeTab === 'metrics' ? 'hsl(var(--card))' : 'transparent',
+              color: activeTab === 'metrics' ? 'hsl(var(--foreground))' : 'hsl(var(--muted-foreground))',
+              fontWeight: 600, fontSize: '0.85rem', boxShadow: activeTab === 'metrics' ? '0 2px 4px rgba(0,0,0,0.1)' : 'none',
+              transition: 'all 0.2s ease'
+            }}
+          >
+            📊 Métricas SaaS
+          </button>
+          <button 
+            onClick={() => setActiveTab('security')}
+            style={{ 
+              padding: '0.5rem 1rem', borderRadius: '8px', border: 'none', cursor: 'pointer',
+              background: activeTab === 'security' ? 'hsl(var(--card))' : 'transparent',
+              color: activeTab === 'security' ? 'hsl(var(--foreground))' : 'hsl(var(--muted-foreground))',
+              fontWeight: 600, fontSize: '0.85rem', boxShadow: activeTab === 'security' ? '0 2px 4px rgba(0,0,0,0.1)' : 'none',
+              transition: 'all 0.2s ease'
+            }}
+          >
+            🛡️ Segurança
+          </button>
+        </div>
         <button
-          onClick={fetchMetrics}
+          onClick={() => activeTab === 'metrics' ? fetchMetrics() : fetchLogs()}
           disabled={isLoading}
           className="refresh-btn"
           style={{
@@ -240,6 +289,8 @@ export default function AdminDashboard() {
         </button>
       </div>
 
+      {activeTab === 'metrics' ? (
+        <>
       {/* ── Metric Cards ── */}
       <div className="admin-page-init" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1.25rem', marginBottom: '1.5rem', animationDelay: '0.1s' }}>
         {[
@@ -615,6 +666,71 @@ export default function AdminDashboard() {
           </div>
         )}
       </div>
+      </>
+      ) : (
+        /* ── Security Logs Tab ── */
+        <div className="admin-page-init" style={{
+          background: 'hsl(var(--card))',
+          border: '1px solid hsl(var(--border))',
+          borderRadius: '20px',
+          padding: '1.75rem',
+        }}>
+          <div style={{ marginBottom: '1.5rem' }}>
+            <h3 style={{ fontSize: '1.25rem', fontWeight: 800, color: 'hsl(var(--foreground))' }}>Registros de Segurança (Auditoria)</h3>
+            <p style={{ color: 'hsl(var(--muted-foreground))', fontSize: '0.9rem' }}>Ações críticas realizadas por todos os usuários em tempo real</p>
+          </div>
+
+          {loadingLogs ? (
+            <div style={{ textAlign: 'center', padding: '4rem' }}>
+               <div className="admin-spinner" style={{ width: '40px', height: '40px', border: '4px solid hsl(var(--primary)/0.2)', borderTopColor: 'hsl(var(--primary))', borderRadius: '50%', animation: 'spin 1s linear infinite', margin: '0 auto 1.5rem' }} />
+               <p style={{ color: 'hsl(var(--muted-foreground))', fontWeight: 500 }}>Sincronizando registros de auditoria...</p>
+            </div>
+          ) : logs.length > 0 ? (
+            <div style={{ overflowX: 'auto' }}>
+              <table style={{ width: '100%', borderCollapse: 'separate', borderSpacing: '0 0.5rem' }}>
+                <thead>
+                  <tr>
+                    {['DATA/HORA', 'USUÁRIO', 'AÇÃO', 'DETALHES'].map(h => (
+                      <th key={h} style={{ padding: '0 1rem 0.75rem', textAlign: 'left', fontSize: '0.75rem', fontWeight: 700, letterSpacing: '0.1em', color: 'hsl(var(--muted-foreground))', textTransform: 'uppercase' }}>{h}</th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody>
+                  {logs.map((log) => (
+                    <tr key={log._id} className="table-row">
+                      <td style={{ padding: '1rem', border: '1px solid hsl(var(--border))', borderRight: 'none', borderRadius: '12px 0 0 12px', fontSize: '0.85rem', color: 'hsl(var(--foreground))', fontWeight: 500 }}>
+                        {new Date(log.timestamp).toLocaleString('pt-BR')}
+                      </td>
+                      <td style={{ padding: '1rem', border: '1px solid hsl(var(--border))', borderLeft: 'none', borderRight: 'none', fontSize: '0.85rem' }}>
+                        <div style={{ fontWeight: 600, color: 'hsl(var(--foreground))' }}>{log.userEmail}</div>
+                        <div style={{ fontSize: '0.7rem', opacity: 0.6 }}>ID: {log.userId}</div>
+                      </td>
+                      <td style={{ padding: '1rem', border: '1px solid hsl(var(--border))', borderLeft: 'none', borderRight: 'none', textAlign: 'left' }}>
+                        <span style={{ 
+                          fontSize: '0.7rem', fontWeight: 800, padding: '0.3rem 0.6rem', borderRadius: '6px',
+                          background: log.action === 'DELETE' ? 'rgba(239,68,68,0.1)' : log.action === 'UPDATE' ? 'rgba(59,130,246,0.1)' : 'rgba(16,185,129,0.1)',
+                          color: log.action === 'DELETE' ? '#EF4444' : log.action === 'UPDATE' ? '#3B82F6' : '#10B981',
+                          border: `1px solid ${log.action === 'DELETE' ? 'rgba(239,68,68,0.2)' : log.action === 'UPDATE' ? 'rgba(59,130,246,0.2)' : 'rgba(16,185,129,0.2)'}`
+                        }}>
+                          {log.action}
+                        </span>
+                      </td>
+                      <td style={{ padding: '1rem', border: '1px solid hsl(var(--border))', borderLeft: 'none', borderRadius: '0 12px 12px 0', fontSize: '0.9rem', color: 'hsl(var(--foreground))', fontWeight: 500 }}>
+                        {log.details}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          ) : (
+             <div style={{ textAlign: 'center', padding: '4rem', opacity: 0.5 }}>
+               <div style={{ fontSize: '3rem', marginBottom: '1rem' }}>🛡️</div>
+               <p>Nenhum registro de segurança encontrado ainda.</p>
+             </div>
+          )}
+        </div>
+      )}
 
       <style>{`
         .delete-btn-hover:hover {
