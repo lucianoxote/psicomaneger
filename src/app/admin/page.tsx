@@ -795,7 +795,35 @@ export default function AdminDashboard() {
               <h3 style={{ fontSize: '1.25rem', fontWeight: 800, color: 'hsl(var(--foreground))' }}>Cofre de Backups (Maquina do Tempo)</h3>
               <p style={{ color: 'hsl(var(--muted-foreground))', fontSize: '0.9rem' }}>Pontos de restauracao semanais salvos no Vercel Blob</p>
             </div>
-            <div style={{ fontSize: '2rem' }}>⏳</div>
+            <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'center' }}>
+              <button
+                onClick={async () => {
+                  const confirmed = confirm('Deseja iniciar um backup completo agora? Isso pode levar alguns segundos.');
+                  if (!confirmed) return;
+                  try {
+                    const res = await fetch('/api/cron/backup');
+                    if (res.ok) {
+                      alert('✅ Backup iniciado com sucesso! Atualize a lista em instantes.');
+                      fetchBackups();
+                    } else {
+                      alert('❌ Erro ao iniciar backup.');
+                    }
+                  } catch (e) {
+                    alert('❌ Erro de conexão.');
+                  }
+                }}
+                style={{
+                  padding: '0.5rem 1rem', borderRadius: '10px', border: '1px solid #10B981',
+                  background: 'transparent', color: '#10B981', fontWeight: 700, fontSize: '0.75rem',
+                  cursor: 'pointer', transition: 'all 0.2s ease'
+                }}
+                onMouseEnter={(e) => e.currentTarget.style.background = 'rgba(16,185,129,0.05)'}
+                onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}
+              >
+                🚀 Iniciar Backup Agora
+              </button>
+              <div style={{ fontSize: '2rem' }}>⏳</div>
+            </div>
           </div>
 
           {loadingBackups ? (

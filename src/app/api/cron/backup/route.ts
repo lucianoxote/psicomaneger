@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import clientPromise from '@/lib/mongodb';
 import { put, list, del } from '@vercel/blob';
+import { auth } from '@/auth';
 
 export const dynamic = 'force-dynamic';
 
@@ -9,12 +10,13 @@ export const dynamic = 'force-dynamic';
  * Faz o backup completo do banco de dados para o Vercel Blob.
  */
 export async function GET(request: Request) {
-  // Verificação básica de segurança para evitar que qualquer um chame a URL
-  // O cabeçalho 'x-vercel-cron' é enviado apenas pela própria Vercel
+  const session = await auth();
+  const isAdmin = session?.user?.email === 'lucianoxote@hotmail.com';
+  
   const authHeader = request.headers.get('authorization');
   const isVercelCron = request.headers.get('x-vercel-cron') === '1';
   
-  if (!isVercelCron && authHeader !== `Bearer ${process.env.CRON_SECRET}`) {
+  if (!isVercelCron && !isAdmin && authHeader !== `Bearer ${process.env.CRON_SECRET}`) {
     return NextResponse.json({ error: 'Não autorizado' }, { status: 401 });
   }
 
