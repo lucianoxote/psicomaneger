@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import clientPromise from '@/lib/mongodb';
 import { ObjectId } from 'mongodb';
 import { auth } from '@/auth';
+import { logAction } from '@/lib/audit';
 
 export const dynamic = 'force-dynamic';
 
@@ -52,6 +53,17 @@ export async function POST(request: Request) {
       createdAt: new Date()
     });
 
+    // Log de Auditoria
+    logAction({
+      userId: session.user.id!,
+      userEmail: session.user.email!,
+      tenantId: session.user.tenantId,
+      action: 'CREATE',
+      entity: 'agendamento',
+      entityId: result.insertedId.toString(),
+      details: `Agendou sessão para o paciente: ${body.paciente} em ${new Date(body.data).toLocaleDateString()}`
+    });
+
     return NextResponse.json({ success: true, id: result.insertedId });
   } catch (e) {
     return NextResponse.json({ error: 'Erro ao agendar' }, { status: 500 });
@@ -74,10 +86,24 @@ export async function PATCH(request: Request) {
       updateFields.data = new Date(updateFields.data);
     }
 
+    const existing = await db.collection('agendamentos').findOne({ _id: new ObjectId(id), tenantId: session.user.tenantId });
+
     await db.collection('agendamentos').updateOne(
       { _id: new ObjectId(id), tenantId: session.user.tenantId },
       { $set: { ...updateFields, updatedAt: new Date() } }
     );
+
+    // Log de Auditoria
+    logAction({
+      userId: session.user.id!,
+      userEmail: session.user.email!,
+      tenantId: session.user.tenantId,
+      action: 'UPDATE',
+      entity: 'agendamento',
+      entityId: id,
+      details: `Atualizou agendamento do paciente: ${(existing as any)?.paciente}`,
+      newData: updateFields
+    });
 
     return NextResponse.json({ success: true });
   } catch (e) {
@@ -98,10 +124,26 @@ export async function DELETE(request: Request) {
 
     const client = await clientPromise;
     const db = client.db();
-    await db.collection('agendamentos').deleteOne({ 
+    const existing = await db.collection('agendamentos').findOne({ _id: new ObjectId(id), tenantId: session.user.tenantId });
+
+    const result = await db.collection('agendamentos').deleteOne({ 
       _id: new ObjectId(id),
       tenantId: session.user.tenantId 
     });
+
+    if (result.deletedCount > 0) {
+      // Log de Auditoria
+      logAction({
+        userId: session.user.id!,
+        userEmail: session.user.email!,
+        tenantId: session.user.tenantId,
+        action: 'DELETE',
+        entity: 'agendamento',
+        entityId: id,
+        details: `Excluiu agendamento do paciente: ${(existing as any)?.paciente} de ${(existing as any)?.data ? new Date((existing as any).data).toLocaleDateString() : 'data ignorada'}`
+      });
+    }
+
     return NextResponse.json({ success: true });
   } catch (e) {
     return NextResponse.json({ error: 'Erro ao excluir agendamento' }, { status: 500 });

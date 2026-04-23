@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import clientPromise from '@/lib/mongodb';
 import { ObjectId } from 'mongodb';
 import { auth } from '@/auth';
+import { logAction } from '@/lib/audit';
 
 export const dynamic = 'force-dynamic';
 
@@ -55,6 +56,17 @@ export async function POST(request: Request) {
       createdAt: new Date()
     });
 
+    // Log de Auditoria
+    logAction({
+      userId: session.user.id!,
+      userEmail: session.user.email!,
+      tenantId: session.user.tenantId!,
+      action: 'CREATE',
+      entity: 'financeiro',
+      entityId: result.insertedId.toString(),
+      details: `Registrou transação: ${body.descricao} - Valor: R$ ${body.valor}`
+    });
+
     return NextResponse.json({ success: true, id: result.insertedId });
   } catch (e) {
     return NextResponse.json({ error: 'Erro ao salvar transação' }, { status: 500 });
@@ -73,10 +85,25 @@ export async function PATCH(request: Request) {
     const client = await clientPromise;
     const db = client.db();
     
+    const existing = await db.collection('financeiro').findOne({ _id: new ObjectId(id), userId: session.user.id });
+
     await db.collection('financeiro').updateOne(
       { _id: new ObjectId(id), userId: session.user.id },
       { $set: updateFields }
     );
+
+    // Log de Auditoria
+    logAction({
+      userId: session.user.id!,
+      userEmail: session.user.email!,
+      tenantId: (existing as any)?.tenantId || '',
+      action: 'UPDATE',
+      entity: 'financeiro',
+      entityId: id,
+      details: `Atualizou transação: ${(existing as any)?.descricao}`,
+      newData: updateFields
+    });
+
     return NextResponse.json({ success: true });
   } catch (e) {
     return NextResponse.json({ error: 'Erro ao atualizar transação' }, { status: 500 });
@@ -96,10 +123,26 @@ export async function DELETE(request: Request) {
 
     const client = await clientPromise;
     const db = client.db();
-    await db.collection('financeiro').deleteOne({ 
+    const existing = await db.collection('financeiro').findOne({ _id: new ObjectId(id), userId: session.user.id });
+
+    const result = await db.collection('financeiro').deleteOne({ 
       _id: new ObjectId(id),
       userId: session.user.id 
     });
+
+    if (result.deletedCount > 0) {
+      // Log de Auditoria
+      logAction({
+        userId: session.user.id!,
+        userEmail: session.user.email!,
+        tenantId: (existing as any)?.tenantId || '',
+        action: 'DELETE',
+        entity: 'financeiro',
+        entityId: id,
+        details: `Excluiu transação: ${(existing as any)?.descricao} - Valor: R$ ${(existing as any)?.valor}`
+      });
+    }
+
     return NextResponse.json({ success: true });
   } catch (e) {
     return NextResponse.json({ error: 'Erro ao excluir transação' }, { status: 500 });

@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import clientPromise from '@/lib/mongodb';
 import { ObjectId } from 'mongodb';
 import { auth } from '@/auth';
+import { logAction } from '@/lib/audit';
 
 export const dynamic = 'force-dynamic';
 
@@ -74,6 +75,17 @@ export async function POST(request: Request) {
       status: 'ativo'
     });
 
+    // Log de Auditoria
+    logAction({
+      userId: session.user.id!,
+      userEmail: session.user.email!,
+      tenantId: session.user.tenantId,
+      action: 'CREATE',
+      entity: 'paciente',
+      entityId: result.insertedId.toString(),
+      details: `Cadastrou o paciente: ${body.nome}`
+    });
+
     return NextResponse.json({ success: true, id: result.insertedId });
   } catch (e) {
     return NextResponse.json({ error: 'Erro ao salvar paciente' }, { status: 500 });
@@ -110,6 +122,18 @@ export async function PATCH(request: Request) {
       { $set: updateDoc }
     );
 
+    // Log de Auditoria
+    logAction({
+      userId: session.user.id!,
+      userEmail: session.user.email!,
+      tenantId: session.user.tenantId,
+      action: 'UPDATE',
+      entity: 'paciente',
+      entityId: id,
+      details: `Atualizou dados do paciente: ${existing.nome}`,
+      newData: updateFields
+    });
+
     return NextResponse.json({ success: true });
   } catch (e) {
     return NextResponse.json({ error: 'Erro ao atualizar paciente' }, { status: 500 });
@@ -130,15 +154,28 @@ export async function DELETE(request: Request) {
     const client = await clientPromise;
     const db = client.db();
     
+    const existing = await db.collection('pacientes').findOne({ _id: new ObjectId(id), tenantId: session.user.tenantId });
+    
     // Ensure ownership before delete
     const result = await db.collection('pacientes').deleteOne({ 
-      _id: new ObjectId(id),
+      _id: new ObjectId(id), 
       tenantId: session.user.tenantId 
     });
 
     if (result.deletedCount === 0) {
       return NextResponse.json({ error: 'Acesso negado ou paciente inexistente' }, { status: 403 });
     }
+
+    // Log de Auditoria
+    logAction({
+      userId: session.user.id!,
+      userEmail: session.user.email!,
+      tenantId: session.user.tenantId,
+      action: 'DELETE',
+      entity: 'paciente',
+      entityId: id,
+      details: `Excluiu o paciente: ${existing?.nome || id}`
+    });
 
     await db.collection('sessoes').deleteMany({ pacienteId: id, tenantId: session.user.tenantId });
     await db.collection('financeiro').deleteMany({ pacienteId: id, tenantId: session.user.tenantId });
