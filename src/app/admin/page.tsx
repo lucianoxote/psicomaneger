@@ -66,10 +66,10 @@ export default function AdminDashboard() {
   };
 
   const handleRestore = async (url: string, date: string) => {
-    const confirm1 = confirm(`🚨 ATENÇÃO: Você está prestes a restaurar o banco de dados para o estado de ${date}. ISSO APAGARÁ TODOS OS DADOS ATUAIS. Deseja continuar?`);
+    const confirm1 = confirm(`[ATENÇÃO] Você está prestes a restaurar o banco de dados para o estado de ${date}. ISSO APAGARÁ TODOS OS DADOS ATUAIS. Deseja continuar?`);
     if (!confirm1) return;
 
-    const confirm2 = confirm(`⚠️ CONFIRMAÇÃO FINAL: Tem certeza absoluta? Esta ação não pode ser desfeita.`);
+    const confirm2 = confirm(`[CONFIRMAÇÃO FINAL] Tem certeza absoluta? Esta ação não pode ser desfeita.`);
     if (!confirm2) return;
 
     setIsRestoring(true);
@@ -214,16 +214,14 @@ export default function AdminDashboard() {
   ];
 
   const chartColors = ['#3B82F6', '#10B981', '#F59E0B'];
-  // Dynamic chart colors based on theme
-  const gridColor     = isDark ? '#334155' : '#e2e8f0';
-  const tickColor     = isDark ? '#94a3b8' : '#64748b';
-  const tooltipStyle  = isDark
+  const gridColor = isDark ? '#334155' : '#e2e8f0';
+  const tickColor = isDark ? '#94a3b8' : '#64748b';
+  const tooltipStyle = isDark
     ? { backgroundColor: '#1e293b', border: '1px solid #475569', borderRadius: '12px', color: '#f1f5f9', boxShadow: '0 4px 20px rgba(0,0,0,0.4)' }
     : { backgroundColor: '#ffffff', border: '1px solid #e2e8f0', borderRadius: '12px', color: '#0f172a', boxShadow: '0 4px 20px rgba(0,0,0,0.12)' };
-  const pieGray       = isDark ? '#334155' : '#CBD5E1';
+  const pieGray = isDark ? '#334155' : '#CBD5E1';
 
-  return (
-    <div style={{ padding: '2rem', maxWidth: '1200px', margin: '0 auto' }}>
+  return <div style={{ padding: '2rem', maxWidth: '1200px', margin: '0 auto' }}>
       <style>{`
         @keyframes fadeIn {
           from { opacity: 0; transform: translateY(10px); }
@@ -282,7 +280,7 @@ export default function AdminDashboard() {
         }
       `}</style>
 
-      {/* ── Header ── */}
+      {/* Header */}
       <div className="admin-page-init" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
         <div>
           <h1 style={{ fontSize: '1.75rem', fontWeight: 800, color: 'hsl(var(--foreground))', letterSpacing: '-0.02em' }}>
@@ -719,7 +717,8 @@ export default function AdminDashboard() {
       </div>
       </>
       ) : (
-        /* ── Security Logs Tab ── */
+        <>
+        {/* ── Security Logs Tab ── */}
         <div className="admin-page-init" style={{
           background: 'hsl(var(--card))',
           border: '1px solid hsl(var(--border))',
@@ -793,8 +792,8 @@ export default function AdminDashboard() {
         }}>
           <div style={{ marginBottom: '1.5rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
             <div>
-              <h3 style={{ fontSize: '1.25rem', fontWeight: 800, color: 'hsl(var(--foreground))' }}>Cofre de Backups (Máquina do Tempo)</h3>
-              <p style={{ color: 'hsl(var(--muted-foreground))', fontSize: '0.9rem' }}>Pontos de restauração semanais salvos no Vercel Blob</p>
+              <h3 style={{ fontSize: '1.25rem', fontWeight: 800, color: 'hsl(var(--foreground))' }}>Cofre de Backups (Maquina do Tempo)</h3>
+              <p style={{ color: 'hsl(var(--muted-foreground))', fontSize: '0.9rem' }}>Pontos de restauracao semanais salvos no Vercel Blob</p>
             </div>
             <div style={{ fontSize: '2rem' }}>⏳</div>
           </div>
@@ -819,7 +818,7 @@ export default function AdminDashboard() {
                     return (
                       <tr key={b.url} className="table-row">
                         <td style={{ padding: '1rem', border: '1px solid hsl(var(--border))', borderRight: 'none', borderRadius: '12px 0 0 12px', fontSize: '0.9rem', color: 'hsl(var(--foreground))', fontWeight: 600 }}>
-                          📅 {dateStr}
+                          [B] {dateStr}
                         </td>
                         <td style={{ padding: '1rem', border: '1px solid hsl(var(--border))', borderLeft: 'none', borderRight: 'none', fontSize: '0.85rem', color: 'hsl(var(--muted-foreground))' }}>
                           {(b.size / 1024).toFixed(1)} KB
@@ -844,7 +843,7 @@ export default function AdminDashboard() {
                             onMouseEnter={(e) => !isRestoring && (e.currentTarget.style.transform = 'scale(1.05)')}
                             onMouseLeave={(e) => !isRestoring && (e.currentTarget.style.transform = 'scale(1)')}
                           >
-                            {isRestoring ? 'RESTAURANDO...' : '🚨 RESTAURAR ESTE PONTO'}
+                            {isRestoring ? 'RESTAURANDO...' : '[!] RESTAURAR ESTE PONTO'}
                           </button>
                         </td>
                       </tr>
@@ -861,10 +860,11 @@ export default function AdminDashboard() {
           
           <div style={{ marginTop: '1.5rem', padding: '1rem', borderRadius: '12px', background: 'rgba(239, 68, 68, 0.05)', border: '1px solid rgba(239, 68, 68, 0.1)' }}>
             <p style={{ fontSize: '0.75rem', color: '#EF4444', fontWeight: 600 }}>
-              ⚠️ AVISO: A restauração é um processo irreversível que substitui todos os dados atuais pelos dados do backup selecionado. Use com extrema cautela.
+              AVISO: A restauracao e um processo irreversivel que substitui todos os dados atuais pelos dados do backup selecionado. Use com extrema cautela.
             </p>
           </div>
         </div>
+        </>
       )}
 
       <style>{`
@@ -939,5 +939,5 @@ export default function AdminDashboard() {
         </div>
       )}
     </div>
-  );
+  ;
 }
