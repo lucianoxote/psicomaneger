@@ -6,19 +6,45 @@ import { logAction } from '@/lib/audit';
 
 export const dynamic = 'force-dynamic';
 
-export async function GET() {
+export async function GET(request: Request) {
   try {
     const session = await auth();
     if (!session?.user?.tenantId) {
       return NextResponse.json({ error: 'Não autorizado' }, { status: 401 });
     }
 
+    const { searchParams } = new URL(request.url);
+    const id = searchParams.get('id');
+
     const client = await clientPromise;
     const db = client.db();
+
+    if (id) {
+      // Se tiver ID, carrega o paciente completo (incluindo anamnese)
+      const paciente = await db.collection('pacientes').findOne({ 
+        _id: new ObjectId(id),
+        tenantId: session.user.tenantId 
+      });
+
+      if (!paciente) {
+        return NextResponse.json({ error: 'Paciente não encontrado' }, { status: 404 });
+      }
+
+      const serializablePaciente = {
+        ...paciente,
+        _id: paciente._id.toString(),
+        createdAt: paciente.createdAt?.toISOString?.(),
+        updatedAt: paciente.updatedAt?.toISOString?.(),
+      };
+
+      return NextResponse.json(serializablePaciente);
+    }
+
+    // Se não tiver ID, carrega a lista simplificada
     const pacientes = await db.collection('pacientes')
       .find({ tenantId: session.user.tenantId })
       .sort({ nome: 1 })
-      .project({ anamnese: 0, observacoes: 0 }) // não carregar campos pesados na lista
+      .project({ anamnese: 0, observacoes: 0 }) 
       .toArray();
 
     const serializablePacientes = pacientes.map((paciente: any) => ({

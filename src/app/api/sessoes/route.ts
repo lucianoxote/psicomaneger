@@ -28,8 +28,8 @@ export async function GET(request: Request) {
     const serializableSessoes = sessoes.map((sessao: any) => ({
       ...sessao,
       _id: sessao._id.toString(),
-      createdAt: sessao.createdAt?.toISOString?.(),
-      data: sessao.data?.toISOString?.(),
+      createdAt: sessao.createdAt instanceof Date ? sessao.createdAt.toISOString() : sessao.createdAt,
+      data: sessao.data instanceof Date ? sessao.data.toISOString() : sessao.data,
     }));
 
     return NextResponse.json(serializableSessoes);
