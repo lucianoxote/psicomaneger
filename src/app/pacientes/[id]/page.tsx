@@ -624,7 +624,7 @@ export default function PatientDetailsPage({ params }: { params: { id: string } 
             <div style={{ display: 'flex', gap: '1rem', marginTop: '0.5rem', opacity: 0.6 }}>
               <span>Doc: {patient.cpf || 'Não informado'}</span>
               <span>•</span>
-              <span>Nascimento: {patient.dataNascimento || 'Não informado'}</span>
+              <span>Nascimento: {patient.dataNascimento ? patient.dataNascimento.split('-').reverse().join('/') : 'Não informado'}</span>
             </div>
             <div style={{ display: 'flex', gap: '1rem', marginTop: '1.5rem' }}>
               <button className="btn" style={{ flex: 1, border: '1px solid hsl(var(--border))' }} onClick={openEditPatientModal}>Editar Dados</button>
@@ -868,7 +868,11 @@ export default function PatientDetailsPage({ params }: { params: { id: string } 
                   filteredSessions.map((s: any) => (
                     <tr key={s._id} style={{ borderBottom: '1px solid hsl(var(--border))', alignItems: 'flex-start' }}>
                       <td style={{ padding: '1rem 1.5rem', verticalAlign: 'top' }}>
-                        <div style={{ fontWeight: '600', marginBottom: '0.5rem' }}>{new Date(s.data).toLocaleDateString('pt-BR')}</div>
+                        <div style={{ fontWeight: '600', marginBottom: '0.5rem' }}>
+                          {s.data && !isNaN(new Date(s.data).getTime()) 
+                            ? new Date(s.data).toLocaleDateString('pt-BR', { timeZone: 'UTC' }) 
+                            : (s.data || 'Data não informada')}
+                        </div>
                         <span className="badge badge-secondary" style={{ fontSize: '0.7rem' }}>{s.tipo}</span>
                         {s.modalidade && <div style={{ fontSize: '0.7rem', opacity: 0.6, marginTop: '0.4rem' }}>{s.modalidade}</div>}
                       </td>
