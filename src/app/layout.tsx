@@ -4,6 +4,7 @@ import "./globals.css";
 import DashboardLayout from "@/components/DashboardLayout";
 import { SettingsProvider } from "@/components/SettingsProvider";
 import AuthProvider from "@/components/AuthProvider";
+import { SpeedInsights } from '@vercel/speed-insights/next';
 
 const geistSans = localFont({
   src: "./fonts/GeistVF.woff",
@@ -40,6 +41,7 @@ export default function RootLayout({
             </DashboardLayout>
           </SettingsProvider>
         </AuthProvider>
+        <SpeedInsights />
       </body>
     </html>
   );
