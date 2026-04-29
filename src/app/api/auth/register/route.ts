@@ -52,16 +52,7 @@ export async function POST(request: Request) {
       createdAt: now,
     });
 
-    // Buscar a logo do administrador para o e-mail (Luciano)
-    const adminConfig = await db.collection("configuracoes").findOne({ tenantId: '69ced783eefbb6f337cd6d70' });
-    let logoUrl = "https://sinapsigestor.com.br/images/logo_luciano.png"; // Padrão Luciano
-    
-    if (adminConfig?.logoUrl) {
-      // Se for um link relativo, transforma em absoluto
-      logoUrl = adminConfig.logoUrl.startsWith('http') 
-        ? adminConfig.logoUrl 
-        : `https://sinapsigestor.com.br${adminConfig.logoUrl}`;
-    }
+    const logoUrl = "https://sinapsigestor.com.br/images/logo-sinapsi-full.png";
 
     // Enviar e-mail de boas-vindas
     try {
