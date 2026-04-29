@@ -41,6 +41,10 @@ export async function POST(request: Request) {
     // Send email
     const resetUrl = `${process.env.NEXTAUTH_URL}/reset-password?token=${token}`;
 
+    // Buscar a logo do administrador para o e-mail
+    const adminConfig = await db.collection("configuracoes").findOne({ tenantId: '6627be9b168c4800085d7705' }); // ID do Luciano
+    const logoUrl = adminConfig?.logoUrl || "https://sinapsigestor.com.br/logo.png";
+
     // Check if e-mail system is configured
     if (process.env.RESEND_API_KEY?.includes('dummy')) {
        return NextResponse.json({ error: 'Configuração de e-mail pendente no servidor. Verifique as chaves na Vercel.' }, { status: 501 });
@@ -51,16 +55,26 @@ export async function POST(request: Request) {
       to: email,
       subject: 'Recuperação de Senha - Sinapsi Gestor',
       html: `
-        <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #e2e8f0; border-radius: 12px;">
-          <h2 style="color: #0e7490; margin-bottom: 24px;">Recuperação de Senha</h2>
-          <p>Você solicitou a redefinição de sua senha no <strong>Sinapsi Gestor</strong>.</p>
-          <p>Clique no botão abaixo para criar uma nova senha. Este link expira em 1 hora.</p>
-          <div style="margin: 32px 0;">
-            <a href="${resetUrl}" style="background-color: #0e7490; color: white; padding: 12px 24px; border-radius: 8px; text-decoration: none; font-weight: 600;">Redefinir Minha Senha</a>
+        <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; color: #334155;">
+          <div style="text-align: center; margin-bottom: 32px;">
+            <img src="${logoUrl}" alt="Sinapsi Gestor" style="max-height: 80px;" />
           </div>
-          <p style="color: #64748b; font-size: 14px;">Se você não solicitou isso, ignore este e-mail.</p>
-          <hr style="margin: 32px 0; border: 0; border-top: 1px solid #e2e8f0;" />
-          <p style="color: #94a3b8; font-size: 12px; text-align: center;">Sinapsi Gestor - Gestão Clínica de Excelência</p>
+          
+          <div style="background-color: #f8fafc; padding: 32px; border-radius: 16px; border: 1px solid #e2e8f0;">
+            <h2 style="color: #0e7490; margin-top: 0; margin-bottom: 24px;">Recuperação de Senha</h2>
+            <p style="font-size: 16px; line-height: 1.6;">Você solicitou a redefinição de sua senha no <strong>Sinapsi Gestor</strong>.</p>
+            <p style="font-size: 16px; line-height: 1.6;">Clique no botão abaixo para criar uma nova senha. Este link expira em 1 hora.</p>
+            
+            <div style="text-align: center; margin: 32px 0;">
+              <a href="${resetUrl}" style="background-color: #0e7490; color: white; padding: 12px 24px; border-radius: 8px; text-decoration: none; font-weight: 600; display: inline-block;">Redefinir Minha Senha</a>
+            </div>
+            
+            <p style="color: #64748b; font-size: 14px; text-align: center;">Se você não solicitou isso, ignore este e-mail.</p>
+          </div>
+          
+          <div style="text-align: center; margin-top: 32px; color: #94a3b8; font-size: 12px;">
+            <p>Sinapsi Gestor - Tecnologia para Psicologia</p>
+          </div>
         </div>
       `,
     });

@@ -3,6 +3,7 @@ import clientPromise from "@/lib/mongodb";
 import bcrypt from "bcryptjs";
 import { auth } from "@/auth";
 import { ObjectId } from "mongodb";
+import { resend } from "@/lib/resend";
 
 export async function POST(request: Request) {
   try {
@@ -50,6 +51,51 @@ export async function POST(request: Request) {
       trialEndsAt,
       createdAt: now,
     });
+
+    // Buscar a logo do administrador para o e-mail
+    const adminConfig = await db.collection("configuracoes").findOne({ tenantId: '6627be9b168c4800085d7705' }); // ID do Luciano
+    const logoUrl = adminConfig?.logoUrl || "https://sinapsigestor.com.br/logo.png"; // Fallback para logo padrão
+
+    // Enviar e-mail de boas-vindas
+    try {
+      await resend.emails.send({
+        from: 'Sinapsi Gestor <suporte@sinapsigestor.com.br>',
+        to: email,
+        subject: `Bem-vindo(a) ao Sinapsi Gestor, ${name}!`,
+        html: `
+          <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; color: #334155;">
+            <div style="text-align: center; margin-bottom: 32px;">
+              <img src="${logoUrl}" alt="Sinapsi Gestor" style="max-height: 80px;" />
+            </div>
+            
+            <div style="background-color: #f8fafc; padding: 32px; border-radius: 16px; border: 1px solid #e2e8f0;">
+              <h1 style="color: #0e7490; font-size: 24px; margin-top: 0;">Olá, ${name}!</h1>
+              <p style="font-size: 16px; line-height: 1.6;">É um prazer ter você conosco! Sua conta no <strong>Sinapsi Gestor</strong> acaba de ser criada e já está pronta para uso.</p>
+              
+              <div style="margin: 32px 0; padding: 24px; background-color: white; border-radius: 12px; border: 1px dashed #cbd5e1;">
+                <p style="margin: 0; font-weight: 600; color: #0e7490;">Seus dados de acesso:</p>
+                <p style="margin: 8px 0 0 0;"><strong>E-mail:</strong> ${email}</p>
+                <p style="margin: 4px 0 0 0;"><strong>Link:</strong> <a href="https://sinapsigestor.com.br" style="color: #0e7490;">sinapsigestor.com.br</a></p>
+              </div>
+
+              <p style="font-size: 16px; line-height: 1.6;">Agora você tem 15 dias de período de teste gratuito para explorar todas as funcionalidades de gestão clínica, prontuário eletrônico e controle financeiro.</p>
+
+              <div style="text-align: center; margin-top: 32px;">
+                <a href="https://sinapsigestor.com.br/login" style="background-color: #0e7490; color: white; padding: 14px 32px; border-radius: 8px; text-decoration: none; font-weight: 600; display: inline-block;">Começar a Usar Agora</a>
+              </div>
+            </div>
+
+            <div style="text-align: center; margin-top: 32px; color: #94a3b8; font-size: 14px;">
+              <p>Dúvidas? Responda a este e-mail ou entre em contato pelo nosso suporte.</p>
+              <p style="margin-top: 16px;">© 2026 Sinapsi Gestor - Tecnologia para Psicologia</p>
+            </div>
+          </div>
+        `
+      });
+    } catch (mailError) {
+      console.error("Erro ao enviar e-mail de boas-vindas:", mailError);
+      // Não interrompe o fluxo de registro se o e-mail falhar
+    }
 
     return NextResponse.json({ success: true, id: userId });
   } catch (e: any) {
