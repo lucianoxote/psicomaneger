@@ -55,7 +55,7 @@ export async function POST(request: Request) {
       html: `
         <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; color: #334155;">
           <div style="text-align: center; margin-bottom: 32px;">
-            <img src="${logoUrl}" alt="Sinapsi Gestor" style="max-height: 80px;" />
+            <img src="${logoUrl}" alt="Sinapsi Gestor" style="max-height: 140px; width: auto;" />
           </div>
           
           <div style="background-color: #f8fafc; padding: 32px; border-radius: 16px; border: 1px solid #e2e8f0;">
