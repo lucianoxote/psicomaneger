@@ -24,8 +24,8 @@ export async function POST(request: Request) {
       return NextResponse.json({ success: true });
     }
 
-    // Select the correct Resend client for testing purposes (Sandbox limitation)
-    const mailClient = email.toLowerCase().includes('liviabrito') ? resendLivia : resend;
+    // Use the main Resend client now that the domain is verified
+    const mailClient = resend;
 
     // Generate token
     const token = crypto.randomBytes(32).toString('hex');
@@ -47,7 +47,7 @@ export async function POST(request: Request) {
     }
 
     await mailClient.emails.send({
-      from: 'Sinapsi Gestor <onboarding@resend.dev>',
+      from: 'Sinapsi Gestor <suporte@sinapsigestor.com.br>',
       to: email,
       subject: 'Recuperação de Senha - Sinapsi Gestor',
       html: `
