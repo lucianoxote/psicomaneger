@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import localFont from "next/font/local";
 import "./globals.css";
 import DashboardLayout from "@/components/DashboardLayout";
@@ -16,14 +16,30 @@ const geistMono = localFont({
   weight: "100 900",
 });
 
+export const viewport: Viewport = {
+  themeColor: "#000000",
+  width: "device-width",
+  initialScale: 1,
+  maximumScale: 1,
+  userScalable: false,
+};
+
 export const metadata: Metadata = {
   title: "Sinapsi Gestor - Gestão Clínica",
   description: "Sistema premium de gestão para psicólogos clínicos",
+  manifest: "/manifest.json",
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: "default",
+    title: "Sinapsi Gestor",
+  },
   icons: {
     icon: '/synapsi_brain_v6.png',
-    apple: '/synapsi_brain_v6.png',
+    apple: '/icon-192x192.png',
   },
 };
+
+
 
 export default function RootLayout({
   children,
