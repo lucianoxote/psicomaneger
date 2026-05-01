@@ -27,7 +27,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   }
 
   // Determine the mobile icon
-  let mobileIcon = "/synapsi_brain_v6.png"; // Default to new SinapsiGestor brain
+  let mobileIcon = "/favicon.png"; // Default to new SinapsiGestor logo
   if (isLivia && !settings.logoUrl) {
     mobileIcon = "/images/livia_brain_icon.png";
   } else if (settings.logoUrl && !isLuciano) {

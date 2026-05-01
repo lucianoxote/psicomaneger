@@ -34,8 +34,8 @@ export const metadata: Metadata = {
     title: "Sinapsi Gestor",
   },
   icons: {
-    icon: '/synapsi_brain_v6.png',
-    apple: '/icon-192x192.png',
+    icon: '/favicon.png',
+    apple: '/favicon.png',
   },
 };
 
