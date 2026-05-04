@@ -62,7 +62,7 @@ export async function POST(request: Request) {
         const dataComHora = `${body.data}T${horaSessao}:00`;
         
         await db.collection('agendamentos').insertOne({
-           userId: session.user.id,
+           tenantId: session.user.tenantId,
            paciente: body.pacienteNome,
            pacienteId: body.pacienteId,
            data: dataComHora,

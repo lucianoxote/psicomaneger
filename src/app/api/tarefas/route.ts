@@ -71,7 +71,7 @@ export async function PATCH(request: Request) {
     const db = client.db();
     
     await db.collection('tarefas').updateOne(
-      { _id: new ObjectId(id), userId: session.user.id },
+      { _id: new ObjectId(id), tenantId: session.user.tenantId },
       { $set: { ...updateFields, updatedAt: new Date() } }
     );
 
@@ -100,7 +100,7 @@ export async function DELETE(request: Request) {
     
     await db.collection('tarefas').deleteOne({ 
       _id: new ObjectId(id),
-      userId: session.user.id 
+      tenantId: session.user.tenantId 
     });
 
     return NextResponse.json({ success: true });

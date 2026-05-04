@@ -85,10 +85,10 @@ export async function PATCH(request: Request) {
     const client = await clientPromise;
     const db = client.db();
     
-    const existing = await db.collection('financeiro').findOne({ _id: new ObjectId(id), userId: session.user.id });
+    const existing = await db.collection('financeiro').findOne({ _id: new ObjectId(id), tenantId: session.user.tenantId });
 
     await db.collection('financeiro').updateOne(
-      { _id: new ObjectId(id), userId: session.user.id },
+      { _id: new ObjectId(id), tenantId: session.user.tenantId },
       { $set: updateFields }
     );
 
@@ -123,11 +123,11 @@ export async function DELETE(request: Request) {
 
     const client = await clientPromise;
     const db = client.db();
-    const existing = await db.collection('financeiro').findOne({ _id: new ObjectId(id), userId: session.user.id });
+    const existing = await db.collection('financeiro').findOne({ _id: new ObjectId(id), tenantId: session.user.tenantId });
 
     const result = await db.collection('financeiro').deleteOne({ 
       _id: new ObjectId(id),
-      userId: session.user.id 
+      tenantId: session.user.tenantId 
     });
 
     if (result.deletedCount > 0) {
