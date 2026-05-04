@@ -28,7 +28,9 @@ export async function GET() {
       data: agendamento.data ? (agendamento.data instanceof Date ? agendamento.data.toISOString() : agendamento.data.toString()) : undefined,
     }));
 
-    return NextResponse.json(serializableAgendamentos);
+    const response = NextResponse.json(serializableAgendamentos);
+    response.headers.set('Cache-Control', 'no-store, no-cache, must-revalidate');
+    return response;
   } catch (e) {
     return NextResponse.json({ error: 'Falha ao conectar ao banco' }, { status: 500 });
   }

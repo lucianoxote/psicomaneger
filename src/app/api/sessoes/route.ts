@@ -32,7 +32,9 @@ export async function GET(request: Request) {
       data: sessao.data instanceof Date ? sessao.data.toISOString() : sessao.data,
     }));
 
-    return NextResponse.json(serializableSessoes);
+    const response = NextResponse.json(serializableSessoes);
+    response.headers.set('Cache-Control', 'no-store, no-cache, must-revalidate');
+    return response;
   } catch (e) {
     return NextResponse.json({ error: 'Falha ao conectar ao banco' }, { status: 500 });
   }

@@ -29,7 +29,9 @@ export async function GET() {
       timestamp: log.timestamp?.toISOString?.(),
     }));
 
-    return NextResponse.json(serializableLogs);
+    const response = NextResponse.json(serializableLogs);
+    response.headers.set('Cache-Control', 'no-store, no-cache, must-revalidate');
+    return response;
   } catch (e) {
     return NextResponse.json({ error: 'Erro ao carregar logs' }, { status: 500 });
   }
