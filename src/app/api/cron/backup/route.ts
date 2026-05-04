@@ -16,7 +16,10 @@ export async function GET(request: Request) {
   const authHeader = request.headers.get('authorization');
   const isVercelCron = request.headers.get('x-vercel-cron') === '1';
   
+  console.log(`[Backup] Iniciando tentativa. VercelCron: ${isVercelCron}, Admin: ${isAdmin}`);
+
   if (!isVercelCron && !isAdmin && authHeader !== `Bearer ${process.env.CRON_SECRET}`) {
+    console.error('[Backup] Tentativa não autorizada bloqueada.');
     return NextResponse.json({ error: 'Não autorizado' }, { status: 401 });
   }
 
@@ -62,6 +65,8 @@ export async function GET(request: Request) {
         await del(blob.url);
       }
     }
+
+    console.log(`[Backup] Sucesso! Arquivo gerado: ${filename}`);
 
     return NextResponse.json({ 
       success: true, 
