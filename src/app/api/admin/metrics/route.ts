@@ -21,7 +21,7 @@ export async function GET(request: Request) {
     const [totalUsers, totalPacientes, totalAgendamentos, atendimentosMensais, plansDistribution] = await Promise.all([
       db.collection("users").countDocuments(),
       db.collection("pacientes").countDocuments(),
-      db.collection("agendamentos").countDocuments(),
+      db.collection("sessoes").countDocuments(),
       db.collection("agendamentos").countDocuments({ 
         status: 'realizado',
         data: { $gte: trintaDiasAtras.toISOString() } 
@@ -102,8 +102,8 @@ export async function GET(request: Request) {
       tenants
     });
     
-    // Cache privado por 30s pois são dados sensíveis de admin
-    response.headers.set('Cache-Control', 'private, max-age=30, stale-while-revalidate=60');
+    // Sem cache para garantir dados em tempo real no dashboard admin
+    response.headers.set('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
     return response;
 
   } catch (error) {
