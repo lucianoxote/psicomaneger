@@ -217,7 +217,7 @@ export default function AdminDashboard() {
   const chartData = [
     { name: 'Clínicas', count: metrics?.totalUsers ?? 0 },
     { name: 'Pacientes', count: metrics?.totalPacientes ?? 0 },
-    { name: 'Sessões', count: metrics?.totalAgendamentos ?? 0 },
+    { name: 'Sessões', count: metrics?.totalSessoes ?? 0 },
   ];
   const planData = metrics?.plans || [];
   const engagementData = [
@@ -357,7 +357,7 @@ export default function AdminDashboard() {
         {[
           { label: 'Clínicas Ativas', value: val(metrics?.totalUsers), icon: '🏥', color: '#3B82F6', pct: '75%', sub: '↑ 12% vs mês anterior' },
           { label: 'Pacientes',       value: val(metrics?.totalPacientes), icon: '👥', color: '#10B981', pct: '68%', sub: '↑ 8% vs mês anterior' },
-          { label: 'Sessões Totais',  value: val(metrics?.totalAgendamentos), icon: '📋', color: '#F59E0B', pct: '82%', sub: '↑ 15% vs mês anterior' },
+          { label: 'Sessões Totais',  value: val(metrics?.totalSessoes), icon: '📋', color: '#F59E0B', pct: '82%', sub: '↑ 15% vs mês anterior' },
           { label: 'Este Mês',        value: val(metrics?.atendimentosMensais), icon: '⚡', color: '#8B5CF6', pct: '90%', sub: 'Em crescimento contínuo' },
         ].map((card) => (
           <div key={card.label} className="interactive-card" style={{

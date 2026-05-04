@@ -18,10 +18,11 @@ export async function GET(request: Request) {
     const trintaDiasAtras = new Date();
     trintaDiasAtras.setDate(trintaDiasAtras.getDate() - 30);
 
-    const [totalUsers, totalPacientes, totalAgendamentos, atendimentosMensais, plansDistribution] = await Promise.all([
+    const [totalUsers, totalPacientes, totalSessoes, totalAgendamentos, atendimentosMensais, plansDistribution] = await Promise.all([
       db.collection("users").countDocuments(),
       db.collection("pacientes").countDocuments(),
       db.collection("sessoes").countDocuments(),
+      db.collection("agendamentos").countDocuments(),
       db.collection("agendamentos").countDocuments({ 
         status: 'realizado',
         data: { $gte: trintaDiasAtras.toISOString() } 
@@ -94,6 +95,7 @@ export async function GET(request: Request) {
       metrics: { 
         totalUsers, 
         totalPacientes, 
+        totalSessoes,
         totalAgendamentos, 
         atendimentosMensais,
         plans: plansDistribution.map(p => ({ name: p._id || 'Gratuito', value: p.count })),
