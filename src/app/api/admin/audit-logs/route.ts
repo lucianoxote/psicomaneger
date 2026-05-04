@@ -34,3 +34,26 @@ export async function GET() {
     return NextResponse.json({ error: 'Erro ao carregar logs' }, { status: 500 });
   }
 }
+
+export async function DELETE(request: Request) {
+  try {
+    const session = await auth();
+    if (session?.user?.email !== 'lucianoxote@hotmail.com') {
+      return NextResponse.json({ error: 'Não autorizado' }, { status: 401 });
+    }
+
+    const { searchParams } = new URL(request.url);
+    const id = searchParams.get('id');
+    if (!id) return NextResponse.json({ error: 'ID obrigatório' }, { status: 400 });
+
+    const client = await clientPromise;
+    const db = client.db();
+    const { ObjectId } = require('mongodb');
+    
+    await db.collection('audit_logs').deleteOne({ _id: new ObjectId(id) });
+
+    return NextResponse.json({ success: true });
+  } catch (e) {
+    return NextResponse.json({ error: 'Erro ao excluir log' }, { status: 500 });
+  }
+}

@@ -109,6 +109,18 @@ export default function AdminDashboard() {
     }
   };
 
+  const handleDeleteLog = async (id: string) => {
+    if (!confirm('Deseja excluir permanentemente este registro de auditoria?')) return;
+    try {
+      const res = await fetch(`/api/admin/audit-logs?id=${id}`, { method: 'DELETE' });
+      if (res.ok) {
+        setLogs(prev => prev.filter(l => l._id !== id));
+      }
+    } catch (e) {
+      console.error(e);
+    }
+  };
+
   const fetchMetrics = async () => {
     setLoading(true);
     try {
@@ -740,7 +752,7 @@ export default function AdminDashboard() {
               <table style={{ width: '100%', borderCollapse: 'separate', borderSpacing: '0 0.5rem' }}>
                 <thead>
                   <tr>
-                    {['DATA/HORA', 'USUÁRIO', 'AÇÃO', 'DETALHES'].map(h => (
+                    {['DATA/HORA', 'USUÁRIO', 'AÇÃO', 'DETALHES', ''].map(h => (
                       <th key={h} style={{ padding: '0 1rem 0.75rem', textAlign: 'left', fontSize: '0.75rem', fontWeight: 700, letterSpacing: '0.1em', color: 'hsl(var(--muted-foreground))', textTransform: 'uppercase' }}>{h}</th>
                     ))}
                   </tr>
@@ -765,8 +777,19 @@ export default function AdminDashboard() {
                           {log.action}
                         </span>
                       </td>
-                      <td style={{ padding: '1rem', border: '1px solid hsl(var(--border))', borderLeft: 'none', borderRadius: '0 12px 12px 0', fontSize: '0.9rem', color: 'hsl(var(--foreground))', fontWeight: 500 }}>
+                      <td style={{ padding: '1rem', border: '1px solid hsl(var(--border))', borderLeft: 'none', borderRight: 'none', fontSize: '0.9rem', color: 'hsl(var(--foreground))', fontWeight: 500 }}>
                         {log.details}
+                      </td>
+                      <td style={{ padding: '1rem', border: '1px solid hsl(var(--border))', borderLeft: 'none', borderRadius: '0 12px 12px 0', textAlign: 'center' }}>
+                        <button 
+                          onClick={() => handleDeleteLog(log._id)}
+                          style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: '1.1rem', opacity: 0.4, transition: 'opacity 0.2s' }}
+                          onMouseOver={(e) => e.currentTarget.style.opacity = '1'}
+                          onMouseOut={(e) => e.currentTarget.style.opacity = '0.4'}
+                          title="Excluir este log"
+                        >
+                          🗑️
+                        </button>
                       </td>
                     </tr>
                   ))}
