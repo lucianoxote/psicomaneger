@@ -86,7 +86,10 @@ export default function FamiliaPage() {
     if (!confirm('Deseja excluir este registro de comunicação?')) return;
     try {
       const res = await fetch(`/api/familia?id=${id}`, { method: 'DELETE' });
-      if (res.ok) fetchLogs();
+      if (res.ok) {
+        // --- ATUALIZAÇÃO OTIMISTA (INSTANTÂNEA) ---
+        setLogs(prev => prev.filter(log => log._id !== id));
+      }
     } catch (e) {
       console.error(e);
     }

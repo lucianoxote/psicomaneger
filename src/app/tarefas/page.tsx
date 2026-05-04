@@ -85,7 +85,8 @@ export default function TarefasPage() {
     try {
       const res = await fetch(`/api/tarefas?id=${id}`, { method: 'DELETE' });
       if (res.ok) {
-        fetchTasksSilently();
+        // --- ATUALIZAÇÃO OTIMISTA (INSTANTÂNEA) ---
+        setTasks(prev => prev.filter(task => task._id !== id));
       }
     } catch (e) {
       console.error(e);

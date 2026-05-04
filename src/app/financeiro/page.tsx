@@ -81,7 +81,10 @@ export default function FinanceiroPage() {
     if (!confirm("Excluir este lançamento?")) return;
     try {
       const res = await fetch(`/api/financeiro?id=${id}`, { method: 'DELETE' });
-      if (res.ok) fetchData();
+      if (res.ok) {
+        // --- ATUALIZAÇÃO OTIMISTA (INSTANTÂNEA) ---
+        setTransacoes(prev => prev.filter(t => t._id !== id));
+      }
     } catch (e) {
       console.error(e);
     }
