@@ -23,7 +23,7 @@ export async function GET() {
       ...log,
       _id: log._id.toString(),
       createdAt: log.createdAt?.toISOString?.(),
-      data: log.data?.toISOString?.(),
+      data: log.data ? (log.data.includes('T') ? log.data.split('T')[0] : log.data) : log.data,
     }));
 
     const response = NextResponse.json(serializableLogs);

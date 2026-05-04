@@ -23,7 +23,7 @@ export async function GET() {
       ...tarefa,
       _id: tarefa._id.toString(),
       createdAt: tarefa.createdAt?.toISOString?.(),
-      data: tarefa.data?.toISOString?.(),
+      data: tarefa.data ? (tarefa.data.includes('T') ? tarefa.data.split('T')[0] : tarefa.data) : tarefa.data,
     }));
 
     const response = NextResponse.json(serializableTarefas);

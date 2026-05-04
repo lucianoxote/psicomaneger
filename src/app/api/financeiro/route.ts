@@ -29,7 +29,7 @@ export async function GET(request: Request) {
       ...item,
       _id: item._id.toString(),
       createdAt: item.createdAt?.toISOString?.(),
-      data: item.data?.toISOString?.(),
+      data: item.data ? (item.data.toISOString ? item.data.toISOString().split('T')[0] : item.data.split('T')[0]) : item.data,
     }));
 
     const response = NextResponse.json(serializableFinanceiro);
