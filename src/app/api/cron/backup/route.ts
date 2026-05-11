@@ -28,7 +28,7 @@ export async function GET(request: Request) {
     const db = client.db();
     
     // 1. Listar coleções que queremos fazer backup
-    const collections = ['pacientes', 'agendamentos', 'financeiro', 'configuracoes', 'users', 'audit_logs'];
+    const collections = ['pacientes', 'agendamentos', 'financeiro', 'configuracoes', 'users', 'audit_logs', 'sessoes', 'comunicacao_familia'];
     const backupData: any = {
       version: '1.0',
       timestamp: new Date().toISOString(),

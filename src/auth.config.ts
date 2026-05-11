@@ -15,8 +15,9 @@ export const authConfig = {
       const isRecoveryPage = nextUrl.pathname.startsWith("/login/forgot-password") || 
                              nextUrl.pathname.startsWith("/reset-password");
       const isRegisterApi = nextUrl.pathname === "/api/auth/register";
+      const isCronRoute = nextUrl.pathname.startsWith("/api/cron");
 
-      if (isRegisterApi) return true;
+      if (isRegisterApi || isCronRoute) return true;
 
       if (!isLoggedIn && !isLoginPage && !isRecoveryPage) {
         return Response.redirect(new URL("/login", nextUrl));
